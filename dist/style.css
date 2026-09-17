@@ -64,3 +64,21 @@ body{min-height:100svh;display:flex;flex-direction:column}header{height:70px;fle
 @media(prefers-reduced-motion:reduce){#call-fx .call-character,#call-fx .call-badge{animation:none!important}}
 /* Short windows may scroll, but never collapse the card table to zero size. */
 @media(min-width:701px){.board,.rooftop .board{width:min(100%,max(480px,calc((100svh - 350px)*1.5)))}.game:has(.call-panel:not([hidden])) .board{width:min(100%,max(480px,calc((100svh - 460px)*1.5)))}}
+
+/* Raised table tags: separate physical plaques above the felt. */
+.world .seat,.world .player-label{--tag-accent:#f5c777;isolation:isolate;z-index:8;border:1px solid color-mix(in srgb,var(--tag-accent) 65%,#302631);border-radius:5px;background:linear-gradient(155deg,#39333b 0%,#19171e 45%,#100e14 100%);box-shadow:inset 0 1px 0 #ffffff30,inset 0 -2px 0 #0009,0 4px 0 #07060a,0 7px 10px #0009;padding:8px 14px;color:#fff4e4;text-shadow:0 2px 2px #000;font-weight:800;letter-spacing:1px}
+.world .seat:before,.world .player-label:before{content:'';position:absolute;inset:3px;border:1px solid #ffffff12;border-radius:3px;pointer-events:none}
+.world .north{--tag-accent:#7fddff;top:25.7%;border-top:3px solid var(--tag-accent)}
+.world .west{--tag-accent:#ff4664;left:25.4%;border-left:3px solid var(--tag-accent);padding:13px 7px}
+.world .east{--tag-accent:#ff9a4d;right:25.4%;border-right:3px solid var(--tag-accent);padding:13px 7px}
+.world .player-label{--tag-accent:#ff4d9b;bottom:24.3%;border-bottom:3px solid var(--tag-accent)}
+.world .player-label span{margin:0;font-size:14px;color:#ffe0ed}
+.world .center{width:150px;height:150px;padding:7px 8px;border:2px solid #a08a72;border-radius:10px;background:linear-gradient(145deg,#48404a,#17151d 25%,#0c0c12 80%,#37303b);box-shadow:inset 0 0 0 3px #100e15,inset 0 0 0 4px #716270,0 6px 0 #060509,0 10px 15px #000b;gap:2px}
+.world .center small{font-size:9px;letter-spacing:3px;color:#c6b4a0;line-height:12px}
+.world .center #round-label{display:block;width:100%;margin:0;padding:3px 0;text-align:center;font-size:20px;line-height:25px;color:#fff0cb;background:linear-gradient(#342d37,#17151e);border:1px solid #806b57;border-radius:4px;box-shadow:inset 0 1px 0 #ffffff15,0 2px 2px #0008;text-shadow:0 0 10px #ffbc7044}
+.world .center #sticks{margin:2px 0;font-size:10px;line-height:12px;color:#d8c5a7}
+.world .center .wall{width:100%;padding:1px 5px;background:#080910;border:1px solid #443949;border-radius:3px;text-align:center;font-size:10px;line-height:20px;box-shadow:inset 0 2px 4px #000}
+.world .center .wall b{font-size:20px;line-height:20px;color:#ff65a9;font-variant-numeric:tabular-nums;text-shadow:0 0 8px #ff278b55}
+.world .center .dora{width:100%;margin:2px 0 0;flex-direction:row;justify-content:center;gap:5px;font-size:9px;line-height:11px;color:#e0d5c4}
+.world .center #dora{min-height:22px;align-items:center;gap:1px}
+.world .center #dora .tile{width:15px;height:22px}
