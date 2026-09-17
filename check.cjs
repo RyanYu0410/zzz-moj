@@ -1,83 +1,32 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const els={};function el(){return {classList:{add(){},contains(){return false},toggle(){return false}},setAttribute(){},replaceChildren(){},appendChild(){},addEventListener(){},style:{},open:false,showModal(){this.open=true},close(){this.open=false}}}
-const context={console,Math,setTimeout:()=>0,clearTimeout(){},document:{getElementById:id=>els[id]??=(el()),createElement:el,addEventListener(){},body:el()},matchMedia:()=>({matches:false})};vm.createContext(context);vm.runInContext(fs.readFileSync(__dirname+'/dist/game.js','utf8'),context);
-vm.runInContext(`
-function assert(x,m){if(!x)throw Error(m)}
-assert(winning([0,1,2,3,4,5,9,10,11,27,27,27,33,33]),'standard win');
-assert(winning([0,0,2,2,9,9,11,11,18,18,27,27,33,33]),'seven pairs');
-assert(winning([0,8,9,17,18,26,27,28,29,30,31,32,33,33]),'orphans');
-assert(!winning([0,1,2,3,4,5,9,10,11,27,27,28,33,33]),'invalid rejected');
-assert(waits([0,1,2,3,4,5,9,10,11,27,27,27,33]).includes(33),'wait found');
-for(let n=0;n<5;n++){newGame();assert(state.wall.length===69,'initial wall');let steps=0;while(!state.over&&steps++<200){if(state.pending)passCall();else if(state.turn===0){selected=0;discard()}else bot();const all=[...state.wall,...state.dead,...state.hands.flat(),...state.rivers.flat()];assert(all.length===136,'tile conservation');assert(counts(all).every(n=>n===4),'four copies each')}assert(state.over,'round ends')}
-newGame();state.hands[0]=[0,1,2,3,4,5,9,10,11,27,27,27,33,5];riichiPick=true;selected=13;discard();assert(state.riichi,'riichi declaration');assert(state.waiting.includes(33),'riichi wait saved');
-console.log('PASS: hand recognition, waits, five simulated rounds, 136-tile conservation, riichi declaration');
-`,context);
-let animations=0,removed=0;const tracks=[];
-function fxNode(){return {...el(),animate(frames,options){animations++;tracks.push({frames,options});},remove(){removed++;},cloneNode(){return fxNode()},getBoundingClientRect(){return {left:100,top:100,width:24,height:30}}}}
-context.document.createElement=fxNode;
-const board=fxNode();board.getBoundingClientRect=()=>({left:0,top:0,width:900,height:500});context.document.querySelector=()=>board;
-for(let i=0;i<4;i++)els['river'+i].lastElementChild=fxNode();
-vm.runInContext('for(let p=0;p<4;p++){state.rivers[p]=[1];animateDiscard(p)};clearEffects()',context);
-assert.equal(animations,20,'Each of four discards schedules five animation tracks');assert.equal(removed,12,'Effects cleaned on reset');console.log('PASS: all four seats trigger flight, impact, cut-in and table response; cleanup verified');
-const poses=Array.from({length:4},()=>({classList:{values:new Set(),add(v){this.values.add(v)},remove(v){this.values.delete(v)}}}));
-board.querySelector=selector=>selector.includes('character-sprite')?poses[Number(selector.match(/person-(\d)/)[1])]:board;
-context.document.querySelectorAll=()=>poses;
-for(let p=0;p<4;p++){
- vm.runInContext('clearEffects()',context);vm.runInContext('animateDiscard('+p+')',context);
- assert.deepEqual(poses.map(n=>n.classList.values.has('discarding')),poses.map((_,i)=>i===p),'Only acting character changes pose');
-}
-vm.runInContext('clearEffects()',context);assert(poses.every(p=>p.classList.values.size===0));console.log('PASS: independent pose triggers and reset for all four characters');
-
-assert(tracks.some(t=>t.options.delay===400&&t.options.duration===250),"Flight starts at release and lands at 650ms");
-assert(tracks.some(t=>t.options.delay===650&&t.options.duration===150),"Table impact starts on landing");
-console.log("PASS: release, flight and landing timing aligned");
-vm.runInContext(`
-assert(baseTile(34)===4&&baseTile(35)===13&&baseTile(36)===22,'red five mapping');
-assert(winning([2,3,34,11,12,35,20,21,36,27,27,27,33,33]),'red fives in winning sequences');
-assert(waits([2,3,34,11,12,35,20,21,36,27,27,27,33]).includes(33),'red fives retain waits');
-assert(counts([4,4,4,34])[4]===4,'red and normal five share copy limit');
-newGame();
-const full=[...state.wall,...state.dead,...state.hands.flat()];
-assert([34,35,36].every(t=>full.filter(x=>x===t).length===1),'one red five per suit');
-assert([4,13,22].every(t=>full.filter(x=>x===t).length===3),'three ordinary fives per suit');
-for(let t=0;t<37;t++){const v=tile(t);assert(v.innerHTML.includes('tile-face'),'every tile has artwork');assert(v.title===tileName(t),'accessible tile name')}
-console.log('PASS: 37 tile faces, red-five distribution, normalized winning shapes and waits');
-`,context);
-vm.runInContext(`
-newGame();state.hands[0]=[2,3,34,5,6,7,9,10,11,18,19,20,27];
-assert(callOptions(1,4).every(o=>o.kind!=='chi'),'cannot chi lower seat');
-assert(callOptions(2,4).every(o=>o.kind!=='chi'),'cannot chi across');
-assert(callOptions(3,4).filter(o=>o.kind==='chi').length===3,'three chi sequences');
-state.riichi=true;assert(callOptions(3,4).length===0,'no calls after riichi');state.riichi=false;
-assert(callOptions(3,27).every(o=>o.kind!=='chi'),'no honor sequence');
-state.hands[0]=[7,9,10,12,13,14,18,19,20,27,28,29,30];assert(callOptions(3,8).length===0,'no cross-suit chi');
-function setupCall(hand,from,called){
- newGame();timers.forEach(clearTimeout);timers=[];
- const pool=[...state.wall,...state.dead,...state.hands.flat()];
- for(const t of [...hand,called]){const i=pool.indexOf(t);assert(i>=0,'fixture has physical tile');pool.splice(i,1)}
- state.hands=[hand.slice(),pool.splice(0,13),pool.splice(0,13),pool.splice(0,13)];state.dead=pool.splice(0,14);state.wall=pool;state.rivers=[[],[],[],[]];state.rivers[from]=[called];state.turn=from;state.drawn=false;state.pending={from,tile:called,options:callOptions(from,called)};
-}
-function physicalTiles(){return [...state.wall,...state.dead,...state.hands.flat(),...state.rivers.flat(),...state.melds.flatMap(m=>m.tiles)]}
-setupCall([4,34,0,1,2,9,10,11,18,19,20,27,27],1,4);
-const beforeWall=state.wall.length;claimCall(0);
-assert(state.melds.length===1&&state.melds[0].tiles.includes(34),'red five retained in pon');
-assert(state.hands[0].length===11&&state.wall.length===beforeWall,'call consumes two without drawing');
-assert(state.rivers[1].length===0&&state.turn===0&&!state.pending,'claimed discard removed and turn transferred');
-assert(physicalTiles().length===136&&counts(physicalTiles()).every(n=>n===4),'all 136 tiles preserved by call');
-assert(!riichiOptions().length&&!canSelfDraw(),'no riichi or self draw immediately after call');
-selected=0;discard();assert(state.turn===1&&state.hands[0].length===10,'after pon next turn is lower seat');
-setupCall([2,3,5,6,9,10,11,18,19,20,27,27,33],3,4);
-claimCall(0);assert(state.melds[0].kind==='chi','chi recorded');
-assert(state.forbidden.includes(4),'same-tile kuikae prohibited');
-setupCall([3,4,5,6,9,10,11,18,19,20,27,27,33],3,2);
-claimCall(0);assert(state.forbidden.includes(5),'sequence-end kuikae prohibited');
-selected=state.hands[0].indexOf(5);discard();assert(state.turn===0&&state.hands[0].length===11,'forbidden discard does not advance');
-setupCall([4,34,0,1,2,9,10,11,18,19,20,27,27],1,4);const wallBeforePass=state.wall.length;passCall();assert(state.turn===2&&state.wall.length===wallBeforePass,'pass resumes next opponent without drawing for player');
-setupCall([4,34,0,1,2,9,10,11,18,19,20,27,27],3,4);const wallBeforeDraw=state.wall.length;passCall();assert(state.turn===0&&state.hands[0].length===14&&state.wall.length===wallBeforeDraw-1,'pass upper seat draws once');
-assert(winning([9,10,11,18,19,20,27,27,27,33,33],1),'open winning shape');
-assert(!winning([9,10,11,18,19,20,27,27,28,33,33],1),'invalid open shape rejected');
-newGame();state.melds=[{tiles:[0,1,2]}];state.hands[0]=[9,10,11,18,19,20,24,25,26,28,28];state.drawn=true;assert(!canSelfDraw(),'open no-yaku win blocked');
-state.hands[0]=[9,10,11,18,19,20,31,31,31,28,28];assert(canSelfDraw(),'open dragon yaku self draw allowed');
-for(let n=0;n<25;n++){newGame();let steps=0;while(!state.over&&steps++<250){if(state.pending){if(n%2)claimCall(0);else passCall()}else if(state.turn===0){selected=state.hands[0].findIndex(t=>!state.forbidden.includes(baseTile(t)));discard()}else bot();const all=physicalTiles();assert(all.length===136&&counts(all).every(v=>v===4),'mixed calls tile conservation');assert([34,35,36].every(t=>all.filter(x=>x===t).length===1),'red copy conservation')}assert(state.over,'round with calls ends')}
-console.log('PASS: chi seat/sequence restrictions, pon, red retention, kuikae, open yaku, pass/turn order, 25 full rounds with calls');
-`,context);
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const {Majiang,RULE,HumanPlayer,Match,handTiles,tileFile,meldKind,meldTiles,turnChoices,responseChoices}=require('./src/engine');
+const S=s=>Majiang.Shoupai.fromString(s);
+function human(hand){let options,respond;const p=new HumanPlayer((o,cb)=>{options=o;respond=cb});p.action({kaiju:{id:0,rule:RULE,title:'test',player:['A','B','C','D'],qijia:0}},()=>{});p.action({qipai:{zhuangfeng:0,jushu:0,changbang:0,lizhibang:0,defen:[25000,25000,25000,25000],baopai:'z4',shoupai:[hand,'','','']}},()=>{});return {p,get options(){return options},respond:r=>respond(r)}}
+assert.equal(RULE['場数'],1);assert.equal(RULE['喰い替え許可レベル'],0);
+for(let id=0;id<37;id++)assert(fs.existsSync('dist/tiles/'+tileFile(id)+'.png'));
+assert.deepEqual(handTiles(S('m123p456s789z1122')),['m1','m2','m3','p4','p5','p6','s7','s8','s9','z1','z1','z2','z2']);
+assert.equal(tileFile('p0'),'pin-red-5');assert.equal(meldKind('m055+'),'pon');assert.equal(meldKind('s555+0'),'kan');assert(meldTiles('m123-').some(t=>t.called));
+const wall=new Majiang.Shan(RULE);assert.equal(wall._pai.length,136);for(const s of ['m','p','s'])assert.equal(wall._pai.filter(p=>p===s+'0').length,1);
+for(let i=0;i<52;i++)wall.zimo();const n=wall.paishu;wall.gangzimo();wall.kaigang();assert.equal(wall.paishu,n-1);assert.equal(wall.baopai.length,2);
+let h=human('m23056p123s123z11');let o=responseChoices(h.p,{l:3,p:'m4'});assert(o.calls.some(m=>meldKind(m)==='chi'));assert(!responseChoices(h.p,{l:1,p:'m4'}).calls.some(m=>meldKind(m)==='chi'));
+h=human('m055p123s123z1122');o=responseChoices(h.p,{l:1,p:'m5'});assert(o.calls.some(m=>meldKind(m)==='pon'));assert(o.calls.some(m=>meldKind(m)==='kan'));const redPon=o.calls.find(m=>meldKind(m)==='pon'&&m.includes('0'));const called=h.p.shoupai.clone().fulou(redPon);assert(called._fulou[0].includes('0'));assert(!Majiang.Game.get_dapai(RULE,called).some(p=>/^m[05]/.test(p)));assert.equal(Majiang.Game.allow_lizhi(RULE,called,null,40,25000),false);
+h=human('m111p123s456z1122');h.p.action({zimo:{l:0,p:'m1'}},()=>{});assert(h.options.kan.includes('m1111'));assert.equal(h.options.type,'turn');
+const add=S('p123s456z1122,m555+');add.zimo('m0');assert(Majiang.Game.get_gang_mianzi(RULE,add,null,30,1).some(m=>m==='m555+0'));
+h=human('m123p123s123z5551');h.p.action({dapai:{l:1,p:'z1'}},()=>{});assert(h.options.win,'legal ron offered');h.respond({});assert.equal(h.p._neng_rong,false,'passing ron produces furiten');assert.equal(responseChoices(h.p,{l:2,p:'z1'}).win,false);
+h=human('m123p123s123z1112');h.p._diyizimo=false;h.p.action({zimo:{l:0,p:'z2'}},()=>{});assert(h.options.win,'self draw offered');
+h=human('m123p123s123z1112');h.p._neng_rong=false;assert.equal(responseChoices(h.p,{l:2,p:'z2'}).win,false,'discard furiten blocks ron');
+h=human('m123p123s123z1112');assert(responseChoices(h.p,{l:2,m:'z222+2'},true).win,'robbing added kan');assert.equal(responseChoices(h.p,{l:2,m:'z2222'},true).win,false);
+const noYaku=S('m123p456s789z22,m456-');assert.equal(Majiang.Game.allow_hule(RULE,noYaku,null,0,1,false,true),false,'open no-yaku hand rejected');
+const scored=Majiang.Util.hule(S('m123p456s789z11555'),null,{rule:RULE,zhuangfeng:0,menfeng:1,hupai:{},baopai:[],jicun:{changbang:0,lizhibang:0}});assert(scored.hupai.length&&scored.defen>0);assert.equal(scored.fenpei.reduce((a,b)=>a+b,0),0,'payments conserve points');
+const akas=Majiang.Util.hule(S('m234p406s678z22555'),null,{rule:RULE,zhuangfeng:0,menfeng:1,hupai:{},baopai:[],jicun:{changbang:0,lizhibang:0}});assert(akas.hupai.some(h=>h.name==='赤ドラ'),'red dora scores');
+// Play a full match through the actual engine. The deterministic policy accepts legal
+// wins/calls and minimizes shanten; full production AI runs separately in Web Workers.
+let calls=0,kans=0;
+class Auto extends HumanPlayer{constructor(){super((o,cb)=>{
+ if(o.type==='turn'){if(o.win)return cb({hule:'-'});if(o.kan.length){kans++;return cb({gang:o.kan[0]})}if(o.abort)return cb({daopai:'-'});const ranked=o.discards.map(p=>({p,n:Majiang.Util.xiangting(this.shoupai.clone().dapai(p))})).sort((a,b)=>a.n-b.n);const p=ranked[0].p;return cb({dapai:p+(o.riichi.includes(p)?'*':'')})}
+ if(o.type==='response'){if(o.win)return cb({hule:'-'});if(o.calls.length){calls++;return cb({fulou:o.calls[0]})}}cb({});
+ })}}
+const g=new Majiang.Game([new Auto(),new Auto(),new Auto(),new Auto()],()=>{},RULE);g.do_sync();assert.equal(g._paipu.rank.length,4);assert.equal(g._paipu.defen.reduce((a,b)=>a+b,0),100000);assert(g._paipu.log.length>=1);assert(calls>0);assert(g._paipu.log.flat().some(e=>e.hule||e.pingju));console.log('PASS: full East match completed ('+g._paipu.log.length+' hands, '+calls+' calls, '+kans+' self kans), scoring and 100,000-point conservation');
+// Disposal must prevent any delayed transition from an abandoned match.
+const m=new Match([],()=>{},RULE);let fired=false;m.schedule(()=>fired=true,1);m.dispose();setTimeout(()=>{assert.equal(fired,false);console.log('PASS: 37 PNG faces, red fives, chi/pon/three kan forms, rinshan/dora, furiten, ron/tsumo, no-yaku rejection, restart disposal')},15);

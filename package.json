@@ -1,0 +1,29 @@
+{
+  "name": "zzz-moj",
+  "version": "1.0.0",
+  "description": "New Eridu riichi mahjong: four-player East match with generated comic artwork",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "test": "node check.cjs",
+    "test:browser": "node scripts/visual-check.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanYu0410/zzz-moj.git"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RyanYu0410/zzz-moj/issues"
+  },
+  "homepage": "https://github.com/RyanYu0410/zzz-moj#readme",
+  "dependencies": {
+    "@kobalab/majiang-ai": "1.2.0",
+    "@kobalab/majiang-core": "1.4.1"
+  },
+  "devDependencies": {
+    "esbuild-wasm": "0.28.2"
+  },
+  "private": true
+}

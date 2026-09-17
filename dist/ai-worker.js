@@ -2575,685 +2575,915 @@
     }
   });
 
-  // src/engine.js
-  var require_engine = __commonJS({
-    "src/engine.js"(exports, module) {
+  // node_modules/@kobalab/majiang-ai/lib/suanpai.js
+  var require_suanpai = __commonJS({
+    "node_modules/@kobalab/majiang-ai/lib/suanpai.js"(exports, module) {
       "use strict";
       var Majiang = require_lib();
-      var RULE = Majiang.rule({ "\u5834\u6570": 1, "\u8D64\u724C": { m: 1, p: 1, s: 1 }, "\u30AB\u30F3\u30C9\u30E9\u5F8C\u4E57\u305B": false });
-      var CHARACTERS = ["\u59AE\u53EF", "\u6BD4\u5229", "\u96C5", "\u827E\u83B2"];
-      var WINDS = ["\u4E1C", "\u5357", "\u897F", "\u5317"];
-      function handTiles(hand) {
-        const result = [];
-        for (const match of hand.toString().split(",")[0].matchAll(/([mpsz])(\d+)/g)) for (const n of match[2]) result.push(match[1] + n);
-        return result;
-      }
-      function tileId(p) {
-        if (p[1] === "0") return 34 + "mps".indexOf(p[0]);
-        return p[0] === "z" ? 26 + Number(p[1]) : "mps".indexOf(p[0]) * 9 + Number(p[1]) - 1;
-      }
-      function tileFile(p) {
-        const id = typeof p === "number" ? p : tileId(p);
-        return id < 27 ? ["man", "pin", "sou"][Math.floor(id / 9)] + "-" + (id % 9 + 1) : id < 34 ? ["east", "south", "west", "north", "white", "green", "red"][id - 27] : ["man", "pin", "sou"][id - 34] + "-red-5";
-      }
-      function meldKind(m) {
-        return (m.match(/\d/g) || []).length === 4 ? "kan" : new Set(m.match(/\d/g).map((n) => n === "0" ? "5" : n)).size === 1 ? "pon" : "chi";
-      }
-      function meldTiles(m) {
-        return [...m.matchAll(/(\d)([+=-]?)/g)].map((x) => ({ p: m[0] + x[1], called: !!x[2] }));
-      }
-      function turnChoices(player, gangzimo = false) {
-        return { type: "turn", discards: player.get_dapai(player.shoupai) || [], riichi: player.allow_lizhi(player.shoupai) || [], kan: player.get_gang_mianzi(player.shoupai) || [], win: !!player.allow_hule(player.shoupai, null, gangzimo), abort: player.allow_pingju(player.shoupai) };
-      }
-      function responseChoices(player, event, rob = false) {
-        const d = ["", "+", "=", "-"][(4 + event.l - player._menfeng) % 4];
-        const p = (rob ? event.m[0] + event.m.slice(-1) : event.p.slice(0, 2)) + d;
-        if (rob && /^[mpsz]\d{4}$/.test(event.m)) return { type: "response", calls: [], win: false };
-        return { type: "response", from: event.l, tile: p, rob, win: !!player.allow_hule(player.shoupai, p, rob), calls: rob ? [] : [...player.get_gang_mianzi(player.shoupai, p) || [], ...player.get_peng_mianzi(player.shoupai, p) || [], ...player.get_chi_mianzi(player.shoupai, p) || []] };
-      }
-      var HumanPlayer = class extends Majiang.Player {
-        constructor(onDecision) {
-          super();
-          this.onDecision = onDecision;
+      var Paishu = class {
+        constructor(paishu, n_zimo) {
+          this._paishu = {};
+          this._sum_paishu = 0;
+          for (let s of ["m", "p", "s", "z"]) {
+            for (let n = 0; n < paishu[s].length; n++) {
+              if (s == "z" && n == 0) continue;
+              this._paishu[s + n] = n == 5 ? paishu[s][n] - paishu[s][0] : paishu[s][n];
+              this._sum_paishu += this._paishu[s + n];
+            }
+          }
+          this._n_zimo = n_zimo;
         }
-        decide(options) {
-          const cb = this._callback;
-          this.onDecision(options, (reply) => cb(reply));
+        val(p, real) {
+          return real ? this._paishu[p.slice(0, 2)] : this._n_zimo > 0 ? this._paishu[p.slice(0, 2)] * this._n_zimo / this._sum_paishu : 0;
         }
-        action_kaiju() {
-          this._callback();
+        pop(p) {
+          this._paishu[p.slice(0, 2)]--;
+          this._sum_paishu--;
+          this._n_zimo -= 4;
+          return this;
         }
-        action_qipai() {
-          this._callback();
-        }
-        action_zimo(event, gangzimo) {
-          if (event.l !== this._menfeng) return this._callback();
-          this.decide(turnChoices(this, gangzimo));
-        }
-        action_dapai(event) {
-          if (event.l === this._menfeng) return this._callback();
-          const options = responseChoices(this, event);
-          if (options.win || options.calls.length) this.decide(options);
-          else this._callback();
-        }
-        action_fulou(event) {
-          if (event.l !== this._menfeng || meldKind(event.m) === "kan") return this._callback();
-          this.decide({ type: "turn", discards: this.get_dapai(this.shoupai) || [], riichi: [], kan: [], win: false, abort: false });
-        }
-        action_gang(event) {
-          if (event.l === this._menfeng) return this._callback();
-          const options = responseChoices(this, event, true);
-          if (options.win) this.decide(options);
-          else this._callback();
-        }
-        action_hule(result) {
-          this.decide({ type: "result", result });
-        }
-        action_pingju(result) {
-          this.decide({ type: "draw", result });
-        }
-        action_jieju(result) {
-          this.decide({ type: "match", result });
+        push(p) {
+          this._paishu[p.slice(0, 2)]++;
+          this._sum_paishu++;
+          this._n_zimo += 4;
+          return this;
         }
       };
-      var Match = class extends Majiang.Game {
-        constructor(...args) {
-          super(...args);
-          this.active = true;
-          this.scheduled = /* @__PURE__ */ new Set();
+      module.exports = class SuanPai {
+        constructor(hongpai) {
+          this._paishu = {
+            m: [hongpai.m, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+            p: [hongpai.p, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+            s: [hongpai.s, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+            z: [0, 4, 4, 4, 4, 4, 4, 4]
+          };
+          this._zhuangfeng = 0;
+          this._menfeng = 0;
+          this._baopai = [];
+          this._dapai = [{}, {}, {}, {}];
+          this._lizhi = [];
+          this._n_zimo = 70;
         }
-        reply(id, reply) {
-          if (!this.active) return;
-          this._reply[id] = reply || {};
-          if (this._reply.filter(Boolean).length === 4 && !this._timeout_id) this._timeout_id = this.schedule(() => this.next());
+        decrease(p) {
+          this._paishu[p[0]][p[1]]--;
+          if (p[1] == 0) this._paishu[p[0]][5]--;
         }
-        next() {
-          if (!this.active) return;
-          return super.next();
-        }
-        schedule(fn, ms = 0) {
-          const id = setTimeout(() => {
-            this.scheduled.delete(id);
-            if (this.active) fn();
-          }, ms);
-          this.scheduled.add(id);
-          return id;
-        }
-        delay(fn, timeout) {
-          if (this._sync) return fn();
-          this.schedule(fn, this._dwell === 0 ? 0 : timeout == null ? Math.max(500, this._dwell) : timeout);
-        }
-        call_players(type, msg, timeout) {
-          this._status = type;
-          this._reply = [];
-          for (let l = 0; l < 4; l++) {
-            const id = this.model.player_id[l];
-            this.schedule(() => this._players[id].action(msg[l], (reply) => {
-              if (this.active) this.reply(id, reply);
-            }));
-          }
-          this._timeout_id = this.schedule(() => this.next(), this._dwell === 0 ? 0 : timeout ?? this._dwell);
-        }
-        notify_players(type, msg) {
-          for (let l = 0; l < 4; l++) {
-            const id = this.model.player_id[l];
-            this.schedule(() => this._players[id].action(msg[l]));
+        qipai(qipai, menfeng) {
+          this._zhuangfeng = qipai.zhuangfeng;
+          this._menfeng = menfeng;
+          this._baopai = [qipai.baopai];
+          this.decrease(qipai.baopai);
+          let paistr = qipai.shoupai[menfeng];
+          for (let suitstr of paistr.match(/[mpsz]\d[\d\+\=\-]*/g) || []) {
+            let s = suitstr[0];
+            for (let n of suitstr.match(/\d/g)) {
+              this.decrease(s + n);
+            }
           }
         }
-        dispose() {
-          this.active = false;
-          clearTimeout(this._timeout_id);
-          for (const id of this.scheduled) clearTimeout(id);
-          this.scheduled.clear();
-          this._players.forEach((p) => p.dispose?.());
+        zimo(zimo) {
+          if (zimo.l == this._menfeng) this.decrease(zimo.p);
+          this._n_zimo--;
+        }
+        dapai(dapai) {
+          if (dapai.l != this._menfeng) {
+            this.decrease(dapai.p);
+            if (dapai.p.slice(-1) == "*") this._lizhi[dapai.l] = true;
+          }
+          let p = dapai.p[0] + (+dapai.p[1] || 5);
+          this._dapai[dapai.l][p] = true;
+          for (let l = 0; l < 4; l++) {
+            if (this._lizhi[l]) this._dapai[l][p] = true;
+          }
+        }
+        fulou(fulou) {
+          if (fulou.l != this._menfeng) {
+            let s = fulou.m[0];
+            for (let n of fulou.m.match(/\d(?![\+\=\-])/g)) {
+              this.decrease(s + n);
+            }
+          }
+        }
+        gang(gang) {
+          if (gang.l != this._menfeng) {
+            if (gang.m.match(/^[mpsz]\d{4}$/)) {
+              let s = gang.m[0];
+              for (let n of gang.m.match(/\d/g)) {
+                this.decrease(s + n);
+              }
+            } else {
+              let s = gang.m[0], n = gang.m.slice(-1);
+              this.decrease(s + n);
+            }
+          }
+        }
+        kaigang(kaigang) {
+          this._baopai.push(kaigang.baopai);
+          this.decrease(kaigang.baopai);
+        }
+        get_paishu() {
+          return new Paishu(this._paishu, this._n_zimo);
+        }
+        paijia(p) {
+          const weight = (s2, n2) => {
+            if (n2 < 1 || 9 < n2) return 0;
+            let rv2 = 1;
+            for (let p2 of this._baopai) {
+              if (s2 + n2 == Majiang.Shan.zhenbaopai(p2)) rv2 *= 2;
+            }
+            return rv2;
+          };
+          let rv = 0;
+          let s = p[0], n = +p[1] || 5;
+          const min = Math.min, max = Math.max, num = this._paishu[s];
+          if (s == "z") {
+            rv = p[1] != "0" ? num[n] * weight(s, n) : 0;
+            if (n == this._zhuangfeng + 1) rv *= 2;
+            if (n == this._menfeng + 1) rv *= 2;
+            if (5 <= n && n <= 7) rv *= 2;
+          } else {
+            let left = 1 <= n - 2 ? min(num[n - 2], num[n - 1]) : 0;
+            let center = 1 <= n - 1 && n + 1 <= 9 ? min(num[n - 1], num[n + 1]) : 0;
+            let right = n + 2 <= 9 ? min(num[n + 1], num[n + 2]) : 0;
+            let n_pai = [
+              left,
+              max(left, center),
+              num[n],
+              max(center, right),
+              right
+            ];
+            rv = n_pai[0] * weight(s, n - 2) + n_pai[1] * weight(s, n - 1) + n_pai[2] * weight(s, n) + n_pai[3] * weight(s, n + 1) + n_pai[4] * weight(s, n + 2);
+            rv += !num[0] ? 0 : n == 7 ? min(num[0], n_pai[0]) * weight(s, n - 2) : n == 6 ? min(num[0], n_pai[1]) * weight(s, n - 1) : n == 5 ? min(num[0], n_pai[2]) * weight(s, n) : n == 4 ? min(num[0], n_pai[3]) * weight(s, n + 1) : n == 3 ? min(num[0], n_pai[4]) * weight(s, n + 2) : 0;
+            if (p[1] == "0") rv *= 2;
+          }
+          rv *= weight(s, n);
+          return rv;
+        }
+        make_paijia(shoupai) {
+          let n_suit = {};
+          for (let s of ["m", "p", "s", "z"]) {
+            n_suit[s] = shoupai._bingpai[s].slice(1).reduce((x, y) => x + y);
+          }
+          let n_sifeng = shoupai._bingpai.z.slice(1, 5).reduce((x, y) => x + y);
+          let n_sanyuan = shoupai._bingpai.z.slice(5).reduce((x, y) => x + y);
+          for (let m of shoupai._fulou) {
+            n_suit[m[0]] += 3;
+            if (m.match(/^z[1234]/)) n_sifeng += 3;
+            if (m.match(/^z[567]/)) n_sanyuan += 3;
+          }
+          let paijia = {};
+          return (p) => paijia[p] ?? (paijia[p] = this.paijia(p) * (p.match(/^z[1234]/) && n_sifeng >= 9 ? 8 : p.match(/^z[567]/) && n_sanyuan >= 6 ? 8 : p[0] == "z" && Math.max(...["m", "p", "s"].map((s) => n_suit[s])) + n_suit.z >= 10 ? 4 : n_suit[p[0]] + n_suit.z >= 10 ? 2 : 1));
+        }
+        suan_weixian(p, l, c = 1) {
+          let s = p[0], n = +p[1] || 5;
+          let r = 0;
+          if (this._dapai[l][s + n]) return r;
+          const paishu = this._paishu[s];
+          r += paishu[n] - (c ? 0 : 1) == 3 ? s == "z" ? 8 : 3 : paishu[n] - (c ? 0 : 1) == 2 ? 3 : paishu[n] - (c ? 0 : 1) == 1 ? 1 : 0;
+          if (s == "z") return r;
+          r += n - 2 < 1 ? 0 : Math.min(paishu[n - 2], paishu[n - 1]) == 0 ? 0 : n - 2 == 1 ? 3 : this._dapai[l][s + (n - 3)] ? 0 : 10;
+          r += n - 1 < 1 ? 0 : n + 1 > 9 ? 0 : Math.min(paishu[n - 1], paishu[n + 1]) == 0 ? 0 : 3;
+          r += n + 2 > 9 ? 0 : Math.min(paishu[n + 1], paishu[n + 2]) == 0 ? 0 : n + 2 == 9 ? 3 : this._dapai[l][s + (n + 3)] ? 0 : 10;
+          return r;
+        }
+        suan_weixian_all(bingpai) {
+          let weixian_all;
+          for (let l = 0; l < 4; l++) {
+            if (!this._lizhi[l]) continue;
+            if (!weixian_all) weixian_all = {};
+            let weixian = {}, sum = 0;
+            for (let s of ["m", "p", "s", "z"]) {
+              for (let n = 1; n < this._paishu[s].length; n++) {
+                weixian[s + n] = this.suan_weixian(s + n, l, bingpai[s][n]);
+                sum += weixian[s + n];
+              }
+            }
+            for (let p of Object.keys(weixian)) {
+              weixian[p] = weixian[p] / (sum || 1) * 100 * (l == 0 ? 1.5 : 1);
+              if (!weixian_all[p]) weixian_all[p] = 0;
+              weixian_all[p] = Math.max(weixian_all[p], weixian[p]);
+            }
+          }
+          if (weixian_all) return (p) => weixian_all[p[0] + (+p[1] || 5)];
         }
       };
-      module.exports = { Majiang, RULE, CHARACTERS, WINDS, handTiles, tileId, tileFile, meldKind, meldTiles, turnChoices, responseChoices, HumanPlayer, Match };
     }
   });
 
-  // src/game.js
-  var require_game2 = __commonJS({
-    "src/game.js"() {
-      var { Majiang, RULE, CHARACTERS, WINDS, handTiles, tileId, tileFile, meldKind, meldTiles, HumanPlayer, Match } = require_engine();
-      var $ = (id) => document.getElementById(id);
-      var NAMES = ["\u4E00\u842C", "\u4E8C\u842C", "\u4E09\u842C", "\u56DB\u842C", "\u4E94\u842C", "\u516D\u842C", "\u4E03\u842C", "\u516B\u842C", "\u4E5D\u842C", "\u4E00\u7B52", "\u4E8C\u7B52", "\u4E09\u7B52", "\u56DB\u7B52", "\u4E94\u7B52", "\u516D\u7B52", "\u4E03\u7B52", "\u516B\u7B52", "\u4E5D\u7B52", "\u4E00\u7D22", "\u4E8C\u7D22", "\u4E09\u7D22", "\u56DB\u7D22", "\u4E94\u7D22", "\u516D\u7D22", "\u4E03\u7D22", "\u516B\u7D22", "\u4E5D\u7D22", "\u6771", "\u5357", "\u897F", "\u5317", "\u767D", "\u767C", "\u4E2D"];
-      var tileName = (p) => {
-        const id = typeof p === "number" ? p : tileId(p);
-        return id >= 34 ? "\u8D64 " + NAMES[[4, 13, 22][id - 34]] : NAMES[id];
-      };
-      var match;
-      var human;
-      var decision = null;
-      var reply = null;
-      var selected = -1;
-      var riichiPick = false;
-      var kanPick = false;
-      var lastText = "\u6B63\u5728\u53D1\u724C\u2026";
-      var sound = false;
-      var ctx;
-      var actionEffects = [];
-      var effectsTimers = [];
-      var resultOpen = false;
-      var later = (fn, ms) => {
-        const id = setTimeout(fn, ms);
-        effectsTimers.push(id);
-        return id;
-      };
-      function tone(freq = 450) {
-        if (!sound) return;
-        try {
-          ctx ?? (ctx = new (window.AudioContext || window.webkitAudioContext)());
-          ctx.resume();
-          const o = ctx.createOscillator(), g = ctx.createGain();
-          o.type = "triangle";
-          o.frequency.value = freq;
-          o.connect(g);
-          g.connect(ctx.destination);
-          g.gain.setValueAtTime(0.045, ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(1e-3, ctx.currentTime + 0.13);
-          o.start();
-          o.stop(ctx.currentTime + 0.14);
-        } catch {
+  // node_modules/@kobalab/majiang-ai/lib/player.js
+  var require_player2 = __commonJS({
+    "node_modules/@kobalab/majiang-ai/lib/player.js"(exports, module) {
+      "use strict";
+      var Majiang = require_lib();
+      var SuanPai = require_suanpai();
+      var width = [8, 8 * 4, 8 * 4 * 2];
+      function add_hongpai(tingpai) {
+        let pai = [];
+        for (let p of tingpai) {
+          if (p[0] != "z" && p[1] == "5") pai.push(p.replace(/5/, "0"));
+          pai.push(p);
         }
+        return pai;
       }
-      function tile(p, small = false) {
-        const id = typeof p === "number" ? p : tileId(p), el = document.createElement("span");
-        el.className = "tile art-tile png-tile" + (small ? " small" : "") + (id >= 34 ? " aka" : "");
-        el.title = tileName(p);
-        el.setAttribute("aria-label", tileName(p));
-        const img = document.createElement("img");
-        img.src = "tiles/" + tileFile(p) + ".png";
-        img.alt = "";
-        img.draggable = false;
-        el.appendChild(img);
-        return el;
-      }
-      function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-      }
-      function clearEffects() {
-        effectsTimers.forEach(clearTimeout);
-        effectsTimers = [];
-        for (const fx of actionEffects) fx.remove();
-        actionEffects = [];
-        document.querySelectorAll(".character-sprite").forEach((p) => p.classList.remove("discarding"));
-        $("cutin").hidden = true;
-        $("call-fx").hidden = true;
-      }
-      var BotWorker = class {
-        constructor() {
-          this.worker = new Worker("ai-worker.js");
-          this.pending = /* @__PURE__ */ new Map();
-          this.sequence = 0;
-          this.alive = true;
-          this.worker.onmessage = ({ data }) => {
-            if (!this.alive) return;
-            if (data.error) return failMatch("\u7535\u8111\u8BA1\u7B97\u4E2D\u65AD\uFF0C\u8BF7\u91CD\u65B0\u5F00\u59CB\u5BF9\u5C40\u3002");
-            const cb = this.pending.get(data.id);
-            this.pending.delete(data.id);
-            cb?.(data.result);
+      module.exports = class Player extends Majiang.Player {
+        qipai(qipai) {
+          this._defen_cache = {};
+          this._eval_cache = {};
+          this._suanpai = new SuanPai(this._rule["\u8D64\u724C"]);
+          this._suanpai.qipai(
+            qipai,
+            (this._id + 4 - this._model.qijia + 4 - qipai.jushu) % 4
+          );
+          super.qipai(qipai);
+        }
+        zimo(zimo, gangzimo) {
+          if (zimo.l == this._menfeng) this._eval_cache = {};
+          this._suanpai.zimo(zimo);
+          super.zimo(zimo, gangzimo);
+        }
+        dapai(dapai) {
+          if (dapai.l != this._menfeng) this._eval_cache = {};
+          this._suanpai.dapai(dapai);
+          super.dapai(dapai);
+        }
+        fulou(fulou) {
+          this._suanpai.fulou(fulou);
+          super.fulou(fulou);
+        }
+        gang(gang) {
+          this._suanpai.gang(gang);
+          super.gang(gang);
+        }
+        kaigang(kaigang) {
+          this._defen_cache = {};
+          this._eval_cache = {};
+          this._suanpai.kaigang(kaigang);
+          super.kaigang(kaigang);
+        }
+        action_kaiju(kaiju) {
+          this._callback();
+        }
+        action_qipai(qipai) {
+          this._callback();
+        }
+        action_zimo(zimo, gangzimo) {
+          if (zimo.l != this._menfeng) return this._callback();
+          let m;
+          if (this.select_hule(null, gangzimo))
+            this._callback({ hule: "-" });
+          else if (this.select_pingju()) this._callback({ daopai: "-" });
+          else if (m = this.select_gang()) this._callback({ gang: m });
+          else this._callback({ dapai: this.select_dapai() });
+        }
+        action_dapai(dapai) {
+          if (dapai.l == this._menfeng) {
+            if (this.select_daopai()) this._callback({ daopai: "-" });
+            else this._callback();
+            return;
+          }
+          let m;
+          if (this.select_hule(dapai)) this._callback({ hule: "-" });
+          else if (m = this.select_fulou(dapai)) this._callback({ fulou: m });
+          else if (this.select_daopai()) this._callback({ daopai: "-" });
+          else this._callback();
+        }
+        action_fulou(fulou) {
+          if (fulou.l != this._menfeng) return this._callback();
+          if (fulou.m.match(/^[mpsz]\d{4}/)) return this._callback();
+          this._callback({ dapai: this.select_dapai() });
+        }
+        action_gang(gang) {
+          if (gang.l == this._menfeng) return this._callback();
+          if (this.select_hule(gang, true)) this._callback({ hule: "-" });
+          else this._callback();
+        }
+        action_hule(hule) {
+          this._callback();
+        }
+        action_pingju(pingju) {
+          this._callback();
+        }
+        action_jieju(jieju) {
+          this._callback();
+        }
+        select_hule(data, hupai, info) {
+          let rongpai;
+          if (data) {
+            if (data.m && data.m.match(/^[mpsz]\d{4}$/)) return false;
+            let d = ["", "+", "=", "-"][(4 + this._model.lunban - this._menfeng) % 4];
+            rongpai = data.m ? data.m[0] + data.m.slice(-1) + d : data.p.slice(0, 2) + d;
+          }
+          let hule = this.allow_hule(this.shoupai, rongpai, hupai);
+          if (info && hule) {
+            let shoupai = this.shoupai.clone();
+            if (rongpai) shoupai.zimo(rongpai);
+            info.push({
+              m: "",
+              n_xiangting: -1,
+              ev: this.get_defen(this.shoupai, rongpai),
+              shoupai: shoupai.toString()
+            });
+          }
+          return hule;
+        }
+        select_pingju() {
+          if (Majiang.Util.xiangting(this.shoupai) < 4) return false;
+          return this.allow_pingju(this.shoupai);
+        }
+        select_fulou(dapai, info) {
+          let n_xiangting = Majiang.Util.xiangting(this.shoupai);
+          if (this._model.shoupai.find((s) => s.lizhi) && n_xiangting >= 3) return;
+          let d = ["", "+", "=", "-"][(4 + this._model.lunban - this._menfeng) % 4];
+          let p = dapai.p.slice(0, 2) + d;
+          if (n_xiangting < 3) {
+            let mianzi = this.get_gang_mianzi(this.shoupai, p).concat(this.get_peng_mianzi(this.shoupai, p)).concat(this.get_chi_mianzi(this.shoupai, p));
+            if (!mianzi.length) return;
+            let fulou;
+            let paishu = this._suanpai.get_paishu();
+            let max = this.eval_shoupai(this.shoupai, paishu, "");
+            if (info) {
+              info.push({
+                m: "",
+                n_xiangting,
+                ev: max,
+                shoupai: this.shoupai.toString()
+              });
+            }
+            for (let m of mianzi) {
+              let shoupai = this.shoupai.clone().fulou(m);
+              let x = Majiang.Util.xiangting(shoupai);
+              if (x >= 3) continue;
+              let ev = this.eval_shoupai(shoupai, paishu);
+              if (info && ev > 0) {
+                info.push({
+                  m,
+                  n_xiangting: x,
+                  ev,
+                  shoupai: shoupai.toString()
+                });
+              }
+              if (this._model.shoupai.find((s) => s.lizhi)) {
+                if (x > 0 && ev < 750) continue;
+                if (x == 0 && ev < 250) continue;
+              }
+              if (ev - max > 1e-7) {
+                max = ev;
+                fulou = m;
+              }
+            }
+            return fulou;
+          } else {
+            let mianzi = this.get_peng_mianzi(this.shoupai, p).concat(this.get_chi_mianzi(this.shoupai, p));
+            if (!mianzi.length) return;
+            n_xiangting = this.xiangting(this.shoupai);
+            let paishu;
+            if (info) {
+              paishu = this._suanpai.get_paishu();
+              let ev = this.eval_shoupai(this.shoupai, paishu);
+              let n_tingpai = Majiang.Util.tingpai(this.shoupai).map((p2) => this._suanpai._paishu[p2[0]][p2[1]]).reduce((x, y) => x + y, 0);
+              info.push({
+                m: "",
+                n_xiangting,
+                ev,
+                n_tingpai,
+                shoupai: this.shoupai.toString()
+              });
+            }
+            for (let m of mianzi) {
+              let shoupai = this.shoupai.clone().fulou(m);
+              let x = this.xiangting(shoupai);
+              if (x >= n_xiangting) continue;
+              if (info) {
+                info.push({
+                  m,
+                  n_xiangting: x,
+                  shoupai: shoupai.toString()
+                });
+              }
+              return m;
+            }
+          }
+        }
+        select_gang(info) {
+          let n_xiangting = Majiang.Util.xiangting(this.shoupai);
+          if (this._model.shoupai.find((s) => s.lizhi) && n_xiangting > 0) return;
+          let paishu = this._suanpai.get_paishu();
+          if (n_xiangting < 3) {
+            let gang, max = this.eval_shoupai(this.shoupai, paishu);
+            for (let m of this.get_gang_mianzi(this.shoupai)) {
+              let shoupai = this.shoupai.clone().gang(m);
+              if (Majiang.Util.xiangting(shoupai) >= 3) continue;
+              let ev = this.eval_shoupai(shoupai, paishu);
+              if (info) {
+                let p = m.match(/\d{4}$/) ? m.slice(0, 2) : m[0] + m.slice(-1);
+                let tingpai = Majiang.Util.tingpai(shoupai);
+                let n_tingpai = tingpai.map((p2) => this._suanpai._paishu[p2[0]][p2[1]]).reduce((x, y) => x + y, 0);
+                info.push({
+                  p,
+                  m,
+                  n_xiangting,
+                  ev,
+                  tingpai,
+                  n_tingpai
+                });
+              }
+              if (ev - max > -1e-7) {
+                gang = m;
+                max = ev;
+              }
+            }
+            return gang;
+          } else {
+            n_xiangting = this.xiangting(this.shoupai);
+            for (let m of this.get_gang_mianzi(this.shoupai)) {
+              let shoupai = this.shoupai.clone().gang(m);
+              if (this.xiangting(shoupai) == n_xiangting) {
+                if (info) {
+                  let p = m.match(/\d{4}$/) ? m.slice(0, 2) : m[0] + m.slice(-1);
+                  let ev = this.eval_shoupai(shoupai, paishu);
+                  let tingpai = Majiang.Util.tingpai(shoupai);
+                  let n_tingpai = tingpai.map((p2) => this._suanpai._paishu[p2[0]][p2[1]]).reduce((x, y) => x + y, 0);
+                  info.push({
+                    p,
+                    m,
+                    n_xiangting,
+                    ev,
+                    tingpai,
+                    n_tingpai
+                  });
+                }
+                return m;
+              }
+            }
+          }
+        }
+        select_dapai(info) {
+          let anquan, min = Infinity;
+          const weixian = this._suanpai.suan_weixian_all(this.shoupai._bingpai);
+          if (weixian) {
+            for (let p of this.get_dapai(this.shoupai)) {
+              if (weixian(p) < min) {
+                min = weixian(p);
+                anquan = p;
+              }
+            }
+          }
+          let dapai = anquan, max = -1, min_tingpai = 0, backtrack = [];
+          let n_xiangting = Majiang.Util.xiangting(this.shoupai);
+          let paishu = this._suanpai.get_paishu();
+          const paijia = this._suanpai.make_paijia(this.shoupai);
+          const cmp = (a, b) => paijia(a) - paijia(b);
+          for (let p of this.get_dapai(this.shoupai).reverse().sort(cmp)) {
+            if (!dapai) dapai = p;
+            let shoupai = this.shoupai.clone().dapai(p);
+            if (n_xiangting > 2 && this.xiangting(shoupai) > n_xiangting || Majiang.Util.xiangting(shoupai) > n_xiangting) {
+              if (anquan) continue;
+              if (n_xiangting < 2) backtrack.push(p);
+              continue;
+            }
+            let ev = this.eval_shoupai(shoupai, paishu);
+            let tingpai = Majiang.Util.tingpai(shoupai);
+            let n_tingpai = tingpai.map((p2) => this._suanpai._paishu[p2[0]][p2[1]]).reduce((x, y) => x + y, 0);
+            if (info) {
+              info.map((i) => {
+                if (i.p == p.slice(0, 2) && i.m)
+                  i.weixian = weixian && weixian(p);
+              });
+              if (!info.find((i) => i.p == p.slice(0, 2) && !i.m)) {
+                info.push({
+                  p: p.slice(0, 2),
+                  n_xiangting,
+                  ev,
+                  tingpai,
+                  n_tingpai,
+                  weixian: weixian && weixian(p)
+                });
+              }
+            }
+            if (weixian && weixian(p) > min) {
+              if (weixian(p) >= 13) continue;
+              if (n_xiangting > 2 || n_xiangting > 0 && ev < 80) {
+                if (weixian(p) >= 8) continue;
+                if (min < 3.2) continue;
+              } else if (n_xiangting > 0 && ev < 750 || n_xiangting == 0 && ev < 50) {
+                if (weixian(p) >= 8) continue;
+                if (min < 3.2 && weixian(p) >= 3.2) continue;
+              }
+            }
+            if (ev - max > 1e-7) {
+              max = ev;
+              dapai = p;
+              min_tingpai = n_tingpai * 6;
+            }
+          }
+          let tmp_max = max;
+          for (let p of backtrack) {
+            let shoupai = this.shoupai.clone().dapai(p);
+            let tingpai = Majiang.Util.tingpai(shoupai);
+            let n_tingpai = tingpai.map((p2) => this._suanpai._paishu[p2[0]][p2[1]]).reduce((x, y) => x + y, 0);
+            if (n_tingpai < min_tingpai) continue;
+            let back = p[0] + (+p[1] || 5);
+            let ev = this.eval_backtrack(shoupai, paishu, back, tmp_max * 2);
+            if (info && ev > 0) {
+              if (!info.find((i) => i.p == p.slice(0, 2) && !i.m)) {
+                info.push({
+                  p: p.slice(0, 2),
+                  n_xiangting: n_xiangting + 1,
+                  ev,
+                  tingpai,
+                  n_tingpai
+                });
+              }
+            }
+            if (ev - max > 1e-7) {
+              max = ev;
+              dapai = p;
+            }
+          }
+          if (anquan) {
+            if (info && dapai == anquan && !info.find((i) => i.p == anquan.slice(0, 2))) {
+              info.push({
+                p: anquan.slice(0, 2),
+                n_xiangting: Majiang.Util.xiangting(
+                  this.shoupai.clone().dapai(anquan)
+                ),
+                weixian: weixian && weixian(anquan)
+              });
+            }
+          }
+          if (this.select_lizhi(dapai) && max >= 350) dapai += "*";
+          return dapai;
+        }
+        select_lizhi(p) {
+          return this.allow_lizhi(this.shoupai, p);
+        }
+        select_daopai() {
+          return this.allow_no_daopai(this.shoupai);
+        }
+        xiangting(shoupai) {
+          function xiangting_menqian(shoupai2) {
+            return shoupai2.menqian ? Majiang.Util.xiangting(shoupai2) : Infinity;
+          }
+          function xiangting_fanpai(shoupai2, zhuangfeng, menfeng, suanpai) {
+            let n_fanpai = 0, back;
+            for (let n of [zhuangfeng + 1, menfeng + 1, 5, 6, 7]) {
+              if (shoupai2._bingpai.z[n] >= 3) n_fanpai++;
+              else if (shoupai2._bingpai.z[n] == 2 && suanpai._paishu.z[n]) back = "z" + n + n + n + "+";
+              for (let m of shoupai2._fulou) {
+                if (m[0] == "z" && m[1] == n) n_fanpai++;
+              }
+            }
+            if (n_fanpai) return Majiang.Util.xiangting(shoupai2);
+            if (back) {
+              let new_shoupai = shoupai2.clone();
+              new_shoupai.fulou(back, false);
+              new_shoupai._zimo = null;
+              return Majiang.Util.xiangting(new_shoupai) + 1;
+            }
+            return Infinity;
+          }
+          function xiangting_duanyao(shoupai2, rule) {
+            if (!rule["\u30AF\u30A4\u30BF\u30F3\u3042\u308A"] && !shoupai2.menqian) return Infinity;
+            if (shoupai2._fulou.find((m) => m.match(/^z|[19]/))) return Infinity;
+            let new_shoupai = shoupai2.clone();
+            for (let s of ["m", "p", "s"]) {
+              new_shoupai._bingpai[s][1] = 0;
+              new_shoupai._bingpai[s][9] = 0;
+            }
+            new_shoupai._bingpai.z = [0, 0, 0, 0, 0, 0, 0, 0];
+            return Majiang.Util.xiangting(new_shoupai);
+          }
+          function xiangting_duidui(shoupai2) {
+            if (shoupai2._fulou.map((m) => m.replace(/0/, "5")).find((m) => !m.match(/^[mpsz](\d)\1\1/)))
+              return Infinity;
+            let n_kezi = shoupai2._fulou.length, n_duizi = 0;
+            for (let s of ["m", "p", "s", "z"]) {
+              let bingpai = shoupai2._bingpai[s];
+              for (let n = 1; n < bingpai.length; n++) {
+                if (bingpai[n] >= 3) n_kezi++;
+                else if (bingpai[n] == 2) n_duizi++;
+              }
+            }
+            if (n_kezi + n_duizi > 5) n_duizi = 5 - n_kezi;
+            return 8 - n_kezi * 2 - n_duizi;
+          }
+          function xiangting_yise(shoupai2, suit) {
+            const regexp = new RegExp(`^[z${suit}]`);
+            if (shoupai2._fulou.find((m) => !m.match(regexp))) return Infinity;
+            let new_shoupai = shoupai2.clone();
+            for (let s of ["m", "p", "s"]) {
+              if (s != suit) new_shoupai._bingpai[s] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            }
+            return Majiang.Util.xiangting(new_shoupai);
+          }
+          return Math.min(
+            xiangting_menqian(shoupai),
+            xiangting_fanpai(
+              shoupai,
+              this._model.zhuangfeng,
+              this._menfeng,
+              this._suanpai
+            ),
+            xiangting_duanyao(shoupai, this._rule),
+            xiangting_duidui(shoupai),
+            xiangting_yise(shoupai, "m"),
+            xiangting_yise(shoupai, "p"),
+            xiangting_yise(shoupai, "s")
+          );
+        }
+        tingpai(shoupai) {
+          let n_xiangting = this.xiangting(shoupai);
+          let pai = [];
+          for (let p of Majiang.Util.tingpai(shoupai, (s) => this.xiangting(s))) {
+            if (n_xiangting > 0) {
+              for (let m of this.get_peng_mianzi(shoupai, p + "+")) {
+                let new_shoupai = shoupai.clone().fulou(m);
+                if (this.xiangting(new_shoupai) < n_xiangting) {
+                  pai.push(p + "+");
+                  break;
+                }
+              }
+              if (pai[pai.length - 1] == p + "+") continue;
+              for (let m of this.get_chi_mianzi(shoupai, p + "-")) {
+                let new_shoupai = shoupai.clone().fulou(m);
+                if (this.xiangting(new_shoupai) < n_xiangting) {
+                  pai.push(p + "-");
+                  break;
+                }
+              }
+              if (pai[pai.length - 1] == p + "-") continue;
+            }
+            pai.push(p);
+          }
+          return pai;
+        }
+        get_defen(shoupai, rongpai) {
+          let paistr = shoupai.toString();
+          if (rongpai)
+            paistr = paistr.replace(/^([^\*\,]*)(.*)$/, `$1${rongpai}$2`);
+          if (this._defen_cache[paistr] != null) return this._defen_cache[paistr];
+          let param = {
+            rule: this._rule,
+            zhuangfeng: this._model.zhuangfeng,
+            menfeng: this._menfeng,
+            hupai: { lizhi: shoupai.menqian },
+            baopai: this.shan.baopai,
+            jicun: { changbang: 0, lizhibang: 0 }
           };
-          this.worker.onerror = () => {
-            if (this.alive) failMatch("\u7535\u8111\u8F7D\u5165\u5931\u8D25\uFF0C\u8BF7\u5237\u65B0\u9875\u9762\u540E\u91CD\u8BD5\u3002");
-          };
+          let hule = Majiang.Util.hule(shoupai, rongpai, param);
+          this._defen_cache[paistr] = hule.defen;
+          return hule.defen;
         }
-        action(message, callback) {
-          const id = ++this.sequence;
-          if (callback) this.pending.set(id, callback);
-          this.worker.postMessage({ id, message, reply: !!callback });
-        }
-        dispose() {
-          this.alive = false;
-          this.worker.terminate();
-          this.pending.clear();
-        }
-      };
-      function failMatch(text) {
-        match?.dispose();
-        decision = null;
-        reply = null;
-        lastText = text;
-        render();
-        show("<h2>\u5BF9\u5C40\u5DF2\u6682\u505C</h2><p>" + text + '</p><button id="restart-error">\u91CD\u65B0\u5F00\u59CB</button>');
-        $("restart-error").onclick = newGame;
-      }
-      function submit(answer) {
-        if (!reply) return;
-        const cb = reply;
-        reply = null;
-        decision = null;
-        riichiPick = false;
-        kanPick = false;
-        selected = -1;
-        if (resultOpen) {
-          resultOpen = false;
-          $("modal").close();
-        }
-        render();
-        cb(answer);
-      }
-      function onDecision(options, callback) {
-        decision = options;
-        reply = callback;
-        selected = -1;
-        riichiPick = false;
-        kanPick = false;
-        if (["result", "draw", "match"].includes(options.type)) {
-          showResult(options);
-          render();
-          return;
-        }
-        render();
-      }
-      function newGame(dealer) {
-        match?.dispose();
-        clearEffects();
-        if ($("modal").open) $("modal").close();
-        resultOpen = false;
-        decision = null;
-        reply = null;
-        selected = -1;
-        riichiPick = false;
-        kanPick = false;
-        lastText = "\u6B63\u5728\u53D1\u724C\u2026";
-        human = new HumanPlayer(onDecision);
-        match = new Match([human, new BotWorker(), new BotWorker(), new BotWorker()], () => {
-        }, RULE, "Nicole \u2022 Riichi Club \xB7 \u4E1C\u98CE\u6218");
-        match.model.player = CHARACTERS.slice();
-        match.speed = 4;
-        match.wait = 0;
-        match.view = { kaiju: render, redraw: () => {
-          clearEffects();
-          lastText = "\u65B0\u4E00\u5C40\u5F00\u59CB";
-          render();
-        }, update: onEvent, say: () => {
-        }, summary: render };
-        match.kaiju(Number.isInteger(dealer) ? dealer : void 0);
-      }
-      function onEvent(event) {
-        render();
-        if (!event) return;
-        const [type, data] = Object.entries(event)[0], id = data.l == null ? null : match.model.player_id[data.l];
-        if (type === "dapai") {
-          lastText = CHARACTERS[id] + " \u5207\u51FA " + tileName(data.p);
-          animateDiscard(id, data.p);
-          if (data.p.includes("*")) {
-            lastText = CHARACTERS[id] + " \u7ACB\u76F4";
-            playWords("\u7ACB\u76F4", "RIICHI", id);
+        eval_shoupai(shoupai, paishu, back) {
+          let paistr = shoupai.toString() + (back != null ? `:${back}` : "");
+          if (this._eval_cache[paistr] != null) return this._eval_cache[paistr];
+          let rv = 0;
+          let n_xiangting = Majiang.Util.xiangting(shoupai);
+          if (n_xiangting == -1) {
+            rv = this.get_defen(shoupai);
+          } else if (shoupai._zimo) {
+            for (let p of this.get_dapai(shoupai)) {
+              let new_shoupai = shoupai.clone().dapai(p);
+              if (Majiang.Util.xiangting(new_shoupai) > n_xiangting) continue;
+              let ev = this.eval_shoupai(new_shoupai, paishu, back);
+              if (ev > rv) rv = ev;
+            }
+          } else if (n_xiangting < 3) {
+            for (let p of add_hongpai(Majiang.Util.tingpai(shoupai))) {
+              if (p == back) {
+                rv = 0;
+                break;
+              }
+              if (paishu.val(p) == 0) continue;
+              let new_shoupai = shoupai.clone().zimo(p);
+              paishu.pop(p);
+              let ev = this.eval_shoupai(new_shoupai, paishu, back);
+              if (!back) {
+                if (n_xiangting > 0)
+                  ev += this.eval_fulou(shoupai, p, paishu, back);
+              }
+              paishu.push(p);
+              rv += ev * paishu.val(p);
+            }
+            rv /= width[n_xiangting];
+          } else {
+            for (let p of add_hongpai(this.tingpai(shoupai))) {
+              if (paishu.val(p, 1) == 0) continue;
+              rv += paishu.val(p, 1) * (p[2] == "+" ? 4 : p[2] == "-" ? 2 : 1);
+            }
           }
-        } else if (type === "fulou" || type === "gang") {
-          const kind = type === "gang" ? "kan" : meldKind(data.m);
-          lastText = CHARACTERS[id] + " " + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind];
-          playCallEffect(kind, id);
-        } else if (type === "zimo" || type === "gangzimo") {
-          lastText = id === 0 ? type === "gangzimo" ? "\u5CAD\u4E0A\u6478\u724C \xB7 \u8BF7\u9009\u62E9\u51FA\u724C" : "\u8F6E\u5230\u4F60\u51FA\u724C" : CHARACTERS[id] + " \u6B63\u5728\u601D\u8003\u2026";
-        } else if (type === "hule") {
-          lastText = CHARACTERS[id] + (data.baojia == null ? " \u81EA\u6478" : " \u8363\u548C");
-          playWords(data.baojia == null ? "\u81EA\u6478" : "\u8363\u548C", data.baojia == null ? "TSUMO" : "RON", id);
-        } else if (type === "pingju") {
-          lastText = "\u672C\u5C40\u6D41\u5C40";
+          this._eval_cache[paistr] = rv;
+          return rv;
         }
-        render();
-      }
-      function ownSeat() {
-        return match.model.player_id.indexOf(0);
-      }
-      function discardCode(index) {
-        const hand = match.model.shoupai[ownSeat()], tiles = handTiles(hand);
-        return tiles[index] + (hand._zimo?.length === 2 && index === tiles.length - 1 ? "_" : "");
-      }
-      function selectDiscard(index) {
-        if (decision?.type !== "turn") return;
-        const p = discardCode(index), allowed = riichiPick ? decision.riichi : decision.discards;
-        if (!allowed.includes(p)) return;
-        if (selected === index) discard();
-        else {
-          selected = index;
-          tone(540);
-          render();
-        }
-      }
-      function discard() {
-        if (decision?.type !== "turn" || selected < 0) return;
-        const p = discardCode(selected), allowed = riichiPick ? decision.riichi : decision.discards;
-        if (allowed.includes(p)) submit({ dapai: p + (riichiPick ? "*" : "") });
-      }
-      function renderMeld(m, small = true) {
-        const group = document.createElement("div");
-        group.className = "meld";
-        group.title = meldKind(m) === "kan" ? /[+=-]/.test(m) ? "\u660E\u6760\uFF0F\u52A0\u6760" : "\u6697\u6760" : meldKind(m) === "pon" ? "\u78B0" : "\u5403";
-        const tiles = meldTiles(m), closed = meldKind(m) === "kan" && !/[+=-]/.test(m);
-        tiles.forEach((t, i) => {
-          const v = tile(t.p, small);
-          if (t.called) v.classList.add("claimed");
-          if (closed && (i === 0 || i === 3)) {
-            v.className = "tile tile-back" + (small ? " small" : "");
-            v.replaceChildren();
-            v.setAttribute("aria-label", "\u6697\u6760\u80CC\u9762");
+        eval_backtrack(shoupai, paishu, back, min) {
+          let n_xiangting = Majiang.Util.xiangting(shoupai);
+          let rv = 0;
+          for (let p of add_hongpai(Majiang.Util.tingpai(shoupai))) {
+            if (p.replace(/0/, "5") == back) continue;
+            if (paishu.val(p) == 0) continue;
+            let new_shoupai = shoupai.clone().zimo(p);
+            paishu.pop(p);
+            let ev = this.eval_shoupai(new_shoupai, paishu, back);
+            paishu.push(p);
+            if (ev - min > 1e-7) rv += ev * paishu.val(p);
           }
-          if (/[+=-]\d$/.test(m) && i === tiles.length - 1) v.classList.add("added-kan");
-          group.appendChild(v);
-        });
-        return group;
-      }
-      function render() {
-        if (!match?.model.shan) return;
-        const model = match.model, seat = ownSeat(), hand = model.shoupai[seat];
-        $("round-label").textContent = WINDS[model.zhuangfeng] + " " + (model.jushu + 1) + " \u5C40";
-        $("wall").textContent = model.shan.paishu;
-        $("sticks").textContent = model.changbang + " \u672C\u573A \xB7 " + model.lizhibang + " \u4F9B\u6258";
-        $("dora").replaceChildren(...model.shan.baopai.map((p) => tile(p, true)));
-        for (let l = 0; l < 4; l++) {
-          const id = model.player_id[l], river = $("river" + id);
-          river.replaceChildren(...model.he[l]._pai.map((p) => {
-            const v = tile(p, true);
-            if (/[+=-]$/.test(p)) v.classList.add("called-away");
-            if (p.includes("*")) v.classList.add("riichi-tile");
-            return v;
-          }));
-          const score = $("score" + id);
-          score.querySelector("small").textContent = WINDS[l] + "\u5BB6" + (l === 0 ? " \xB7 \u5E84" : "") + (model.shoupai[l].lizhi ? " \xB7 \u7ACB\u76F4" : "");
-          score.querySelector("b").textContent = model.defen[id].toLocaleString();
-          score.classList.toggle("active-seat", model.lunban === l);
-          $("seat-label" + id).textContent = CHARACTERS[id] + " \xB7 " + WINDS[l] + "\u5BB6";
-          $("board-melds" + id).replaceChildren(...model.shoupai[l]._fulou.map((m) => renderMeld(m)));
+          return rv / width[n_xiangting];
         }
-        $("melds").replaceChildren(...hand._fulou.map((m) => renderMeld(m)));
-        $("melds").hidden = !hand._fulou.length;
-        const handNode = $("hand");
-        handNode.replaceChildren();
-        handTiles(hand).forEach((p, i) => {
-          const v = tile(p), b = document.createElement("button");
-          b.className = v.className + (selected === i ? " selected" : "") + (hand._zimo?.length === 2 && i === handTiles(hand).length - 1 ? " drawn" : "");
-          b.replaceChildren(...v.childNodes);
-          b.title = tileName(p);
-          b.setAttribute("aria-label", tileName(p) + (b.classList.contains("drawn") ? " \u6478\u5165" : ""));
-          b.setAttribute("aria-pressed", selected === i);
-          const legal = decision?.type === "turn" ? riichiPick ? decision.riichi : decision.discards : [];
-          b.disabled = !legal.includes(discardCode(i));
-          b.onclick = () => selectDiscard(i);
-          handNode.appendChild(b);
-        });
-        $("discard").disabled = decision?.type !== "turn" || selected < 0;
-        $("win").disabled = decision?.type !== "turn" || !decision.win;
-        $("riichi").disabled = decision?.type !== "turn" || !decision.riichi.length;
-        $("riichi").textContent = hand.lizhi ? "\u5DF2\u7ACB\u76F4" : riichiPick ? "\u53D6\u6D88\u7ACB\u76F4" : "\u7ACB\u76F4";
-        $("kan").disabled = decision?.type !== "turn" || !decision.kan.length;
-        $("kan").textContent = kanPick ? "\u6536\u8D77\u6760" : "\u6760";
-        $("abort").hidden = decision?.type !== "turn" || !decision.abort;
-        $("status").textContent = decision?.type === "response" ? decision.rob ? "\u62A2\u6760\u673A\u4F1A" : "\u53EF\u4EE5\u9E23\u724C\uFF0F\u8363\u548C" : decision?.type === "turn" ? riichiPick ? "\u7ACB\u76F4 \xB7 \u9009\u62E9\u5207\u724C" : hand.lizhi ? "\u5DF2\u7ACB\u76F4 \xB7 \u6478\u5207\uFF0F\u81EA\u6478" : "\u8F6E\u5230\u4F60\u51FA\u724C" : lastText;
-        const shanten = Majiang.Util.xiangting(hand);
-        $("hint").textContent = decision?.type === "response" ? "\u8363\u548C\u4F18\u5148\uFF1B\u8DF3\u8FC7\u8363\u548C\u4F1A\u8FDB\u5165\u632F\u542C" : riichiPick ? "\u5207\u51FA\u9AD8\u4EAE\u724C\u5E76\u652F\u4ED8 1,000 \u70B9" : hand.lizhi ? "\u7ACB\u76F4\u540E\u53EA\u53EF\u6478\u5207\u3001\u5408\u6CD5\u6697\u6760\u6216\u548C\u724C" : shanten === 0 ? hand._zimo ? "\u53EF\u4FDD\u6301\u542C\u724C \xB7 \u8BF7\u9009\u62E9\u5207\u724C" : "\u542C\u724C \xB7 " + (Majiang.Util.tingpai(hand) || []).map(tileName).join("\u3001") : shanten < 0 ? "\u724C\u5F62\u5B8C\u6210\uFF0C\u987B\u6709\u5F79\u624D\u80FD\u548C\u724C" : shanten + " \u5411\u542C \xB7 \u5403\u78B0\u540E\u4E0D\u53EF\u7ACB\u76F4";
-        $("tilelabel").textContent = selected >= 0 ? tileName(handTiles(hand)[selected]) : "\u9009\u62E9\u4E00\u5F20\u724C";
-        renderChoices();
-      }
-      function actionButton(label, action, meld, kind) {
-        const b = document.createElement("button");
-        b.className = "call-choice";
-        b.setAttribute("aria-label", label + (meld ? " " + meldTiles(meld).map((t) => tileName(t.p)).join("\u3001") : ""));
-        if (kind) {
-          const img = document.createElement("img");
-          img.src = kind + "-fx.png";
-          img.alt = label;
-          b.appendChild(img);
-        } else {
-          const text = document.createElement("strong");
-          text.textContent = label;
-          b.appendChild(text);
-        }
-        if (meld) meldTiles(meld).forEach((t) => b.appendChild(tile(t.p, true)));
-        b.onclick = action;
-        return b;
-      }
-      function renderChoices() {
-        const panel = $("call-panel"), choices = $("call-choices");
-        choices.replaceChildren();
-        const response = decision?.type === "response";
-        panel.hidden = !response && !(kanPick && decision?.kan.length);
-        $("call-pass").hidden = !response;
-        if (panel.hidden) return;
-        if (response) {
-          $("call-label").textContent = CHARACTERS[match.model.player_id[decision.from]] + " " + (decision.rob ? "\u52A0\u6760" : "\u5207\u51FA") + " " + tileName(decision.tile);
-          if (decision.win) choices.appendChild(actionButton("\u8363\u548C", () => submit({ hule: "-" })));
-          for (const m of decision.calls) {
-            const kind = meldKind(m);
-            choices.appendChild(actionButton({ chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind], () => submit({ fulou: m }), m, kind));
+        eval_fulou(shoupai, p, paishu, back) {
+          let n_xiangting = Majiang.Util.xiangting(shoupai);
+          let peng_max = 0;
+          for (let m of this.get_peng_mianzi(shoupai, p + "+")) {
+            let new_shoupai = shoupai.clone().fulou(m);
+            if (Majiang.Util.xiangting(new_shoupai) >= n_xiangting) continue;
+            peng_max = Math.max(
+              this.eval_shoupai(new_shoupai, paishu, back),
+              peng_max
+            );
           }
-        } else {
-          $("call-label").textContent = "\u9009\u62E9\u6697\u6760\uFF0F\u52A0\u6760";
-          for (const m of decision.kan) choices.appendChild(actionButton(/[+=-]/.test(m) ? "\u52A0\u6760" : "\u6697\u6760", () => submit({ gang: m }), m, "kan"));
-        }
-      }
-      function playCallEffect(kind, id = 0, preview = false) {
-        const layer = $("call-fx");
-        layer.querySelector("img").src = kind + "-fx.png";
-        layer.querySelector("img").alt = { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind];
-        layer.querySelector("small").textContent = preview ? "\u6F14\u51FA\u9884\u89C8" : CHARACTERS[id] + " \xB7 " + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind];
-        layer.hidden = false;
-        layer.classList.remove("playing");
-        void layer.offsetWidth;
-        layer.classList.add("playing");
-        tone(kind === "kan" ? 220 : 660);
-        later(() => layer.hidden = true, 1500);
-      }
-      function playWords(title, english, id) {
-        if (document.body.classList.contains("no-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        $("cut-title").textContent = title;
-        $("cut-sub").textContent = CHARACTERS[id] + " \xB7 " + english;
-        $("cutin").hidden = false;
-        later(() => $("cutin").hidden = true, 1800);
-      }
-      function show(html) {
-        $("modalbody").innerHTML = html;
-        if (!$("modal").open) $("modal").showModal();
-      }
-      var DRAW_NAMES = { "\u8352\u724C\u5E73\u5C40": "\u8352\u724C\u6D41\u5C40", "\u4E5D\u7A2E\u4E5D\u724C": "\u4E5D\u79CD\u4E5D\u724C", "\u56DB\u98A8\u9023\u6253": "\u56DB\u98CE\u8FDE\u6253", "\u56DB\u5BB6\u7ACB\u76F4": "\u56DB\u5BB6\u7ACB\u76F4", "\u56DB\u958B\u69D3": "\u56DB\u6760\u6563\u4E86", "\u4E09\u5BB6\u548C": "\u4E09\u5BB6\u548C\u6D41\u5C40", "\u6D41\u3057\u6E80\u8CAB": "\u6D41\u5C40\u6EE1\u8D2F" };
-      function showResult(options) {
-        resultOpen = true;
-        const result = options.result, model = match.model;
-        if (options.type === "match") {
-          show('<h2>\u4E1C\u98CE\u6218 \xB7 \u7EC8\u5C40</h2><div class="settlement">' + result.rank.map((rank, id) => ({ rank, id })).sort((a, b) => a.rank - b.rank).map(({ rank, id }) => "<p><b>#" + rank + " " + CHARACTERS[id] + "</b><span>" + result.defen[id].toLocaleString() + " \u70B9</span></p>").join("") + '</div><button id="next" class="primary">\u518D\u5F00\u4E00\u573A</button><button id="download-log">\u4FDD\u5B58\u724C\u8C31</button>');
-          $("next").onclick = newGame;
-          $("download-log").onclick = () => downloadLog(result);
-          return;
-        }
-        const win = options.type === "result";
-        const title = win ? CHARACTERS[model.player_id[result.l]] + " " + (result.baojia == null ? "\u81EA\u6478" : "\u8363\u548C \xB7 " + CHARACTERS[model.player_id[result.baojia]] + " \u653E\u94F3") : DRAW_NAMES[result.name] || result.name;
-        const detail = win ? (result.damanguan ? result.damanguan + " \u500D\u5F79\u6EE1" : result.fanshu + " \u756A " + result.fu + " \u7B26") + " \xB7 " + result.defen.toLocaleString() + " \u70B9" : "";
-        show("<h2>" + escapeHtml(title) + '</h2><strong class="result-points">' + detail + '</strong><div id="result-hand"></div><div class="yaku-list">' + (result.hupai || []).map((h) => "<span>" + escapeHtml(h.name) + " <b>" + escapeHtml(h.fanshu) + " \u756A</b></span>").join("") + "</div>" + (result.fubaopai?.length ? '<p>\u91CC\u5B9D\u724C\u6307\u793A</p><div id="ura"></div>' : "") + '<div class="settlement">' + result.fenpei.map((delta, l) => {
-          const id = model.player_id[l];
-          return "<p><b>" + CHARACTERS[id] + "</b><span>" + model.defen[id].toLocaleString() + " \u2192 " + (model.defen[id] + delta).toLocaleString() + '</span><em class="' + (delta >= 0 ? "gain" : "loss") + '">' + (delta > 0 ? "+" : "") + delta + "</em></p>";
-        }).join("") + '</div><button id="next" class="primary">\u786E\u8BA4\u7ED3\u7B97 \xB7 \u7EE7\u7EED</button>');
-        if (win) {
-          const h = Majiang.Shoupai.fromString(result.shoupai);
-          $("result-hand").replaceChildren(...handTiles(h).map((p) => tile(p, true)), ...h._fulou.map((m) => renderMeld(m)));
-          if ($("ura")) $("ura").replaceChildren(...result.fubaopai.map((p) => tile(p, true)));
-        } else {
-          result.shoupai.forEach((s, l) => {
-            if (!s) return;
-            const label = document.createElement("p");
-            label.textContent = CHARACTERS[model.player_id[l]] + " \u542C\u724C";
-            $("result-hand").appendChild(label);
-            const h = Majiang.Shoupai.fromString(s);
-            handTiles(h).forEach((p) => $("result-hand").appendChild(tile(p, true)));
-          });
-        }
-        $("next").onclick = () => submit({});
-      }
-      function downloadLog(log) {
-        const blob = new Blob([JSON.stringify(log, null, 2)], { type: "application/json" }), url = URL.createObjectURL(blob), a = document.createElement("a");
-        a.href = url;
-        a.download = "nicole-riichi-" + Date.now() + ".json";
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1e3);
-      }
-      function showGallery() {
-        show('<h2>\u65B0\u827E\u5229\u90FD \xB7 37 \u5F20\u7279\u8272\u724C</h2><p>\u672C\u724C\u5C40\u76F4\u63A5\u4F7F\u7528\u8FD9\u4E9B PNG\uFF1B\u6BCF\u95E8\u4E00\u5F20\u7EA2\u4E94\uFF0C\u8BA1\u5165\u8D64\u5B9D\u724C\u3002</p><div id="tile-catalog"></div>');
-        const families = [["\u4E07\u5B50", 0, 9], ["\u997C\u5B50", 9, 18], ["\u7D22\u5B50", 18, 27], ["\u5B57\u724C", 27, 34], ["\u8D64\u4E94", 34, 37]];
-        for (const [label, start, end] of families) {
-          const h = document.createElement("h3");
-          h.textContent = label;
-          const row = document.createElement("div");
-          row.className = "catalog-row";
-          for (let id = start; id < end; id++) row.appendChild(tile(id));
-          $("tile-catalog").append(h, row);
-        }
-      }
-      $("discard").onclick = discard;
-      $("win").onclick = () => {
-        if (decision?.type === "turn" && decision.win) submit({ hule: "-" });
-      };
-      $("riichi").onclick = () => {
-        if (decision?.type === "turn" && decision.riichi.length) {
-          riichiPick = !riichiPick;
-          selected = -1;
-          kanPick = false;
-          render();
-        }
-      };
-      $("kan").onclick = () => {
-        if (decision?.type === "turn" && decision.kan.length) {
-          kanPick = !kanPick;
-          riichiPick = false;
-          selected = -1;
-          render();
-        }
-      };
-      $("abort").onclick = () => {
-        if (decision?.abort) submit({ daopai: "-" });
-      };
-      $("call-pass").onclick = () => {
-        if (decision?.type === "response") submit({});
-      };
-      $("new").onclick = () => {
-        if (resultOpen) return;
-        show('<h2>\u91CD\u65B0\u5F00\u59CB\u4E1C\u98CE\u6218\uFF1F</h2><p>\u5F53\u524D\u70B9\u6570\u548C\u672C\u573A\u8FDB\u5EA6\u4F1A\u91CD\u7F6E\uFF0C\u56DB\u4EBA\u4ECE 25,000 \u70B9\u5F00\u59CB\u3002</p><button id="reset" class="primary">\u91CD\u65B0\u5F00\u59CB</button>');
-        $("reset").onclick = newGame;
-      };
-      $("close").onclick = () => {
-        if (!resultOpen) $("modal").close();
-      };
-      $("modal").addEventListener("cancel", (e) => {
-        if (resultOpen) e.preventDefault();
-      });
-      $("sound").onclick = () => {
-        sound = !sound;
-        $("sound").textContent = "\u58F0\u97F3 " + (sound ? "ON" : "OFF");
-        $("sound").setAttribute("aria-pressed", sound);
-        tone();
-      };
-      $("motion").onclick = () => {
-        const off = document.body.classList.toggle("no-motion");
-        $("motion").textContent = "\u52A8\u4F5C\u7279\u6548 " + (off ? "OFF" : "ON");
-        $("motion").setAttribute("aria-pressed", !off);
-        if (off) clearEffects();
-      };
-      $("scene").onclick = () => {
-        const roof = document.body.classList.toggle("rooftop");
-        $("scene").textContent = "\u5149\u7EBF\uFF1A" + (roof ? "\u65E5\u5149" : "\u591C\u573A") + " \u21BB";
-      };
-      $("preview-chi").onclick = () => playCallEffect("chi", 0, true);
-      $("preview-pon").onclick = () => playCallEffect("pon", 0, true);
-      $("preview-kan").onclick = () => playCallEffect("kan", 0, true);
-      $("tile-gallery").onclick = showGallery;
-      $("rules").onclick = () => show('<h2>\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06 \xB7 \u4E1C\u98CE\u6218</h2><p>\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u6309\u4E1C\u4E00\u81F3\u4E1C\u56DB\u63A8\u8FDB\uFF1B\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u65E0\u4EBA\u8FBE\u5230 30,000 \u70B9\u65F6\u8FDB\u5165\u5357\u5165\u5EF6\u957F\uFF1B\u98DE\u4EBA\u7ED3\u675F\u3002</p><ul><li>\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002</li><li>\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002</li><li>\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002</li><li>\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002</li><li>\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002</li><li>\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002</li></ul><p>\u4F7F\u7528 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> \u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002</p>');
-      document.addEventListener("keydown", (e) => {
-        if ($("modal").open) return;
-        if (decision?.type === "response") {
-          if (e.key === "Escape") submit({});
-          return;
-        }
-        if (decision?.type !== "turn") return;
-        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-          e.preventDefault();
-          const n = handTiles(match.model.shoupai[ownSeat()]).length, step = e.key === "ArrowRight" ? 1 : -1;
-          for (let k = 0; k < n; k++) {
-            selected = (selected + step + n) % n;
-            if ((riichiPick ? decision.riichi : decision.discards).includes(discardCode(selected))) break;
+          let chi_max = 0;
+          for (let m of this.get_chi_mianzi(shoupai, p + "-")) {
+            let new_shoupai = shoupai.clone().fulou(m);
+            if (Majiang.Util.xiangting(new_shoupai) >= n_xiangting) continue;
+            chi_max = Math.max(
+              this.eval_shoupai(new_shoupai, paishu, back),
+              chi_max
+            );
           }
-          render();
+          return peng_max > chi_max ? peng_max * 3 : peng_max * 2 + chi_max;
         }
-        if (e.key === "Enter" && document.activeElement.tagName !== "BUTTON") discard();
-      });
-      var viewport = document.querySelector(".board");
-      var world = document.querySelector(".world");
-      new ResizeObserver(() => world.style.setProperty("--scene-scale", viewport.clientWidth / 1e3)).observe(viewport);
-      function animateDiscard(player, called) {
-        if (document.body.classList.contains("no-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        const target = $("river" + player).lastElementChild;
-        if (!target?.animate) return;
-        const board = document.querySelector(".world"), rect = board.getBoundingClientRect(), tr = target.getBoundingClientRect(), scale = rect.width / 1e3, br = { width: 1e3, height: 2e3 / 3 };
-        const x = (tr.left + tr.width / 2 - rect.left) / scale, y = (tr.top + tr.height / 2 - rect.top) / scale;
-        const origins = [[550, 470], [800, 280], [450, 197], [200, 385]];
-        const [sx, sy] = origins[player];
-        const person = board.querySelector?.(".person-" + player + " .character-sprite");
-        if (person) {
-          person.classList.remove("discarding");
-          void person.offsetWidth;
-          person.classList.add("discarding");
-          later(() => person.classList.remove("discarding"), 1200);
-        }
-        target.animate([{ opacity: 0 }, { opacity: 0, offset: 0.99 }, { opacity: 1 }], { duration: 650 });
-        const fly = target.cloneNode(true);
-        fly.className += " flying-tile";
-        fly.style.opacity = "0";
-        board.appendChild(fly);
-        actionEffects.push(fly);
-        fly.animate([{ transform: `translate(${sx}px,${sy}px) translate(-50%,-50%) rotate(-22deg) scale(2.2)`, opacity: 1 }, { transform: `translate(${x}px,${y}px) translate(-50%,-50%) rotate(0deg) scale(1)`, opacity: 1 }], { duration: 250, delay: 400, easing: "cubic-bezier(.16,.8,.28,1)", fill: "forwards" });
-        const burst = document.createElement("img");
-        burst.src = "impact.png";
-        burst.className = "impact-art";
-        burst.alt = "";
-        burst.style.left = x + "px";
-        burst.style.top = y + "px";
-        board.appendChild(burst);
-        actionEffects.push(burst);
-        burst.animate([{ opacity: 0, transform: "translate(-50%,-50%) scale(.15)" }, { opacity: 0, transform: "translate(-50%,-50%) scale(.15)", offset: 0.54 }, { opacity: 0.95, transform: "translate(-50%,-50%) scale(.65)", offset: 0.56 }, { opacity: 0, transform: "translate(-50%,-50%) scale(1.25)" }], { duration: 1200, fill: "forwards" });
-        const banner = document.createElement("div");
-        banner.className = "discard-banner " + (player === 0 ? "nicole-banner" : "opponent-banner");
-        const label = document.createElement("b");
-        label.textContent = ["\u59AE\u53EF", "\u6BD4\u5229", "\u96C5", "\u827E\u83B2"][player] + " / \u5207";
-        banner.appendChild(label);
-        const name = document.createElement("span");
-        name.textContent = tileName(called);
-        banner.appendChild(name);
-        board.appendChild(banner);
-        actionEffects.push(banner);
-        banner.animate([{ opacity: 0, transform: "translateX(-110%) skewX(-7deg)" }, { opacity: 1, transform: "translateX(0) skewX(-7deg)", offset: 0.2 }, { opacity: 1, transform: "translateX(0) skewX(-7deg)", offset: 0.7 }, { opacity: 0, transform: "translateX(30%) skewX(-7deg)" }], { duration: 900, fill: "forwards" });
-        const surface = board.querySelector?.(".table-layer") || board;
-        surface.animate([{ transform: "translate(0,0)" }, { transform: "translate(2px,1px)" }, { transform: "translate(-2px,0)" }, { transform: "translate(0,0)" }], { duration: 150, delay: 650 });
-        later(() => {
-          fly.remove();
-          tone(190);
-        }, 650);
-        later(() => {
-          for (const el of [fly, burst, banner]) el.remove();
-          actionEffects = actionEffects.filter((el) => ![fly, burst, banner].includes(el));
-        }, 1230);
-      }
-      function publicTable() {
-        const m = match?.model;
-        if (!m?.shan) return {};
-        return { round: WINDS[m.zhuangfeng] + (m.jushu + 1), scores: m.defen.slice(), remaining: m.shan.paishu, hand: handTiles(m.shoupai[ownSeat()]).map(tileName), rivers: m.he.map((h) => h._pai.map(tileName)), melds: m.shoupai.map((h) => h._fulou.slice()), turn: m.player_id[m.lunban], available: decision ? { type: decision.type, win: decision.win, kan: decision.kan, calls: decision.calls } : null };
-      }
-      if (navigator.modelContext?.registerTool) {
-        try {
-          navigator.modelContext.registerTool({ name: "read_mahjong_table", description: "Read public mahjong table and your own hand; never opponent hands or hidden wall.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true }, execute: async () => ({ content: [{ type: "text", text: JSON.stringify(publicTable()) }] }) });
-        } catch {
-        }
-      }
-      if (new URLSearchParams(location.search).has("test")) window.mahjongTest = { get match() {
-        return match;
-      }, get decision() {
-        return decision;
-      }, get human() {
-        return human;
-      }, newGame, submit, render, tile, publicTable, Majiang, RULE };
-      newGame();
+      };
     }
   });
-  require_game2();
+
+  // node_modules/@kobalab/majiang-ai/lib/minipaipu.js
+  var require_minipaipu = __commonJS({
+    "node_modules/@kobalab/majiang-ai/lib/minipaipu.js"(exports, module) {
+      "use strict";
+      var Majiang = require_lib();
+      function parse_heinfo(heinfo, menfeng, paistr) {
+        let he = [], fulou = [];
+        for (let i = 0; i < 4; i++) {
+          let l = (menfeng + i) % 4;
+          fulou[l] = (heinfo[i] || "").split(/,/);
+          he[l] = fulou[l].shift().match(/[mpsz]\d[_\*\+\=\-\^]*/g) || [];
+          fulou[l] = fulou[l].map((m) => Majiang.Shoupai.valid_mianzi(m)).filter((m) => m);
+        }
+        fulou[menfeng] = paistr.split(/,/).slice(1);
+        for (let l = 0; l < 4; l++) {
+          for (let m of fulou[l].reverse()) {
+            if (m.match(/[mpsz]\d{3}[\+\=\-]\d$/)) {
+              let p = m[0] + m[5] + "^";
+              let i = he[l].lastIndexOf(p);
+              if (i >= 0) {
+                he[l][i] = `^,${m}`;
+                m = m.slice(0, 5);
+              }
+            }
+            let d = { "+": 1, "=": 2, "-": 3 }[m.match(/[\+\=\-]/)] || 0;
+            if (d) {
+              let p = m[0] + m.match(/\d[\+\=\-]/);
+              let i = he[(l + d) % 4].map((p2) => p2.replace(/[_\*]/, "")).lastIndexOf(p);
+              if (i < 0) he[(l + d) % 4].unshift(`${p},${m}`);
+              else he[(l + d) % 4][i] += `,${m}`;
+            } else {
+              let p = m[0] + m[1] + "^";
+              let i = he[l].lastIndexOf(p);
+              if (i < 0) he[l].unshift(`^,${m}`);
+              else he[l][i] = `^,${m}`;
+            }
+          }
+        }
+        return he;
+      }
+      function play_heinfo(player, heinfo, menfeng, paistr, fix) {
+        let he = parse_heinfo(heinfo, menfeng, paistr);
+        let rv = ["", "", "", ""];
+        let l = 0, fulou, gang;
+        while (he.find((h) => h && h.length) || gang) {
+          if (!he[l].length || fulou && he[l][0][0] == "^") {
+            if (fulou) {
+              player.model.shoupai[l]._bingpai._--;
+              fulou = null;
+            } else {
+              player.shan.paishu--;
+            }
+            if (gang) {
+              he[l].unshift(`^,${gang}`);
+              gang = null;
+            }
+            l = (l + 1) % 4;
+            continue;
+          }
+          let id = player.model.player_id[l];
+          let [p, m] = he[l].shift().split(/,/);
+          if (p == "^") {
+            if (l != menfeng) {
+              player.zimo({ l, m: "_" });
+              player.gang({ l, m });
+            } else {
+              player.shan.paishu--;
+            }
+            rv[id] += m[0] + (m[5] || m[1]) + "^";
+            continue;
+          } else {
+            p = p.replace(/[\+\=\-\^]$/, "");
+            if (!fulou) {
+              player.zimo({ l, p });
+            } else if (l == menfeng) {
+              player._suanpai._paishu[p[0]][p[1]]--;
+              if (p[1] == 0) player._suanpai._paishu[p[0]][5]--;
+            }
+            player.dapai({ l, p });
+            rv[id] += p;
+            if (gang) {
+              he[l].unshift(`^,${gang}`);
+              gang = null;
+            }
+          }
+          if (m) {
+            let d = { "+": 1, "=": 2, "-": 3 }[m.match(/[\+\=\-]/)];
+            l = (l + 4 - d) % 4;
+            if (m.match(/[mpsz]\d{3}[\+\=\-]\d$/)) {
+              gang = m;
+              m = m.slice(0, 5);
+            }
+            if (l != menfeng) {
+              player.fulou({ l, m });
+            } else {
+              player.model.he[player.model.lunban].fulou(m);
+              player.shoupai._bingpai._++;
+              player._suanpai._paishu[p[0]][p[1]]++;
+              if (p[1] == 0) player._suanpai._paishu[p[0]][5]++;
+            }
+            rv[id] += m.match(/[\+\=\-]/);
+            if (m.length == 5) fulou = m;
+          } else {
+            l = (l + 1) % 4;
+            fulou = null;
+          }
+        }
+        player.shoupai.fromString(paistr);
+        for (let i = 1; i < 4; i++) {
+          let l2 = (menfeng + i) % 4;
+          let fulou2 = (heinfo[i] || "").split(/,/).slice(1).map((m) => Majiang.Shoupai.valid_mianzi(m)).filter((m) => m);
+          rv[i] = [rv[i], ...fulou2].join(",");
+          if (fix) player.model.shoupai[l2]._fulou = fulou2;
+        }
+        return rv;
+      }
+      function minipaipu(player, baseinfo, heinfo, fix) {
+        let { paistr, zhuangfeng, menfeng, baopai, hongpai, xun } = baseinfo;
+        baopai = baopai.filter((p) => Majiang.Shoupai.valid_pai(p));
+        const rule = hongpai ? Majiang.rule({ "\u8D64\u724C": { m: 1, p: 1, s: 1 } }) : Majiang.rule({ "\u8D64\u724C": { m: 0, p: 0, s: 0 } });
+        player.kaiju({ id: 0, rule, qijia: 0 });
+        let qipai = {
+          zhuangfeng,
+          jushu: [0, 3, 2, 1][menfeng],
+          changbang: 0,
+          lizhibang: 0,
+          defen: [25e3, 25e3, 25e3, 25e3],
+          baopai: baopai.shift(),
+          shoupai: ["", "", "", ""]
+        };
+        qipai.shoupai[menfeng] = paistr;
+        player.qipai(qipai);
+        if (player.shoupai.get_dapai()) player.model.shan.paishu--;
+        let rv;
+        if (heinfo) rv = play_heinfo(player, heinfo, menfeng, paistr, fix);
+        else if (xun) player.shan.paishu -= (xun - 1) * 4 + menfeng;
+        while (baopai.length) player.kaigang({ baopai: baopai.shift() });
+        if (player._suanpai._n_zimo) player._suanpai._n_zimo = player.shan.paishu;
+        return rv;
+      }
+      module.exports = minipaipu;
+    }
+  });
+
+  // node_modules/@kobalab/majiang-ai/lib/index.js
+  var require_lib2 = __commonJS({
+    "node_modules/@kobalab/majiang-ai/lib/index.js"(exports, module) {
+      "use strict";
+      var AI = require_player2();
+      AI.minipaipu = require_minipaipu();
+      module.exports = AI;
+    }
+  });
+
+  // src/ai-worker.js
+  var require_ai_worker = __commonJS({
+    "src/ai-worker.js"() {
+      var AI = require_lib2();
+      var player = new AI();
+      self.onmessage = ({ data }) => {
+        try {
+          player.action(data.message, data.reply ? (result) => self.postMessage({ id: data.id, result: result || {} }) : void 0);
+        } catch (error) {
+          self.postMessage({ id: data.id, error: error.message });
+        }
+      };
+    }
+  });
+  require_ai_worker();
 })();
 /*! Bundled license information:
 
@@ -3264,5 +3494,14 @@
    *  Copyright(C) 2021 Satoshi Kobayashi
    *  Released under the MIT license
    *  https://github.com/kobalab/majiang-core/blob/master/LICENSE
+   *)
+
+@kobalab/majiang-ai/lib/index.js:
+  (*!
+   *  @kobalab/majiang-ai v1.2.0
+   *
+   *  Copyright(C) 2021 Satoshi Kobayashi
+   *  Released under the MIT license
+   *  https://github.com/kobalab/majiang-ai/blob/master/LICENSE
    *)
 */
