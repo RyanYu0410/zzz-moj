@@ -31,3 +31,15 @@ vm.runInContext('clearEffects()',context);assert(poses.every(p=>p.classList.valu
 assert(tracks.some(t=>t.options.delay===400&&t.options.duration===250),"Flight starts at release and lands at 650ms");
 assert(tracks.some(t=>t.options.delay===650&&t.options.duration===150),"Table impact starts on landing");
 console.log("PASS: release, flight and landing timing aligned");
+vm.runInContext(`
+assert(baseTile(34)===4&&baseTile(35)===13&&baseTile(36)===22,'red five mapping');
+assert(winning([2,3,34,11,12,35,20,21,36,27,27,27,33,33]),'red fives in winning sequences');
+assert(waits([2,3,34,11,12,35,20,21,36,27,27,27,33]).includes(33),'red fives retain waits');
+assert(counts([4,4,4,34])[4]===4,'red and normal five share copy limit');
+newGame();
+const full=[...state.wall,...state.dead,...state.hands.flat()];
+assert([34,35,36].every(t=>full.filter(x=>x===t).length===1),'one red five per suit');
+assert([4,13,22].every(t=>full.filter(x=>x===t).length===3),'three ordinary fives per suit');
+for(let t=0;t<37;t++){const v=tile(t);assert(v.innerHTML.includes('tile-face'),'every tile has artwork');assert(v.title===tileName(t),'accessible tile name')}
+console.log('PASS: 37 tile faces, red-five distribution, normalized winning shapes and waits');
+`,context);

@@ -1,0 +1,187 @@
+[
+  {
+    "id": 0,
+    "label": "一萬",
+    "file": "man-1.png"
+  },
+  {
+    "id": 1,
+    "label": "二萬",
+    "file": "man-2.png"
+  },
+  {
+    "id": 2,
+    "label": "三萬",
+    "file": "man-3.png"
+  },
+  {
+    "id": 3,
+    "label": "四萬",
+    "file": "man-4.png"
+  },
+  {
+    "id": 4,
+    "label": "五萬",
+    "file": "man-5.png"
+  },
+  {
+    "id": 5,
+    "label": "六萬",
+    "file": "man-6.png"
+  },
+  {
+    "id": 6,
+    "label": "七萬",
+    "file": "man-7.png"
+  },
+  {
+    "id": 7,
+    "label": "八萬",
+    "file": "man-8.png"
+  },
+  {
+    "id": 8,
+    "label": "九萬",
+    "file": "man-9.png"
+  },
+  {
+    "id": 9,
+    "label": "一筒",
+    "file": "pin-1.png"
+  },
+  {
+    "id": 10,
+    "label": "二筒",
+    "file": "pin-2.png"
+  },
+  {
+    "id": 11,
+    "label": "三筒",
+    "file": "pin-3.png"
+  },
+  {
+    "id": 12,
+    "label": "四筒",
+    "file": "pin-4.png"
+  },
+  {
+    "id": 13,
+    "label": "五筒",
+    "file": "pin-5.png"
+  },
+  {
+    "id": 14,
+    "label": "六筒",
+    "file": "pin-6.png"
+  },
+  {
+    "id": 15,
+    "label": "七筒",
+    "file": "pin-7.png"
+  },
+  {
+    "id": 16,
+    "label": "八筒",
+    "file": "pin-8.png"
+  },
+  {
+    "id": 17,
+    "label": "九筒",
+    "file": "pin-9.png"
+  },
+  {
+    "id": 18,
+    "label": "一索",
+    "file": "sou-1.png"
+  },
+  {
+    "id": 19,
+    "label": "二索",
+    "file": "sou-2.png"
+  },
+  {
+    "id": 20,
+    "label": "三索",
+    "file": "sou-3.png"
+  },
+  {
+    "id": 21,
+    "label": "四索",
+    "file": "sou-4.png"
+  },
+  {
+    "id": 22,
+    "label": "五索",
+    "file": "sou-5.png"
+  },
+  {
+    "id": 23,
+    "label": "六索",
+    "file": "sou-6.png"
+  },
+  {
+    "id": 24,
+    "label": "七索",
+    "file": "sou-7.png"
+  },
+  {
+    "id": 25,
+    "label": "八索",
+    "file": "sou-8.png"
+  },
+  {
+    "id": 26,
+    "label": "九索",
+    "file": "sou-9.png"
+  },
+  {
+    "id": 27,
+    "label": "東",
+    "file": "east.png"
+  },
+  {
+    "id": 28,
+    "label": "南",
+    "file": "south.png"
+  },
+  {
+    "id": 29,
+    "label": "西",
+    "file": "west.png"
+  },
+  {
+    "id": 30,
+    "label": "北",
+    "file": "north.png"
+  },
+  {
+    "id": 31,
+    "label": "白",
+    "file": "white.png"
+  },
+  {
+    "id": 32,
+    "label": "發",
+    "file": "green.png"
+  },
+  {
+    "id": 33,
+    "label": "中",
+    "file": "red.png"
+  },
+  {
+    "id": 34,
+    "label": "赤 五萬",
+    "file": "man-red-5.png"
+  },
+  {
+    "id": 35,
+    "label": "赤 五筒",
+    "file": "pin-red-5.png"
+  },
+  {
+    "id": 36,
+    "label": "赤 五索",
+    "file": "sou-red-5.png"
+  }
+]
