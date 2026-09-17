@@ -18,3 +18,7 @@ Use case: stylized-concept. Create one finished game action callout PNG, 1536x10
 
 ## Four character victory standees
 Generated with built-in imagegen. Full exact prompts: `dist/winners/prompts.json`. Outputs: `dist/winners/nicole.png`, `billy.png`, `miyabi.png`, `ellen.png`.
+
+
+## Twelve character call illustrations
+Generated with built-in imagegen: four characters × Chi/Pon/Kan. Exact prompts: `dist/calls/prompts.json`.

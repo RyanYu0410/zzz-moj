@@ -58,3 +58,14 @@ All concealed hands and melds now sit on the table. Opponents show anonymous bac
 Each winner has a generated full-body transparent PNG in `dist/winners/`: Nicole, Billy, Miyabi and Ellen. A win first opens the matching character reveal; clicking “查看立绘与结算” opens their portrait alongside the winning hand, yaku and payments. Confirming settlement continues the match. The flow also supports sequential winners and mobile scrolling. Exact built-in image-generation prompts are in `dist/winners/prompts.json`.
 
 Additional browser checks: `node scripts/winner-browser-check.cjs`.
+
+
+## Call options and action artwork
+
+Chi, Pon and Kan remain visible in the action bar. They enable only when legal; selecting one filters the available tile combinations, and a second selection confirms the call. Concealed/added Kan uses the same Kan control on your turn. Skip remains available during responses.
+
+Every character has three distinct action illustrations in `dist/calls/` (`nicole`, `billy`, `miyabi`, `ellen` × `chi`, `pon`, `kan`). Gameplay maps each call to the acting character; the preview character selector lets you inspect all twelve without changing the hand. Reduced motion keeps a static illustration.
+
+The build writes content-versioned CSS and game URLs and versions the AI worker. This fixes mixed cached stylesheet/game versions that could hide or misplace table racks. Always run `npm run build` after editing source or CSS. Short windows keep a minimum table size instead of collapsing it.
+
+Additional UI checks: `node scripts/call-options-browser-check.cjs`.

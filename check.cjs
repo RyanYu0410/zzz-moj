@@ -30,3 +30,11 @@ class Auto extends HumanPlayer{constructor(){super((o,cb)=>{
 const g=new Majiang.Game([new Auto(),new Auto(),new Auto(),new Auto()],()=>{},RULE);g.do_sync();assert.equal(g._paipu.rank.length,4);assert.equal(g._paipu.defen.reduce((a,b)=>a+b,0),100000);assert(g._paipu.log.length>=1);assert(calls>0);assert(g._paipu.log.flat().some(e=>e.hule||e.pingju));console.log('PASS: full East match completed ('+g._paipu.log.length+' hands, '+calls+' calls, '+kans+' self kans), scoring and 100,000-point conservation');
 // Disposal must prevent any delayed transition from an abandoned match.
 const m=new Match([],()=>{},RULE);let fired=false;m.schedule(()=>fired=true,1);m.dispose();setTimeout(()=>{assert.equal(fired,false);console.log('PASS: 37 PNG faces, red fives, chi/pon/three kan forms, rinshan/dora, furiten, ron/tsumo, no-yaku rejection, restart disposal')},15);
+
+// Prevent HTML and CSS/JS from coming from different cached revisions.
+const crypto=require('node:crypto');
+const hash=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex').slice(0,12);
+const html=fs.readFileSync('dist/index.html','utf8');
+assert(html.includes('style.css?v='+hash('dist/style.css')),'HTML points to the exact stylesheet build');
+assert(html.includes('game.js?v='+hash('dist/game.js')),'HTML points to the exact game build');
+console.log('PASS: versioned assets prevent stale stylesheet / script mixing');

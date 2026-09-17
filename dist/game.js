@@ -2731,6 +2731,7 @@
       var selected = -1;
       var riichiPick = false;
       var kanPick = false;
+      var callFilter = null;
       var lastText = "\u6B63\u5728\u53D1\u724C\u2026";
       var sound = false;
       var ctx;
@@ -2785,7 +2786,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js");
+          this.worker = new Worker("ai-worker.js?v=3810d8366b92");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -2827,6 +2828,7 @@
         decision = null;
         riichiPick = false;
         kanPick = false;
+        callFilter = null;
         selected = -1;
         if (resultOpen) {
           resultOpen = false;
@@ -2843,6 +2845,7 @@
         selected = -1;
         riichiPick = false;
         kanPick = false;
+        callFilter = null;
         if (["result", "draw", "match"].includes(options.type)) {
           if (options.type === "result") showVictory(options);
           else showResult(options);
@@ -2863,6 +2866,7 @@
         selected = -1;
         riichiPick = false;
         kanPick = false;
+        callFilter = null;
         lastText = "\u6B63\u5728\u53D1\u724C\u2026";
         human = new HumanPlayer(onDecision);
         match = new Match([human, new BotWorker(), new BotWorker(), new BotWorker()], () => {
@@ -2997,8 +3001,12 @@
         $("win").disabled = decision?.type !== "turn" || !decision.win;
         $("riichi").disabled = decision?.type !== "turn" || !decision.riichi.length;
         $("riichi").textContent = hand.lizhi ? "\u5DF2\u7ACB\u76F4" : riichiPick ? "\u53D6\u6D88\u7ACB\u76F4" : "\u7ACB\u76F4";
-        $("kan").disabled = decision?.type !== "turn" || !decision.kan.length;
-        $("kan").textContent = kanPick ? "\u6536\u8D77\u6760" : "\u6760";
+        for (const kind of ["chi", "pon", "kan"]) {
+          const available = decision?.type === "response" ? decision.calls.some((m) => meldKind(m) === kind) : kind === "kan" && decision?.type === "turn" && decision.kan.length > 0;
+          $(kind).disabled = !available;
+          $(kind).setAttribute("aria-expanded", kind === "kan" && decision?.type === "turn" ? kanPick : callFilter === kind);
+          $(kind).title = available ? "\u9009\u62E9" + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind] + "\u724C\u7EC4\u5408" : { chi: "\u4E0A\u5BB6\u5F03\u724C\u53EF\u7EC4\u6210\u987A\u5B50\u65F6\u53EF\u5403", pon: "\u5BF9\u624B\u5F03\u724C\u4E0E\u4F60\u7684\u5BF9\u5B50\u76F8\u540C\u65F6\u53EF\u78B0", kan: "\u6301\u6709\u56DB\u5F20\u540C\u724C\u6216\u53EF\u52A0\u6760\u65F6\u5F00\u653E" }[kind];
+        }
         $("abort").hidden = decision?.type !== "turn" || !decision.abort;
         $("status").textContent = decision?.type === "response" ? decision.rob ? "\u62A2\u6760\u673A\u4F1A" : "\u53EF\u4EE5\u9E23\u724C\uFF0F\u8363\u548C" : decision?.type === "turn" ? riichiPick ? "\u7ACB\u76F4 \xB7 \u9009\u62E9\u5207\u724C" : hand.lizhi ? "\u5DF2\u7ACB\u76F4 \xB7 \u6478\u5207\uFF0F\u81EA\u6478" : "\u8F6E\u5230\u4F60\u51FA\u724C" : lastText;
         const shanten = Majiang.Util.xiangting(hand);
@@ -3036,6 +3044,7 @@
           if (decision.win) choices.appendChild(actionButton("\u8363\u548C", () => submit({ hule: "-" })));
           for (const m of decision.calls) {
             const kind = meldKind(m);
+            if (callFilter && kind !== callFilter) continue;
             choices.appendChild(actionButton({ chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind], () => submit({ fulou: m }), m, kind));
           }
         } else {
@@ -3043,17 +3052,35 @@
           for (const m of decision.kan) choices.appendChild(actionButton(/[+=-]/.test(m) ? "\u52A0\u6760" : "\u6697\u6760", () => submit({ gang: m }), m, "kan"));
         }
       }
+      var callEffectTimer;
       function playCallEffect(kind, id = 0, preview = false) {
         const layer = $("call-fx");
-        layer.querySelector("img").src = kind + "-fx.png";
-        layer.querySelector("img").alt = { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind];
-        layer.querySelector("small").textContent = preview ? "\u6F14\u51FA\u9884\u89C8" : CHARACTERS[id] + " \xB7 " + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind];
+        clearTimeout(callEffectTimer);
+        $("call-character").src = "calls/" + WIN_ART[id] + "-" + kind + ".png";
+        $("call-character").alt = CHARACTERS[id] + " \xB7 " + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind] + " \u4E13\u5C5E\u52A8\u4F5C";
+        $("call-badge").src = kind + "-fx.png";
+        $("call-badge").alt = { chi: "\u5403 Chi", pon: "\u78B0 Pon", kan: "\u6760 Kan" }[kind];
+        layer.style.setProperty("--action-color", WIN_COLORS[id]);
+        layer.querySelector("small").textContent = (preview ? "\u6F14\u51FA\u9884\u89C8 \xB7 " : "") + CHARACTERS[id] + " \xB7 " + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind];
         layer.hidden = false;
         layer.classList.remove("playing");
         void layer.offsetWidth;
         layer.classList.add("playing");
         tone(kind === "kan" ? 220 : 660);
-        later(() => layer.hidden = true, 1500);
+        callEffectTimer = later(() => layer.hidden = true, 2100);
+      }
+      function chooseCallKind(kind) {
+        if (decision?.type === "response" && decision.calls.some((m) => meldKind(m) === kind)) {
+          callFilter = callFilter === kind ? null : kind;
+          render();
+          return;
+        }
+        if (kind === "kan" && decision?.type === "turn" && decision.kan.length) {
+          kanPick = !kanPick;
+          riichiPick = false;
+          selected = -1;
+          render();
+        }
       }
       function playWords(title, english, id) {
         if (document.body.classList.contains("no-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -3160,14 +3187,9 @@
           render();
         }
       };
-      $("kan").onclick = () => {
-        if (decision?.type === "turn" && decision.kan.length) {
-          kanPick = !kanPick;
-          riichiPick = false;
-          selected = -1;
-          render();
-        }
-      };
+      $("chi").onclick = () => chooseCallKind("chi");
+      $("pon").onclick = () => chooseCallKind("pon");
+      $("kan").onclick = () => chooseCallKind("kan");
       $("abort").onclick = () => {
         if (decision?.abort) submit({ daopai: "-" });
       };
@@ -3201,9 +3223,9 @@
         const roof = document.body.classList.toggle("rooftop");
         $("scene").textContent = "\u5149\u7EBF\uFF1A" + (roof ? "\u65E5\u5149" : "\u591C\u573A") + " \u21BB";
       };
-      $("preview-chi").onclick = () => playCallEffect("chi", 0, true);
-      $("preview-pon").onclick = () => playCallEffect("pon", 0, true);
-      $("preview-kan").onclick = () => playCallEffect("kan", 0, true);
+      $("preview-chi").onclick = () => playCallEffect("chi", Number($("preview-character").value), true);
+      $("preview-pon").onclick = () => playCallEffect("pon", Number($("preview-character").value), true);
+      $("preview-kan").onclick = () => playCallEffect("kan", Number($("preview-character").value), true);
       $("tile-gallery").onclick = showGallery;
       $("rules").onclick = () => show('<h2>\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06 \xB7 \u4E1C\u98CE\u6218</h2><p>\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u6309\u4E1C\u4E00\u81F3\u4E1C\u56DB\u63A8\u8FDB\uFF1B\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u65E0\u4EBA\u8FBE\u5230 30,000 \u70B9\u65F6\u8FDB\u5165\u5357\u5165\u5EF6\u957F\uFF1B\u98DE\u4EBA\u7ED3\u675F\u3002</p><ul><li>\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002</li><li>\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002</li><li>\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002</li><li>\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002</li><li>\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002</li><li>\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002</li></ul><p>\u4F7F\u7528 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> \u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002</p>');
       document.addEventListener("keydown", (e) => {
@@ -3297,7 +3319,7 @@
         return decision;
       }, get human() {
         return human;
-      }, newGame, submit, render, tile, publicTable, Majiang, RULE, showVictory, showResult };
+      }, newGame, submit, render, tile, publicTable, Majiang, RULE, showVictory, showResult, playCallEffect };
       newGame();
     }
   });
