@@ -82,3 +82,7 @@ body{min-height:100svh;display:flex;flex-direction:column}header{height:70px;fle
 .world .center .dora{width:100%;margin:2px 0 0;flex-direction:row;justify-content:center;gap:5px;font-size:9px;line-height:11px;color:#e0d5c4}
 .world .center #dora{min-height:22px;align-items:center;gap:1px}
 .world .center #dora .tile{width:15px;height:22px}
+
+/* Bottom-up shade behind the player's hand and nameplate. */
+.world:after{content:'';position:absolute;left:0;right:0;bottom:0;height:180px;z-index:6;pointer-events:none;background:linear-gradient(to top,#050308f2 0%,#08050cc9 24%,#10071170 52%,transparent 100%)}
+.world .player-label{top:603px;bottom:auto;z-index:8}
