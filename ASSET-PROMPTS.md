@@ -14,3 +14,7 @@ Use case: stylized-concept. Asset: transparent PNG single decorative mahjong til
 
 
 Use case: stylized-concept. Create one finished game action callout PNG, 1536x1024 horizontal canvas, genuine transparent background and clean alpha cutout. Use the provided image ONLY as a style and composition reference: the same smooth heavy black American comic ink, glossy beveled lettering, lightning-like burst shards, punchy halftone accents, centered explosive action composition. The new callout has exact large Chinese character "杠" (wood radical 木 on left and 工 on right), and smaller italic Latin text "KAN" on the right. Text must be exactly 杠 and KAN, no other text. Dominant saturated gold and orange; hot pink and cyan only as minor bevel edges and shards. Strong sunlight glint with prismatic rainbow flares. Match reference overall centered horizontal composition and smooth bold outlines, ensure all artwork fits canvas with transparent margin. Very legible Chinese character, smooth clean ink silhouette. No rectangular panel, no solid background, no dark backdrop or colored ambient glow filling transparent regions. Preserve actual alpha transparency outside the graphic, not painted checkerboard.
+
+
+## Four character victory standees
+Generated with built-in imagegen. Full exact prompts: `dist/winners/prompts.json`. Outputs: `dist/winners/nicole.png`, `billy.png`, `miyabi.png`, `ellen.png`.

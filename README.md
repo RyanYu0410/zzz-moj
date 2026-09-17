@@ -49,3 +49,12 @@ Export the existing PNG collection with `node scripts/export-tiles.cjs /absolute
 ## Dependencies and attribution
 
 Rule engine: [@kobalab/majiang-core](https://github.com/kobalab/majiang-core) 1.4.1. AI: [@kobalab/majiang-ai](https://github.com/kobalab/majiang-ai) 1.2.0. Both are MIT licensed; see `dist/THIRD-PARTY-NOTICES.txt`. This project preserves its generated artwork independently of those libraries.
+
+
+## Table racks and character victories
+
+All concealed hands and melds now sit on the table. Opponents show anonymous backs only; clicking your own table tiles retains the original selection/discard controls.
+
+Each winner has a generated full-body transparent PNG in `dist/winners/`: Nicole, Billy, Miyabi and Ellen. A win first opens the matching character reveal; clicking “查看立绘与结算” opens their portrait alongside the winning hand, yaku and payments. Confirming settlement continues the match. The flow also supports sequential winners and mobile scrolling. Exact built-in image-generation prompts are in `dist/winners/prompts.json`.
+
+Additional browser checks: `node scripts/winner-browser-check.cjs`.

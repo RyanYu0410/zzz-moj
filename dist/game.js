@@ -2718,6 +2718,8 @@
       var { Majiang, RULE, CHARACTERS, WINDS, handTiles, tileId, tileFile, meldKind, meldTiles, HumanPlayer, Match } = require_engine();
       var $ = (id) => document.getElementById(id);
       var NAMES = ["\u4E00\u842C", "\u4E8C\u842C", "\u4E09\u842C", "\u56DB\u842C", "\u4E94\u842C", "\u516D\u842C", "\u4E03\u842C", "\u516B\u842C", "\u4E5D\u842C", "\u4E00\u7B52", "\u4E8C\u7B52", "\u4E09\u7B52", "\u56DB\u7B52", "\u4E94\u7B52", "\u516D\u7B52", "\u4E03\u7B52", "\u516B\u7B52", "\u4E5D\u7B52", "\u4E00\u7D22", "\u4E8C\u7D22", "\u4E09\u7D22", "\u56DB\u7D22", "\u4E94\u7D22", "\u516D\u7D22", "\u4E03\u7D22", "\u516B\u7D22", "\u4E5D\u7D22", "\u6771", "\u5357", "\u897F", "\u5317", "\u767D", "\u767C", "\u4E2D"];
+      var WIN_ART = ["nicole", "billy", "miyabi", "ellen"];
+      var WIN_COLORS = ["#ff4d9b", "#ff9a4d", "#7fddff", "#ff4664"];
       var tileName = (p) => {
         const id = typeof p === "number" ? p : tileId(p);
         return id >= 34 ? "\u8D64 " + NAMES[[4, 13, 22][id - 34]] : NAMES[id];
@@ -2829,6 +2831,8 @@
         if (resultOpen) {
           resultOpen = false;
           $("modal").close();
+          $("victory").close();
+          $("modal").classList.remove("winner-result");
         }
         render();
         cb(answer);
@@ -2840,7 +2844,8 @@
         riichiPick = false;
         kanPick = false;
         if (["result", "draw", "match"].includes(options.type)) {
-          showResult(options);
+          if (options.type === "result") showVictory(options);
+          else showResult(options);
           render();
           return;
         }
@@ -2850,6 +2855,8 @@
         match?.dispose();
         clearEffects();
         if ($("modal").open) $("modal").close();
+        if ($("victory").open) $("victory").close();
+        $("modal").classList.remove("winner-result");
         resultOpen = false;
         decision = null;
         reply = null;
@@ -2890,7 +2897,7 @@
           lastText = id === 0 ? type === "gangzimo" ? "\u5CAD\u4E0A\u6478\u724C \xB7 \u8BF7\u9009\u62E9\u51FA\u724C" : "\u8F6E\u5230\u4F60\u51FA\u724C" : CHARACTERS[id] + " \u6B63\u5728\u601D\u8003\u2026";
         } else if (type === "hule") {
           lastText = CHARACTERS[id] + (data.baojia == null ? " \u81EA\u6478" : " \u8363\u548C");
-          playWords(data.baojia == null ? "\u81EA\u6478" : "\u8363\u548C", data.baojia == null ? "TSUMO" : "RON", id);
+          $("cutin").hidden = true;
         } else if (type === "pingju") {
           lastText = "\u672C\u5C40\u6D41\u5C40";
         }
@@ -2958,6 +2965,17 @@
           score.classList.toggle("active-seat", model.lunban === l);
           $("seat-label" + id).textContent = CHARACTERS[id] + " \xB7 " + WINDS[l] + "\u5BB6";
           $("board-melds" + id).replaceChildren(...model.shoupai[l]._fulou.map((m) => renderMeld(m)));
+          if (id !== 0) {
+            const backs = $("backs" + id);
+            backs.replaceChildren();
+            for (let i = 0; i < handTiles(model.shoupai[l]).length; i++) {
+              const back = document.createElement("span");
+              back.className = "tile-back";
+              back.setAttribute("aria-hidden", "true");
+              backs.appendChild(back);
+            }
+            backs.setAttribute("aria-label", CHARACTERS[id] + " \xB7 " + handTiles(model.shoupai[l]).length + " \u5F20\u6697\u724C");
+          }
         }
         $("melds").replaceChildren(...hand._fulou.map((m) => renderMeld(m)));
         $("melds").hidden = !hand._fulou.length;
@@ -3049,8 +3067,27 @@
         if (!$("modal").open) $("modal").showModal();
       }
       var DRAW_NAMES = { "\u8352\u724C\u5E73\u5C40": "\u8352\u724C\u6D41\u5C40", "\u4E5D\u7A2E\u4E5D\u724C": "\u4E5D\u79CD\u4E5D\u724C", "\u56DB\u98A8\u9023\u6253": "\u56DB\u98CE\u8FDE\u6253", "\u56DB\u5BB6\u7ACB\u76F4": "\u56DB\u5BB6\u7ACB\u76F4", "\u56DB\u958B\u69D3": "\u56DB\u6760\u6563\u4E86", "\u4E09\u5BB6\u548C": "\u4E09\u5BB6\u548C\u6D41\u5C40", "\u6D41\u3057\u6E80\u8CAB": "\u6D41\u5C40\u6EE1\u8D2F" };
+      function showVictory(options) {
+        resultOpen = true;
+        const r = options.result, id = match.model.player_id[r.l], dialog = $("victory");
+        clearEffects();
+        if ($("modal").open) $("modal").close();
+        dialog.style.setProperty("--winner-color", WIN_COLORS[id]);
+        $("victory-art").src = "winners/" + WIN_ART[id] + ".png";
+        $("victory-art").alt = CHARACTERS[id] + " \u4E13\u5C5E\u548C\u724C\u7ACB\u7ED8";
+        $("victory-title").textContent = CHARACTERS[id] + " \xB7 " + (r.baojia == null ? "\u81EA\u6478" : "\u8363\u548C");
+        $("victory-sub").textContent = (r.damanguan ? r.damanguan + " \u500D\u5F79\u6EE1" : r.fanshu + " \u756A " + r.fu + " \u7B26") + " / " + r.defen.toLocaleString() + " \u70B9";
+        $("reveal-result").onclick = () => {
+          dialog.close();
+          showResult(options);
+        };
+        if (!dialog.open) dialog.showModal();
+        $("reveal-result").focus();
+      }
+      $("victory").addEventListener("cancel", (e) => e.preventDefault());
       function showResult(options) {
         resultOpen = true;
+        $("modal").classList.remove("winner-result");
         const result = options.result, model = match.model;
         if (options.type === "match") {
           show('<h2>\u4E1C\u98CE\u6218 \xB7 \u7EC8\u5C40</h2><div class="settlement">' + result.rank.map((rank, id) => ({ rank, id })).sort((a, b) => a.rank - b.rank).map(({ rank, id }) => "<p><b>#" + rank + " " + CHARACTERS[id] + "</b><span>" + result.defen[id].toLocaleString() + " \u70B9</span></p>").join("") + '</div><button id="next" class="primary">\u518D\u5F00\u4E00\u573A</button><button id="download-log">\u4FDD\u5B58\u724C\u8C31</button>');
@@ -3066,6 +3103,17 @@
           return "<p><b>" + CHARACTERS[id] + "</b><span>" + model.defen[id].toLocaleString() + " \u2192 " + (model.defen[id] + delta).toLocaleString() + '</span><em class="' + (delta >= 0 ? "gain" : "loss") + '">' + (delta > 0 ? "+" : "") + delta + "</em></p>";
         }).join("") + '</div><button id="next" class="primary">\u786E\u8BA4\u7ED3\u7B97 \xB7 \u7EE7\u7EED</button>');
         if (win) {
+          const id = model.player_id[result.l];
+          $("modal").classList.add("winner-result");
+          $("modal").style.setProperty("--winner-color", WIN_COLORS[id]);
+          const art = document.createElement("img");
+          art.src = "winners/" + WIN_ART[id] + ".png";
+          art.alt = CHARACTERS[id] + " \u548C\u724C\u7ACB\u7ED8";
+          art.className = "settlement-art";
+          const detail2 = document.createElement("div");
+          detail2.className = "settlement-detail";
+          detail2.append(...$("modalbody").childNodes);
+          $("modalbody").replaceChildren(art, detail2);
           const h = Majiang.Shoupai.fromString(result.shoupai);
           $("result-hand").replaceChildren(...handTiles(h).map((p) => tile(p, true)), ...h._fulou.map((m) => renderMeld(m)));
           if ($("ura")) $("ura").replaceChildren(...result.fubaopai.map((p) => tile(p, true)));
@@ -3159,7 +3207,7 @@
       $("tile-gallery").onclick = showGallery;
       $("rules").onclick = () => show('<h2>\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06 \xB7 \u4E1C\u98CE\u6218</h2><p>\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u6309\u4E1C\u4E00\u81F3\u4E1C\u56DB\u63A8\u8FDB\uFF1B\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u65E0\u4EBA\u8FBE\u5230 30,000 \u70B9\u65F6\u8FDB\u5165\u5357\u5165\u5EF6\u957F\uFF1B\u98DE\u4EBA\u7ED3\u675F\u3002</p><ul><li>\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002</li><li>\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002</li><li>\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002</li><li>\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002</li><li>\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002</li><li>\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002</li></ul><p>\u4F7F\u7528 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> \u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002</p>');
       document.addEventListener("keydown", (e) => {
-        if ($("modal").open) return;
+        if ($("modal").open || $("victory").open) return;
         if (decision?.type === "response") {
           if (e.key === "Escape") submit({});
           return;
@@ -3249,7 +3297,7 @@
         return decision;
       }, get human() {
         return human;
-      }, newGame, submit, render, tile, publicTable, Majiang, RULE };
+      }, newGame, submit, render, tile, publicTable, Majiang, RULE, showVictory, showResult };
       newGame();
     }
   });

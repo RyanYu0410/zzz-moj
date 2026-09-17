@@ -29,7 +29,7 @@ const assert=require('node:assert/strict');
  for(let i=0;i<250;i++){
   await page.waitForFunction(()=>!!mahjongTest.decision,{},{timeout:20000});
   const type=await page.evaluate(()=>mahjongTest.decision.type);
-  if(['result','draw'].includes(type)){results++;assert(await page.locator('.settlement p').count()===4);await page.screenshot({path:'/tmp/zzz-settlement.png'});await page.locator('#next').click();break}
+  if(['result','draw'].includes(type)){results++;if(type==='result'){await page.locator('#victory').waitFor({state:'visible'});await page.locator('#reveal-result').click()}assert(await page.locator('.settlement p').count()===4);await page.screenshot({path:'/tmp/zzz-settlement.png'});await page.locator('#next').click();break}
   if(type==='match')break;
   await page.evaluate(()=>{const a=mahjongTest,d=a.decision;if(d.type==='response')a.submit(d.win?{hule:'-'}:d.calls.length?{fulou:d.calls[0]}:{});else if(d.win)a.submit({hule:'-'});else if(d.kan.length)a.submit({gang:d.kan[0]});else{const h=a.human.shoupai;const best=d.discards.map(p=>({p,n:a.Majiang.Util.xiangting(h.clone().dapai(p))})).sort((a,b)=>a.n-b.n)[0].p;a.submit({dapai:best+(d.riichi.includes(best)?'*':'')})}});decisions++;
  }
