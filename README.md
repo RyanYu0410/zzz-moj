@@ -31,6 +31,6 @@ node check.cjs
 
 Four-player closed-hand draw/discard practice, basic bots, tenpai/riichi and self-draw shape detection. No calls, ron, full scoring or tournament progression yet. Character animations use six generated key poses rather than skeletal animation.
 
-Reduced-motion mode preserves non-flashing pose changes while skipping flight, shake and burst effects. Use the in-game action check to view character poses.
+Discard animations play when a tile is discarded. The in-game motion toggle and the system reduced-motion preference disable discard animations, including character poses. Browser visual verification is still needed; the automated checks verify animation triggers and timing only.
 
 Unofficial fan project. Zenless Zone Zero characters belong to their respective rights holders. No license to the underlying characters is implied.
