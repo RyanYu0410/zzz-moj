@@ -29,7 +29,7 @@ node check.cjs
 
 ## Scope
 
-Four-player closed-hand draw/discard practice, basic bots, tenpai/riichi and self-draw shape detection. No calls, ron, full scoring or tournament progression yet. Character animations use six generated key poses rather than skeletal animation.
+Four-player draw/discard practice with player chi/pon, basic closed-hand bots, tenpai/riichi and self-draw detection. No kan, ron, full yaku/scoring or tournament progression yet. Open self-draw currently supports tanyao and value honor triplets; unsupported open-hand yaku cannot win yet. Character animations use six generated key poses rather than skeletal animation.
 
 Discard animations play when a tile is discarded. The in-game motion toggle and the system reduced-motion preference disable discard animations, including character poses. Browser visual verification is still needed; the automated checks verify animation triggers and timing only.
 
@@ -41,9 +41,11 @@ Unofficial fan project. Zenless Zone Zero characters belong to their respective 
 - `dist/chi-fx.png` and `dist/pon-fx.png`: generated transparent comic callouts with prismatic sunlight flares.
 - `dist/tile-shell.png`: generated ivory/black/pink/cyan tile frame. Exact symbols are rendered by the game for legibility.
 - `dist/tiles/`: 37 exported transparent PNG tiles (360 × 500), covering 27 suit tiles, seven honors and three red fives. `manifest.json` maps IDs to filenames.
-- The preview controls show chi/pon artwork without changing the hand. Actual chi/pon meld rules remain unimplemented.
+- Actual opponent discards now offer legal chi/pon choices or skip, pause the turn, and play the PNG callout when claimed. Chi is upper-seat only; pon is allowed from any opponent. Melds retain red fives and show the claimed tile sideways. Calls disable riichi, forbid same-tile and sequence-swap kuikae, and require a discard without drawing. Separate artwork previews remain available.
 - One red five per suit replaces an ordinary five in the 136-tile wall. Hand recognition normalizes red fives to ordinary fives; scoring remains unimplemented.
 - Red fives have a static glow; selected tiles have a warm prismatic glow. Callout animation respects reduced-motion preferences and the motion toggle.
 - `ASSET-PROMPTS.md` records the built-in image-generation prompts. Tile symbols and PNG exports are deterministic browser renders of the generated frame plus code-drawn symbols.
 
 To regenerate tile exports, serve `dist` locally, install Playwright and Chrome, and run `node scripts/export-tiles.cjs`. `PLAYWRIGHT_MODULE` can point to an existing Playwright installation. Browser verification: `node scripts/visual-check.cjs` with the same local server.
+
+Call integration tests: `node check.cjs` and `node scripts/calls-browser-check.cjs` (with the local server and Playwright). Bots currently stay closed and do not call.
