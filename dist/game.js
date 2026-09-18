@@ -2786,7 +2786,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=45ab9604fd3e");
+          this.worker = new Worker("ai-worker.js?v=074385e73469");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3258,6 +3258,7 @@
       function fitScene() {
         const scale = Math.min(viewport.clientWidth / 1e3, viewport.clientHeight / (2e3 / 3));
         world.style.setProperty("--scene-scale", scale);
+        world.style.setProperty("--touch-world", 44 / Math.max(scale, 0.01) + "px");
       }
       function fitHand() {
         const target = compactLayout.matches ? $("mobile-hand-dock") : world;

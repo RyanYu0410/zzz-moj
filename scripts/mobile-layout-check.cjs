@@ -4,6 +4,8 @@ for(const [w,h] of [[390,844],[400,600],[700,700],[844,390],[1440,900]]){
  await page.setViewportSize({width:w,height:h});await page.waitForTimeout(120);
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight));
  for(const selector of ['#hand','#chi','#pon','#kan','#discard','#round-toggle','#scores-toggle','#menu-toggle']){const b=await page.locator(selector).boundingBox();assert(b&&b.x>=-1&&b.y>=0&&b.x+b.width<=w+1&&b.y+b.height<=h+1,selector+' outside '+w+'x'+h)}
+ for(const selector of ['#chi','#pon','#kan','#discard','#round-toggle','#scores-toggle','#menu-toggle']){const b=await page.locator(selector).boundingBox();assert(b.width>=43.9&&b.height>=43.9,selector+' touch target too small')}
+ if(w<=520&&h>500){const b=await page.locator('#hand button').first().boundingBox();assert(b.width>=44&&b.height>=44)}
  await page.locator('#scores-toggle').click();assert(await page.locator('#score0').isVisible());assert.equal(await page.locator('#score0 b').textContent(),await page.locator('#my-points').textContent());await page.keyboard.press('Escape');
  await page.locator('#menu-toggle').click();assert(await page.locator('#motion').isVisible());await page.locator('#motion').click();assert.equal(await page.locator('.bangboo-idle').evaluate(e=>getComputedStyle(e).animationName),'none');await page.locator('#motion').click();await page.keyboard.press('Escape');
  await page.screenshot({path:'/tmp/mahjong-fullscreen-'+w+'x'+h+'.png'});

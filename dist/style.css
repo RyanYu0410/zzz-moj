@@ -151,3 +151,41 @@ main{position:relative;display:block;width:100%;max-width:none;height:100dvh;min
 @media(max-height:500px){.game{padding-top:52px;gap:3px}.game-hud{height:50px!important;padding-top:4px!important;padding-bottom:4px!important}.controlbar{padding:4px 8px}.controlbar small{display:none}.game .call-panel{max-height:90px}}
 .world:after{background:radial-gradient(ellipse at 50% 95%,#050308c9,transparent 70%)}
 @media(max-aspect-ratio:1/1),(max-width:700px){.controlbar .actions{width:100%;margin-left:0}.actions button{white-space:nowrap;font-size:11px}.world:after{display:none}}
+
+/* iOS-inspired typography, generous controls and quiet grouped surfaces. */
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Noto Sans SC',sans-serif;font-size:17px;-webkit-text-size-adjust:100%}
+button,select{touch-action:manipulation}button:disabled{opacity:.48}
+.hud-actions button{min-height:50px;font-size:17px;font-weight:600;padding:10px 16px;border:1px solid #ffffff18;border-radius:18px;background:#211d29e8;backdrop-filter:blur(20px)}
+.hud-actions b{color:#fff;font-size:20px;letter-spacing:-.5px}.game-hud .brand{font-size:25px}.game-hud .brand span{font-size:12px}
+.controlbar{padding:14px 16px;border:1px solid #ffffff12;border-radius:24px;background:#1c1924ed;backdrop-filter:blur(24px);gap:14px}
+.controlbar strong{font-size:17px;font-weight:600;line-height:1.35}.controlbar small{font-size:13px;line-height:1.4;color:#c1bdca}
+.actions{gap:8px}.actions button{font-size:17px;font-weight:600;min-width:52px;min-height:52px;padding:12px 16px;border:0;border-radius:15px;background:#38333f;color:#fff}
+.actions #discard{background:#ff559d;color:#190712;font-weight:800;box-shadow:none}.actions button:not(:disabled):hover{background:#645363;color:white}.actions #discard:not(:disabled):hover{background:#ff80b6;color:#190712}
+.actions #chi:not(:disabled),.actions #pon:not(:disabled),.actions #kan:not(:disabled){background:#634c33;color:#ffe1a8;box-shadow:none}
+.hud-panel,.round-info{border:1px solid #ffffff1a;border-radius:28px;background:#24212bed;backdrop-filter:blur(30px);padding:28px;color:#f7f5fa;box-shadow:0 20px 80px #0008}
+.hud-panel h2,.round-info h2{font-size:30px;letter-spacing:-.6px;font-weight:700;margin:4px 0 24px}.hud-panel h3{font-size:17px;color:#c8c1ce}
+.panel-close,.round-info-close{width:44px;height:44px;min-height:44px;min-width:44px;padding:0;top:12px;right:12px;border:0;border-radius:50%;background:#ffffff12;color:#dfdce5;font-size:28px}
+.menu-buttons{grid-template-columns:1fr;gap:1px;border-radius:18px;overflow:hidden}.menu-buttons button{min-height:54px;font-size:17px;text-align:left;padding:14px 18px;border:0;border-radius:0;background:#ffffff09}
+.hud-panel .scoreboard{grid-template-columns:1fr;gap:1px;border-radius:18px;overflow:hidden}.hud-panel .scoreboard>div{display:grid;grid-template-columns:1fr auto;min-height:78px;gap:4px 12px;border:0;border-radius:0;padding:14px 16px;background:#ffffff08}.hud-panel .scoreboard span{font-size:17px;font-weight:600}.hud-panel .scoreboard small{font-size:14px;grid-column:1}.hud-panel .scoreboard b{font-size:30px;grid-column:2;grid-row:1/3;align-self:center;font-variant-numeric:tabular-nums;color:#fff}
+.hud-panel .asset-controls select{font-size:17px;min-height:48px;flex:1;border-radius:12px}.hud-panel .asset-controls .png-action{width:64px;min-height:48px}.hud-panel .asset-controls #tile-gallery{font-size:17px;min-height:52px;background:#ffffff09;border:0;border-radius:14px}.preview-label,.hud-panel>p{font-size:14px}
+.round-info>small{font-size:13px}.round-info #sticks{font-size:17px;padding:16px;border:0;background:#ffffff08;border-radius:14px}.round-info .wall{font-size:17px;border-radius:14px;padding:14px}.round-info .wall b{font-size:36px}.round-info .dora{font-size:17px}.round-info #dora .tile{width:44px;height:62px}.round-info>p{font-size:13px}
+.game .call-panel{border-radius:20px;padding:12px;background:#28212fef}.call-panel strong{font-size:17px}.call-panel button{min-width:44px;min-height:48px;border-radius:12px;font-size:17px}
+@media(max-aspect-ratio:1/1),(max-width:700px){
+ header.game-hud{height:calc(76px + env(safe-area-inset-top));padding-left:12px;padding-right:12px;gap:8px}.game{padding-top:calc(78px + env(safe-area-inset-top));padding-left:10px;padding-right:10px;gap:8px}.hud-actions{gap:8px}.hud-actions button{padding:10px 12px}.hud-actions b{margin-left:4px}
+ .controlbar{padding:12px;border-radius:24px;gap:10px}.controlbar strong{font-size:17px}.controlbar .actions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.actions button{font-size:17px;min-width:44px;min-height:52px;padding:10px 3px}
+ #mobile-hand-dock{padding:12px 2px 0;background:linear-gradient(transparent,#121019d9);border-radius:20px}
+ #mobile-hand-dock .player-label{border:0;background:none;box-shadow:none;margin:8px 0 0;padding:0;line-height:22px}#mobile-hand-dock .player-label span{font-size:15px;color:#f5dce8}
+ #mobile-hand-dock #hand .tile{min-height:52px;max-width:48px}
+ .hud-panel,.round-info{inset:auto 0 0;width:100%;max-height:88dvh;margin:0;border-radius:28px 28px 0 0;padding:28px 22px calc(24px + env(safe-area-inset-bottom))}
+ .hud-panel:before,.round-info:before{content:'';position:absolute;top:8px;left:calc(50% - 18px);width:36px;height:5px;border-radius:8px;background:#ffffff40}
+}
+@media(max-width:520px) and (min-height:501px){
+ .controlbar .actions{grid-template-columns:repeat(3,minmax(0,1fr))}.actions button{min-height:50px}
+ #mobile-hand-dock #hand{display:grid;grid-template-columns:repeat(7,minmax(44px,1fr));gap:5px 3px;max-width:370px;padding:3px 0;overflow:visible}
+ #mobile-hand-dock #hand .tile{width:100%;max-width:none;min-width:44px;min-height:56px;height:58px;aspect-ratio:auto}
+ #mobile-hand-dock #hand .tile.drawn{margin-left:0}.game .call-panel{max-height:118px}
+ .world .bangboo-toggle{min-width:144px;min-height:157px}
+}
+@media(max-width:359px) and (min-height:501px){#mobile-hand-dock #hand{grid-template-columns:repeat(6,minmax(44px,1fr))}.hud-actions button{font-size:15px;padding:8px}.hud-actions b{font-size:17px}.game-hud .brand{font-size:19px}}
+@media(max-height:500px){.actions button{min-height:44px;font-size:17px;padding:8px 12px}.controlbar{padding:6px 10px}.hud-actions button{min-height:44px;padding:7px 12px}}
+.world .bangboo-toggle{min-width:var(--touch-world,44px);min-height:var(--touch-world,44px)}

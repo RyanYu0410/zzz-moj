@@ -85,7 +85,7 @@ document.addEventListener('keydown',e=>{if($('modal').open||$('victory').open||d
 const viewport=document.querySelector('.board'),world=document.querySelector('.world');
 const compactLayout=matchMedia('(max-aspect-ratio: 1/1), (max-width: 700px)');
 const rack=document.querySelector('.player-rack'),nameplate=document.querySelector('.player-label');
-function fitScene(){const scale=Math.min(viewport.clientWidth/1000,viewport.clientHeight/(2000/3));world.style.setProperty('--scene-scale',scale)}
+function fitScene(){const scale=Math.min(viewport.clientWidth/1000,viewport.clientHeight/(2000/3));world.style.setProperty('--scene-scale',scale);world.style.setProperty('--touch-world',44/Math.max(scale,.01)+'px')}
 function fitHand(){const target=compactLayout.matches?$('mobile-hand-dock'):world;target.append(rack,nameplate);fitScene()}
 compactLayout.addEventListener('change',fitHand);new ResizeObserver(fitScene).observe(viewport);fitHand();
 $('fullscreen').hidden=!document.fullscreenEnabled;
