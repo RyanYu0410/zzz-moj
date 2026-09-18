@@ -2786,7 +2786,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=db36e4111d71");
+          this.worker = new Worker("ai-worker.js?v=0502d7285c22");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3107,12 +3107,31 @@
         if (!$("modal").open) $("modal").showModal();
       }
       var DRAW_NAMES = { "\u8352\u724C\u5E73\u5C40": "\u8352\u724C\u6D41\u5C40", "\u4E5D\u7A2E\u4E5D\u724C": "\u4E5D\u79CD\u4E5D\u724C", "\u56DB\u98A8\u9023\u6253": "\u56DB\u98CE\u8FDE\u6253", "\u56DB\u5BB6\u7ACB\u76F4": "\u56DB\u5BB6\u7ACB\u76F4", "\u56DB\u958B\u69D3": "\u56DB\u6760\u6563\u4E86", "\u4E09\u5BB6\u548C": "\u4E09\u5BB6\u548C\u6D41\u5C40", "\u6D41\u3057\u6E80\u8CAB": "\u6D41\u5C40\u6EE1\u8D2F" };
+      function addWinAtmosphere(root) {
+        root.querySelector(".win-atmosphere")?.remove();
+        const fx = document.createElement("div");
+        fx.className = "win-atmosphere";
+        fx.setAttribute("aria-hidden", "true");
+        for (const name of ["win-halo", "win-beam", "win-streak", "win-flare"]) {
+          const el = document.createElement("i");
+          el.className = name;
+          fx.appendChild(el);
+        }
+        for (let i = 0; i < 18; i++) {
+          const el = document.createElement("i");
+          el.className = "win-spark";
+          el.style.cssText = `--x:${(i * 37 + 11) % 100}%;--y:${(i * 23 + 7) % 100}%;--delay:${-(i % 7) * 0.65}s;--duration:${3 + i % 4}s`;
+          fx.appendChild(el);
+        }
+        root.prepend(fx);
+      }
       function showVictory(options) {
         resultOpen = true;
         const r = options.result, id = match.model.player_id[r.l], dialog = $("victory");
         clearEffects();
         if ($("modal").open) $("modal").close();
         dialog.style.setProperty("--winner-color", WIN_COLORS[id]);
+        addWinAtmosphere(dialog);
         $("victory-art").src = "winners/" + WIN_ART[id] + ".png";
         $("victory-art").alt = CHARACTERS[id] + " \u4E13\u5C5E\u548C\u724C\u7ACB\u7ED8";
         $("victory-title").textContent = CHARACTERS[id] + " \xB7 " + (r.baojia == null ? "\u81EA\u6478" : "\u8363\u548C");
@@ -3146,6 +3165,7 @@
           const id = model.player_id[result.l];
           $("modal").classList.add("winner-result");
           $("modal").style.setProperty("--winner-color", WIN_COLORS[id]);
+          addWinAtmosphere($("modal"));
           const art = document.createElement("img");
           art.src = "winners/" + WIN_ART[id] + ".png";
           art.alt = CHARACTERS[id] + " \u548C\u724C\u7ACB\u7ED8";
