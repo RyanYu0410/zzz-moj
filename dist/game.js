@@ -2786,7 +2786,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=f237c0f1b0c5");
+          this.worker = new Worker("ai-worker.js?v=45ab9604fd3e");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -2953,6 +2953,7 @@
         if (!match?.model.shan) return;
         const model = match.model, seat = ownSeat(), hand = model.shoupai[seat];
         $("round-label").textContent = WINDS[model.zhuangfeng] + " " + (model.jushu + 1) + " \u5C40";
+        $("my-points").textContent = model.defen[0].toLocaleString();
         $("round-info-title").textContent = $("round-label").textContent;
         $("wall").textContent = model.shan.paishu;
         $("sticks").textContent = model.changbang + " \u672C\u573A \xB7 " + model.lizhibang + " \u4F9B\u6258";
@@ -3232,7 +3233,7 @@
       $("tile-gallery").onclick = showGallery;
       $("rules").onclick = () => show('<h2>\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06 \xB7 \u4E1C\u98CE\u6218</h2><p>\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u6309\u4E1C\u4E00\u81F3\u4E1C\u56DB\u63A8\u8FDB\uFF1B\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u65E0\u4EBA\u8FBE\u5230 30,000 \u70B9\u65F6\u8FDB\u5165\u5357\u5165\u5EF6\u957F\uFF1B\u98DE\u4EBA\u7ED3\u675F\u3002</p><ul><li>\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002</li><li>\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002</li><li>\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002</li><li>\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002</li><li>\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002</li><li>\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002</li></ul><p>\u4F7F\u7528 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> \u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002</p>');
       document.addEventListener("keydown", (e) => {
-        if ($("modal").open || $("victory").open || $("round-info").matches(":popover-open")) return;
+        if ($("modal").open || $("victory").open || document.querySelector("[popover]:popover-open")) return;
         if (decision?.type === "response") {
           if (e.key === "Escape") submit({});
           return;
@@ -3251,7 +3252,36 @@
       });
       var viewport = document.querySelector(".board");
       var world = document.querySelector(".world");
-      new ResizeObserver(() => world.style.setProperty("--scene-scale", viewport.clientWidth / 1e3)).observe(viewport);
+      var compactLayout = matchMedia("(max-aspect-ratio: 1/1), (max-width: 700px)");
+      var rack = document.querySelector(".player-rack");
+      var nameplate = document.querySelector(".player-label");
+      function fitScene() {
+        const scale = Math.min(viewport.clientWidth / 1e3, viewport.clientHeight / (2e3 / 3));
+        world.style.setProperty("--scene-scale", scale);
+      }
+      function fitHand() {
+        const target = compactLayout.matches ? $("mobile-hand-dock") : world;
+        target.append(rack, nameplate);
+        fitScene();
+      }
+      compactLayout.addEventListener("change", fitHand);
+      new ResizeObserver(fitScene).observe(viewport);
+      fitHand();
+      $("fullscreen").hidden = !document.fullscreenEnabled;
+      $("fullscreen").onclick = async () => {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else await document.documentElement.requestFullscreen();
+          $("game-menu").hidePopover();
+        } catch {
+          $("fullscreen").textContent = "\u5F53\u524D\u6D4F\u89C8\u5668\u4E0D\u652F\u6301\u5168\u5C4F";
+        }
+      };
+      document.addEventListener("fullscreenchange", () => {
+        $("fullscreen").textContent = document.fullscreenElement ? "\u9000\u51FA\u5168\u5C4F \u2199" : "\u8FDB\u5165\u5168\u5C4F \u2197";
+      });
+      for (const id of ["rules", "new", "tile-gallery"]) $(id).addEventListener("click", () => $("game-menu").hidePopover());
+      for (const id of ["preview-chi", "preview-pon", "preview-kan"]) $(id).addEventListener("click", () => $("game-menu").hidePopover());
       function animateDiscard(player, called) {
         if (document.body.classList.contains("no-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         const target = $("river" + player).lastElementChild;

@@ -69,3 +69,7 @@ Every character has three distinct action illustrations in `dist/calls/` (`nicol
 The build writes content-versioned CSS and game URLs and versions the AI worker. This fixes mixed cached stylesheet/game versions that could hide or misplace table racks. Always run `npm run build` after editing source or CSS. Short windows keep a minimum table size instead of collapsing it.
 
 Additional UI checks: `node scripts/call-options-browser-check.cjs`.
+
+### 手机全屏牌桌
+
+页面填满可用屏幕并适配安全区，支持 2:3、1:1、长竖屏与横屏。手机手牌固定在底部；顶部「点数」查看四家实时点数，「菜单」提供声音、动作、规则、重开、光线与演出预览。支持 Fullscreen API 的浏览器可在菜单进入原生全屏。扩展地面覆盖整个场景，原角色待机、吃碰杠演出和结算保留。

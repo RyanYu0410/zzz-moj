@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
  await page.waitForFunction(()=>mahjongTest.decision,{},{timeout:20000});
  assert.equal(await page.locator('.scoreboard b').count(),4);
  assert(await page.locator('#hand .png-tile img').count()>=13);
- await page.locator('#tile-gallery').click();assert.equal(await page.locator('#tile-catalog .png-tile img').count(),37);await page.locator('#close').click();
+ if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#tile-gallery').click();assert.equal(await page.locator('#tile-catalog .png-tile img').count(),37);await page.locator('#close').click();
  // A deterministic, physically valid wall retains 136 tiles and gives the dealer a concealed kan.
  await page.evaluate(()=>{
   const api=mahjongTest;api.newGame(0);const m=api.match,original=m.qipai.bind(m);m.speed=0;
@@ -36,8 +36,8 @@ const assert=require('node:assert/strict');
  assert(results>0,'real workers reach settlement');
  await page.waitForFunction(()=>mahjongTest.decision);
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/zzz-match-mobile.png'});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- await page.locator('#preview-kan').click();await page.waitForTimeout(250);assert(await page.locator('#call-badge').evaluate(e=>e.complete&&e.naturalWidth>0));
- await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#preview-pon').click();assert.equal(await page.locator('#call-badge').evaluate(e=>getComputedStyle(e).animationName),'none');
- await page.locator('#new').click();await page.locator('#reset').click();await page.waitForFunction(()=>mahjongTest.decision);assert.equal(await page.locator('#melds .meld').count(),0);
+ if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#preview-kan').click();await page.waitForTimeout(250);assert(await page.locator('#call-badge').evaluate(e=>e.complete&&e.naturalWidth>0));
+ await page.emulateMedia({reducedMotion:'reduce'});if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#preview-pon').click();assert.equal(await page.locator('#call-badge').evaluate(e=>getComputedStyle(e).animationName),'none');
+ if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#new').click();await page.locator('#reset').click();await page.waitForFunction(()=>mahjongTest.decision);assert.equal(await page.locator('#melds .meld').count(),0);
  assert.deepEqual(errors,[]);await browser.close();console.log('PASS: PNGs, gallery, real concealed kan/rinshan/dora, worker-backed round settlement ('+decisions+' decisions), mobile, reduced motion and restart');
 })().catch(e=>{console.error(e);process.exit(1)});

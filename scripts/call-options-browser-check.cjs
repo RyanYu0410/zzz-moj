@@ -13,11 +13,11 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const asse
  await page.evaluate(()=>{mahjongTest.human.onDecision({type:'turn',discards:[],riichi:[],kan:[],win:false,abort:false},()=>{})});for(const kind of ['chi','pon','kan'])assert.equal(await page.locator('#'+kind).isEnabled(),false);
  const names=['nicole','billy','miyabi','ellen'];
  for(let id=0;id<4;id++)for(const kind of ['chi','pon','kan']){
-  await page.locator('#preview-character').selectOption(String(id));await page.locator('#preview-'+kind).click();await page.locator('#call-character').evaluate(e=>e.decode());
+  if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#preview-character').selectOption(String(id));await page.locator('#preview-'+kind).click();await page.locator('#call-character').evaluate(e=>e.decode());
   assert.equal(await page.locator('#call-character').getAttribute('src'),'calls/'+names[id]+'-'+kind+'.png');assert.equal(await page.locator('#call-badge').getAttribute('src'),kind+'-fx.png');
   if(id===1&&kind==='kan'){await page.waitForTimeout(400);await page.screenshot({path:'/tmp/zzz-billy-kan-action.png'})}
  }
- await page.setViewportSize({width:390,height:844});await page.locator('#preview-character').selectOption('3');await page.locator('#preview-pon').click();await page.locator('#call-character').evaluate(e=>e.decode());await page.waitForTimeout(400);await page.screenshot({path:'/tmp/zzz-ellen-pon-mobile.png'});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#preview-chi').click();assert.equal(await page.locator('#call-character').evaluate(e=>getComputedStyle(e).animationName),'none');
+ await page.setViewportSize({width:390,height:844});if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#preview-character').selectOption('3');await page.locator('#preview-pon').click();await page.locator('#call-character').evaluate(e=>e.decode());await page.waitForTimeout(400);await page.screenshot({path:'/tmp/zzz-ellen-pon-mobile.png'});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await page.emulateMedia({reducedMotion:'reduce'});if(!await page.locator('#game-menu').isVisible())await page.locator('#menu-toggle').click();await page.locator('#preview-chi').click();assert.equal(await page.locator('#call-character').evaluate(e=>getComputedStyle(e).animationName),'none');
  assert.deepEqual(errors,[]);await browser.close();console.log('PASS: visible tiles, legal-call button selection, all 12 actor/action artworks, mobile and reduced motion');
 })().catch(e=>{console.error(e);process.exit(1)});

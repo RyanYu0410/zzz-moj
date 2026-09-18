@@ -26,3 +26,7 @@ Generated with built-in imagegen: four characters × Chi/Pon/Kan. Exact prompts:
 ## 举牌邦布
 
 内置 image_gen 生成透明 PNG：`dist/bangboo-round.png`。完整提示词：`dist/bangboo-prompt.txt`。实时局数叠加在空白牌面上，点击展开本场、供托、余牌和宝牌。
+
+## 手机全屏扩展地面
+
+以 `dist/floor-layer.png` 为参考，使用内置 image_gen 扩展为 2:3 竖屏背景，兼容居中裁切到 1:1。新素材：`dist/floor-expanded.png`；完整提示词：`dist/floor-expanded-prompt.txt`。原素材保留。

@@ -115,3 +115,39 @@ body{min-height:100svh;display:flex;flex-direction:column}header{height:70px;fle
 @keyframes idle-miyabi{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.012)}}
 @keyframes idle-ellen{0%,100%{transform:translateY(0) rotate(.9deg)}50%{transform:translateY(-2.5px) rotate(-.9deg) scale(1.008)}}
 @media(prefers-reduced-motion:reduce){.bangboo-idle,.character-sprite:not(.discarding){animation:none!important}}
+
+/* Full viewport play surface, with secondary information in drawers. */
+html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+body{display:block;background:#151218 url('floor-expanded.png') center/cover no-repeat}
+body:before{content:'';position:fixed;inset:0;pointer-events:none;background:linear-gradient(#06050a80,transparent 24%,transparent 65%,#06030bd9);z-index:0}
+header.game-hud{position:absolute;top:0;left:0;right:0;height:calc(64px + env(safe-area-inset-top));padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left));z-index:15;border:0;background:linear-gradient(#07050bd9,transparent)}
+.game-hud .brand{font-size:24px}.game-hud .brand span{font-size:12px;margin-top:4px;letter-spacing:4px}.hud-actions{display:flex;gap:8px}.hud-actions button{min-height:44px;padding:8px 14px;border:1px solid #866176;border-radius:10px;background:#15101ddd;font-size:13px}.hud-actions b{color:#ffd8a8;margin-left:7px;font-variant-numeric:tabular-nums}
+main{position:relative;display:block;width:100%;max-width:none;height:100dvh;min-height:0;margin:0;padding:0;z-index:1}
+.game{height:100%;width:100%;padding:calc(66px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.game .board,.rooftop .game .board,.game:has(.call-panel:not([hidden])) .board{flex:1;width:100%;min-height:0;aspect-ratio:auto;height:auto;margin:0;border:0;border-radius:0;box-shadow:none;background:none;overflow:hidden}
+.world{left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--scene-scale,1));transform-origin:center}
+.world .floor-layer{display:none}.world:after{background:linear-gradient(to top,#050308b3,transparent)}
+.controlbar{width:100%;max-width:1000px;flex:none;margin:0 auto;padding:8px 12px;display:flex;align-items:center;flex-direction:row;border-radius:12px;background:#100b16d9;border:1px solid #72536966;backdrop-filter:blur(12px)}
+.controlbar>div:first-child{min-width:0;flex:1}.controlbar strong{font-size:14px}.controlbar small{font-size:11px;color:#bdaabb}.actions{flex-wrap:nowrap;gap:5px}.actions button{min-height:44px;border-radius:7px;font-size:13px;padding:8px 12px}.game>footer{display:none}
+.game .call-panel{flex:none;max-height:180px;overflow:auto;width:min(100%,860px);margin:0 auto;border-radius:10px;z-index:10}.call-panel[hidden]{display:none}.call-choice{min-height:44px}
+#mobile-hand-dock{display:none}.hud-panel{position:fixed;inset:0;margin:auto;width:min(450px,92vw);max-height:85dvh;overflow:auto;height:fit-content;border:1px solid #b57699;border-radius:16px;background:linear-gradient(135deg,#302031,#110e19);color:#fff1e6;padding:24px;box-shadow:0 20px 90px #000c}
+.hud-panel::backdrop{background:#07050bb3;backdrop-filter:blur(5px)}.hud-panel h2{font-size:24px;margin:0 0 20px}.hud-panel h3{font-size:14px;color:#eabed5;margin-top:24px}.panel-close{position:absolute;top:6px;right:6px;border:0;font-size:25px;min-width:44px;min-height:44px;padding:4px}.hud-panel .scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0}.hud-panel .scoreboard>div{min-height:90px;padding:12px;display:flex;flex-direction:column;gap:5px}.hud-panel .scoreboard b{font-size:26px}.hud-panel>p{color:#bc9fb3;font-size:12px}.menu-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.menu-buttons button{min-height:48px;padding:10px;font-size:13px;border-radius:8px}.hud-panel .asset-controls{display:flex;flex-wrap:wrap;margin:0;padding:0;border:0;gap:8px}.hud-panel .asset-controls #tile-gallery{width:100%;margin:6px 0 0;border-radius:8px;min-height:44px}
+@media(max-aspect-ratio:1/1),(max-width:700px){
+ .game{padding:calc(64px + env(safe-area-inset-top)) 6px calc(8px + env(safe-area-inset-bottom));gap:6px}
+ #mobile-hand-dock{display:flex;flex-direction:column;align-items:center;position:relative;flex:none;z-index:9;width:100%;padding:12px 0 0;background:linear-gradient(transparent,#08050de6 70%);border-radius:12px}
+ #mobile-hand-dock .player-rack{position:relative;left:auto;top:auto;width:100%;height:auto;min-height:52px;flex-wrap:wrap;gap:5px;padding:0 3px}
+ #mobile-hand-dock #hand{width:100%;max-width:none;min-height:0;margin:0;padding:0;gap:2px;display:flex;justify-content:center}
+ #mobile-hand-dock #hand .tile{flex:0 1 42px;width:calc((100vw - 50px)/14);max-width:42px;min-width:0;height:auto;aspect-ratio:5/7;min-height:36px;padding:0;touch-action:manipulation}
+ #mobile-hand-dock #hand .tile:disabled{opacity:1;filter:brightness(.85)}
+ #mobile-hand-dock #hand .tile.selected{transform:translateY(-12px) scale(1.12);z-index:3}
+ #mobile-hand-dock #hand .tile.drawn{margin-left:5px}
+ #mobile-hand-dock #melds{margin:0;min-height:0;gap:4px}#mobile-hand-dock #melds[hidden]{display:none}#mobile-hand-dock #melds .tile{width:20px;height:28px}
+ #mobile-hand-dock .player-label{position:static;transform:none;margin:8px 0 2px;padding:3px 12px;background:#1c111eee;border:1px solid #a34b78;border-radius:6px;box-shadow:0 2px 4px #0008;font-size:12px}
+ #mobile-hand-dock .player-label span{margin:0;color:#ffd7e8}
+ .controlbar{flex-direction:column;align-items:stretch;gap:6px;padding:8px}.controlbar>div:first-child{display:flex;align-items:center;gap:5px}.controlbar small{display:none}.controlbar strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;justify-content:stretch;gap:4px}.actions button{flex:1;padding:8px 3px;font-size:12px;min-height:46px}.actions #discard{flex:1.3}
+ .game .call-panel{max-height:155px;padding:7px;gap:5px}.game #call-choices{gap:4px}.game .call-choice{padding:5px}
+ .hud-actions button{padding:8px 10px}.world:after{display:none}
+}
+@media(max-height:500px){.game{padding-top:52px;gap:3px}.game-hud{height:50px!important;padding-top:4px!important;padding-bottom:4px!important}.controlbar{padding:4px 8px}.controlbar small{display:none}.game .call-panel{max-height:90px}}
+.world:after{background:radial-gradient(ellipse at 50% 95%,#050308c9,transparent 70%)}
+@media(max-aspect-ratio:1/1),(max-width:700px){.controlbar .actions{width:100%;margin-left:0}.actions button{white-space:nowrap;font-size:11px}.world:after{display:none}}
