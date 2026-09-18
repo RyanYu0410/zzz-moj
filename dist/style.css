@@ -101,3 +101,17 @@ body{min-height:100svh;display:flex;flex-direction:column}header{height:70px;fle
 .round-info #sticks{padding:12px;border:1px solid #705466;border-radius:6px;color:#ffe1af;text-align:center;font-size:16px;background:#08060b55}
 .round-info .wall{margin:14px 0;padding:12px;text-align:center;background:#090710;border-radius:6px;font-size:14px}.round-info .wall b{font-size:32px;margin:0 8px;font-variant-numeric:tabular-nums}
 .round-info .dora{flex-direction:column;gap:10px;font-size:14px;color:#efcfdf}.round-info #dora{display:flex;justify-content:center;gap:5px;min-height:56px}.round-info #dora .tile{width:36px;height:50px}.round-info>p{text-align:center;font-size:11px;color:#b9a3b1;margin:22px 0 0}
+
+/* Idle motion stays inside each rotated seat, leaving tile positions fixed. */
+.bangboo-idle{position:absolute;inset:0;display:block;transform-origin:50% 88%;animation:bangboo-idle 3.6s ease-in-out infinite}
+.bangboo-toggle:hover .bangboo-idle,.bangboo-toggle:focus-visible .bangboo-idle{animation-duration:1.8s}
+.character-sprite:not(.discarding){transform-origin:50% 65%;animation:idle-nicole 4.8s ease-in-out infinite}
+.billy:not(.discarding){animation-name:idle-billy;animation-duration:3.7s;animation-delay:-1.2s}
+.miyabi:not(.discarding){animation-name:idle-miyabi;animation-duration:6s;animation-delay:-2.4s}
+.ellen:not(.discarding){animation-name:idle-ellen;animation-duration:5.4s;animation-delay:-3.1s}
+@keyframes bangboo-idle{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}30%{transform:translateY(-4px) rotate(1deg) scale(1.025,1.015)}60%{transform:translateY(-1px) rotate(2deg) scale(1)}80%{transform:translateY(-3px) rotate(-1deg) scale(1.01)}}
+@keyframes idle-nicole{0%,100%{transform:translateY(0) rotate(-.7deg) scale(1)}50%{transform:translateY(-3px) rotate(.7deg) scale(1.014)}}
+@keyframes idle-billy{0%,100%{transform:translateY(0) rotate(-1deg)}35%{transform:translateY(-2px) rotate(1.2deg)}65%{transform:translateY(-1px) rotate(.2deg)}}
+@keyframes idle-miyabi{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.012)}}
+@keyframes idle-ellen{0%,100%{transform:translateY(0) rotate(.9deg)}50%{transform:translateY(-2.5px) rotate(-.9deg) scale(1.008)}}
+@media(prefers-reduced-motion:reduce){.bangboo-idle,.character-sprite:not(.discarding){animation:none!important}}
