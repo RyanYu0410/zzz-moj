@@ -189,3 +189,21 @@ button,select{touch-action:manipulation}button:disabled{opacity:.48}
 @media(max-width:359px) and (min-height:501px){#mobile-hand-dock #hand{grid-template-columns:repeat(6,minmax(44px,1fr))}.hud-actions button{font-size:15px;padding:8px}.hud-actions b{font-size:17px}.game-hud .brand{font-size:19px}}
 @media(max-height:500px){.actions button{min-height:44px;font-size:17px;padding:8px 12px}.controlbar{padding:6px 10px}.hud-actions button{min-height:44px;padding:7px 12px}}
 .world .bangboo-toggle{min-width:var(--touch-world,44px);min-height:var(--touch-world,44px)}
+
+/* Four fixed meld lanes sit inside the felt, independent of the hand dock. */
+#melds{display:none!important}
+.meld{--meld-w:20px;--meld-h:28px;position:relative}
+.meld-called{position:relative;display:inline-block;flex:0 0 var(--meld-h);width:var(--meld-h);height:var(--meld-h)}
+.meld .meld-called .tile{position:absolute;width:var(--meld-w);height:var(--meld-h);left:50%;top:50%;margin:0;translate:none;transform:translate(-50%,-50%) rotate(90deg)}
+.meld .meld-called .added-kan{top:calc(50% - var(--meld-w) - 1px)}
+.meld:has(.added-kan){padding-top:0}
+.world .board-melds{display:flex;align-items:flex-end;justify-content:flex-end;width:320px;height:42px;gap:6px;z-index:8;transform-origin:0 0;pointer-events:none}
+.world .board-melds .meld{--meld-w:16px;--meld-h:23px;flex:0 0 auto;padding:0;gap:1px;border:0;border-radius:0;background:none;min-height:23px;box-shadow:none}
+.world .board-melds .tile{width:16px;height:23px;flex-shrink:0;box-shadow:0 2px 0 #665965,0 3px 4px #0008}
+.world .bm0{left:340px;top:460px;right:auto;bottom:auto;transform:none}
+.world .bm2{left:660px;top:204px;right:auto;bottom:auto;transform:rotate(180deg)}
+.world .bm1{left:752px;top:492px;right:auto;bottom:auto;transform:rotate(-90deg)}
+.world .bm3{left:248px;top:172px;right:auto;bottom:auto;transform:rotate(90deg)}
+.world:has(.bm2 .meld) .north{left:28%}
+.world .oh1{left:830px}.world .oh3{left:170px}
+.world:has(.bm2 .meld) .north{left:50%;top:205px;padding:3px 10px;font-size:12px}

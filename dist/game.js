@@ -2786,7 +2786,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=074385e73469");
+          this.worker = new Worker("ai-worker.js?v=db36e4111d71");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -2936,16 +2936,26 @@
         group.className = "meld";
         group.title = meldKind(m) === "kan" ? /[+=-]/.test(m) ? "\u660E\u6760\uFF0F\u52A0\u6760" : "\u6697\u6760" : meldKind(m) === "pon" ? "\u78B0" : "\u5403";
         const tiles = meldTiles(m), closed = meldKind(m) === "kan" && !/[+=-]/.test(m);
+        let calledSlot;
         tiles.forEach((t, i) => {
           const v = tile(t.p, small);
-          if (t.called) v.classList.add("claimed");
           if (closed && (i === 0 || i === 3)) {
             v.className = "tile tile-back" + (small ? " small" : "");
             v.replaceChildren();
             v.setAttribute("aria-label", "\u6697\u6760\u80CC\u9762");
           }
-          if (/[+=-]\d$/.test(m) && i === tiles.length - 1) v.classList.add("added-kan");
-          group.appendChild(v);
+          if (/[+=-]\d$/.test(m) && i === tiles.length - 1 && calledSlot) {
+            v.classList.add("added-kan");
+            calledSlot.appendChild(v);
+            return;
+          }
+          if (t.called) {
+            v.classList.add("claimed");
+            calledSlot = document.createElement("span");
+            calledSlot.className = "meld-called";
+            calledSlot.appendChild(v);
+            group.appendChild(calledSlot);
+          } else group.appendChild(v);
         });
         return group;
       }
