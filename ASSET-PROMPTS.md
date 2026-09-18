@@ -22,3 +22,7 @@ Generated with built-in imagegen. Full exact prompts: `dist/winners/prompts.json
 
 ## Twelve character call illustrations
 Generated with built-in imagegen: four characters × Chi/Pon/Kan. Exact prompts: `dist/calls/prompts.json`.
+
+## 举牌邦布
+
+内置 image_gen 生成透明 PNG：`dist/bangboo-round.png`。完整提示词：`dist/bangboo-prompt.txt`。实时局数叠加在空白牌面上，点击展开本场、供托、余牌和宝牌。

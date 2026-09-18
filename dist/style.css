@@ -86,3 +86,18 @@ body{min-height:100svh;display:flex;flex-direction:column}header{height:70px;fle
 /* Bottom-up shade behind the player's hand and nameplate. */
 .world:after{content:'';position:absolute;left:0;right:0;bottom:0;height:180px;z-index:6;pointer-events:none;background:linear-gradient(to top,#050308f2 0%,#08050cc9 24%,#10071170 52%,transparent 100%)}
 .world .player-label{top:603px;bottom:auto;z-index:8}
+
+/* Bangboo holds the live round; details open above the table on demand. */
+.world .bangboo-toggle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;width:144px;height:157px;padding:0;border:0;background:none;color:#fff1d1;filter:drop-shadow(0 5px 5px #0009)}
+.world .bangboo-toggle:hover{background:none;color:#fff;filter:drop-shadow(0 0 10px #ff4d9b77)}
+.bangboo-toggle img{position:absolute;left:0;top:0;width:144px;height:144px;object-fit:contain;pointer-events:none}
+.bangboo-toggle strong{position:absolute;top:85px;left:25px;width:94px;line-height:24px;font-size:17px;font-weight:900;text-align:center;white-space:nowrap;text-shadow:0 1px 2px #000}
+.bangboo-toggle small{position:absolute;bottom:0;left:0;width:100%;font-size:10px;letter-spacing:1px;color:#f0cedd;text-shadow:0 1px 3px #000}
+.round-info{position:fixed;inset:0;margin:auto;width:min(360px,90vw);height:fit-content;max-height:85svh;overflow:auto;padding:26px;border:1px solid #ee77ad;border-radius:16px;color:#fff1df;background:radial-gradient(ellipse at top right,#4b263d,#16111d 65%);box-shadow:0 20px 80px #000b, inset 0 0 0 4px #ffffff06;font-family:inherit}
+.round-info::backdrop{background:#080510a8;backdrop-filter:blur(3px)}
+.round-info-close{position:absolute;right:8px;top:6px;padding:4px 11px;font-size:24px;border:0;border-radius:6px}
+.round-info-mascot{position:absolute;right:36px;top:20px;width:85px;height:85px;object-fit:contain;pointer-events:none}
+.round-info>small{font-size:11px;letter-spacing:1px;color:#f8a9cf}.round-info h2{font-size:30px;margin:12px 0 24px}
+.round-info #sticks{padding:12px;border:1px solid #705466;border-radius:6px;color:#ffe1af;text-align:center;font-size:16px;background:#08060b55}
+.round-info .wall{margin:14px 0;padding:12px;text-align:center;background:#090710;border-radius:6px;font-size:14px}.round-info .wall b{font-size:32px;margin:0 8px;font-variant-numeric:tabular-nums}
+.round-info .dora{flex-direction:column;gap:10px;font-size:14px;color:#efcfdf}.round-info #dora{display:flex;justify-content:center;gap:5px;min-height:56px}.round-info #dora .tile{width:36px;height:50px}.round-info>p{text-align:center;font-size:11px;color:#b9a3b1;margin:22px 0 0}
