@@ -93,7 +93,7 @@ const viewport=document.querySelector('.board'),world=document.querySelector('.w
 const compactLayout=matchMedia('(max-aspect-ratio: 1/1), (max-width: 700px)');
 const rack=document.querySelector('.player-rack'),nameplate=document.querySelector('.player-label');
 function fitScene(){const scale=Math.min(viewport.clientWidth/1000,viewport.clientHeight/(2000/3));world.style.setProperty('--scene-scale',scale);world.style.setProperty('--touch-world',44/Math.max(scale,.01)+'px')}
-function fitHand(){const target=compactLayout.matches?$('mobile-hand-dock'):world;target.append(rack,nameplate);fitScene()}
+function fitHand(){const target=compactLayout.matches?$('mobile-hand-dock'):world;target.append(rack);world.append(nameplate);fitScene()}
 compactLayout.addEventListener('change',fitHand);new ResizeObserver(fitScene).observe(viewport);fitHand();
 $('fullscreen').hidden=!document.fullscreenEnabled;
 $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();$('game-menu').hidePopover()}catch{$('fullscreen').textContent='当前浏览器不支持全屏'}};
@@ -128,5 +128,6 @@ function publicTable(){const m=match?.model;if(!m?.shan)return {};return {round:
 if(navigator.modelContext?.registerTool){try{navigator.modelContext.registerTool({name:'read_mahjong_table',description:'Read public mahjong table and your own hand; never opponent hands or hidden wall.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:async()=>({content:[{type:'text',text:JSON.stringify(publicTable())}]})})}catch{}}
 // Test access is opt-in and never enabled by the normal playable URL.
 if(new URLSearchParams(location.search).has('test'))window.mahjongTest={get match(){return match},get decision(){return decision},get human(){return human},newGame,submit,render,tile,publicTable,Majiang,RULE,showVictory,showResult,playCallEffect};
+require('./scene-resources').initSceneResources();
 require('./i18n').initLanguage();
 newGame();

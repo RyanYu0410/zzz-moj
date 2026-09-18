@@ -62,6 +62,7 @@ const copy = [
 const digits=['一','二','三','四','五','六','七','八','九'];for(let suit=0;suit<3;suit++)digits.forEach((d,n)=>copy.push([d+['萬','筒','索'][suit],`${n+1} ${['Characters','Circles','Bamboo'][suit]}`,`${d}${['萬','筒','索'][suit]}`]));
 copy.push(['東','East','東'],['南','South','南'],['西','West','西'],['北','North','北'],['白','White','白'],['發','Green','發'],['中','Red','中']);
 copy.push(['場風','Round wind','場風'],['自風','Seat wind','自風'],['翻牌','Dragon','役牌'],['国士無双十三面','Kokushi 13-sided wait','国士無双十三面'],['四暗刻単騎','Suuankou single wait','四暗刻単騎'],['純正九蓮宝燈','Pure Chuuren Poutou','純正九蓮宝燈']);
+copy.push(['场景素材','Scene styles','シーン素材'],['地面','Floor','床'],['牌桌','Table','卓'],['霓虹街区','Neon streets','ネオン街'],['赤色工坊','Crimson workshop','赤の工房'],['霜月道场','Frostmoon dojo','霜月道場'],['深海会馆','Deep sea lounge','深海ラウンジ'],['素材载入失败，请重试。','Could not load the artwork. Please try again.','素材を読み込めませんでした。再度お試しください。']);
 const entries=new Map(copy.map(r=>[r[0],r]));const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const pattern=new RegExp([...entries.keys()].sort((a,b)=>b.length-a.length).map(escape).join('|'),'g');
 function initLanguage(){
  let locale='zh';try{const saved=localStorage.getItem('riichi-language');if(['zh','en','ja'].includes(saved))locale=saved}catch{}

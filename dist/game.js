@@ -2712,6 +2712,68 @@
     }
   });
 
+  // src/scene-resources.js
+  var require_scene_resources = __commonJS({
+    "src/scene-resources.js"(exports, module) {
+      "use strict";
+      var THEMES = { nicole: { floor: "floor-expanded.png", wide: "floor-layer.png", table: "table-layer.png" }, billy: { floor: "themes/billy-floor.png", table: "themes/billy-table.png" }, miyabi: { floor: "themes/miyabi-floor.png", table: "themes/miyabi-table.png" }, ellen: { floor: "themes/ellen-floor.png", table: "themes/ellen-table.png" } };
+      function initSceneResources() {
+        const floorSelect = document.getElementById("floor-theme"), tableSelect = document.getElementById("table-theme"), status = document.getElementById("scene-resource-status");
+        const state = { floor: "nicole", table: "nicole" };
+        try {
+          const saved = JSON.parse(localStorage.getItem("riichi-scene") || "{}");
+          for (const key of ["floor", "table"]) if (THEMES[saved[key]]) state[key] = saved[key];
+        } catch {
+        }
+        const versions = { floor: 0, table: 0 };
+        function floorPath() {
+          const theme = THEMES[state.floor];
+          return theme.wide && innerWidth / innerHeight >= 2 / 3 ? theme.wide : theme.floor;
+        }
+        let lastFloor = "";
+        function fitGround() {
+          const path = floorPath();
+          if (path !== lastFloor) {
+            document.body.style.setProperty("--floor-image", `url("${path}")`);
+            lastFloor = path;
+          }
+        }
+        async function select(kind, value, save = true) {
+          const serial = ++versions[kind];
+          const previous = state[kind], entry = THEMES[value];
+          if (!entry) return;
+          const path = kind === "table" ? entry.table : entry.wide && innerWidth / innerHeight >= 2 / 3 ? entry.wide : entry.floor;
+          const image = new Image();
+          image.src = path;
+          try {
+            await image.decode();
+            if (serial !== versions[kind]) return;
+            state[kind] = value;
+            if (kind === "table") document.querySelector(".table-layer").src = path;
+            else fitGround();
+            status.textContent = "";
+            if (save) try {
+              localStorage.setItem("riichi-scene", JSON.stringify(state));
+            } catch {
+            }
+          } catch {
+            if (serial !== versions[kind]) return;
+            (kind === "floor" ? floorSelect : tableSelect).value = previous;
+            status.textContent = "\u7D20\u6750\u8F7D\u5165\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u3002";
+          }
+        }
+        floorSelect.value = state.floor;
+        tableSelect.value = state.table;
+        fitGround();
+        select("table", state.table, false);
+        floorSelect.addEventListener("change", () => select("floor", floorSelect.value));
+        tableSelect.addEventListener("change", () => select("table", tableSelect.value));
+        window.addEventListener("resize", fitGround);
+      }
+      module.exports = { initSceneResources };
+    }
+  });
+
   // src/i18n.js
   var require_i18n = __commonJS({
     "src/i18n.js"(exports, module) {
@@ -2902,6 +2964,7 @@
       for (let suit = 0; suit < 3; suit++) digits.forEach((d, n) => copy.push([d + ["\u842C", "\u7B52", "\u7D22"][suit], `${n + 1} ${["Characters", "Circles", "Bamboo"][suit]}`, `${d}${["\u842C", "\u7B52", "\u7D22"][suit]}`]));
       copy.push(["\u6771", "East", "\u6771"], ["\u5357", "South", "\u5357"], ["\u897F", "West", "\u897F"], ["\u5317", "North", "\u5317"], ["\u767D", "White", "\u767D"], ["\u767C", "Green", "\u767C"], ["\u4E2D", "Red", "\u4E2D"]);
       copy.push(["\u5834\u98A8", "Round wind", "\u5834\u98A8"], ["\u81EA\u98A8", "Seat wind", "\u81EA\u98A8"], ["\u7FFB\u724C", "Dragon", "\u5F79\u724C"], ["\u56FD\u58EB\u7121\u53CC\u5341\u4E09\u9762", "Kokushi 13-sided wait", "\u56FD\u58EB\u7121\u53CC\u5341\u4E09\u9762"], ["\u56DB\u6697\u523B\u5358\u9A0E", "Suuankou single wait", "\u56DB\u6697\u523B\u5358\u9A0E"], ["\u7D14\u6B63\u4E5D\u84EE\u5B9D\u71C8", "Pure Chuuren Poutou", "\u7D14\u6B63\u4E5D\u84EE\u5B9D\u71C8"]);
+      copy.push(["\u573A\u666F\u7D20\u6750", "Scene styles", "\u30B7\u30FC\u30F3\u7D20\u6750"], ["\u5730\u9762", "Floor", "\u5E8A"], ["\u724C\u684C", "Table", "\u5353"], ["\u9713\u8679\u8857\u533A", "Neon streets", "\u30CD\u30AA\u30F3\u8857"], ["\u8D64\u8272\u5DE5\u574A", "Crimson workshop", "\u8D64\u306E\u5DE5\u623F"], ["\u971C\u6708\u9053\u573A", "Frostmoon dojo", "\u971C\u6708\u9053\u5834"], ["\u6DF1\u6D77\u4F1A\u9986", "Deep sea lounge", "\u6DF1\u6D77\u30E9\u30A6\u30F3\u30B8"], ["\u7D20\u6750\u8F7D\u5165\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u3002", "Could not load the artwork. Please try again.", "\u7D20\u6750\u3092\u8AAD\u307F\u8FBC\u3081\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u518D\u5EA6\u304A\u8A66\u3057\u304F\u3060\u3055\u3044\u3002"]);
       var entries = new Map(copy.map((r) => [r[0], r]));
       var escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       var pattern = new RegExp([...entries.keys()].sort((a, b) => b.length - a.length).map(escape).join("|"), "g");
@@ -3041,7 +3104,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=ed1f53488622");
+          this.worker = new Worker("ai-worker.js?v=1990cbdae121");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3547,7 +3610,8 @@
       }
       function fitHand() {
         const target = compactLayout.matches ? $("mobile-hand-dock") : world;
-        target.append(rack, nameplate);
+        target.append(rack);
+        world.append(nameplate);
         fitScene();
       }
       compactLayout.addEventListener("change", fitHand);
@@ -3639,6 +3703,7 @@
       }, get human() {
         return human;
       }, newGame, submit, render, tile, publicTable, Majiang, RULE, showVictory, showResult, playCallEffect };
+      require_scene_resources().initSceneResources();
       require_i18n().initLanguage();
       newGame();
     }

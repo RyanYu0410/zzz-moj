@@ -256,3 +256,15 @@ html[lang=en] .world .west{left:25%}html[lang=en] .world .east{right:25%}
 html[lang=en] .controlbar strong{white-space:normal;font-size:15px}
 html[lang=en] .actions button{font-size:15px}html[lang=ja] .actions button{font-size:15px}
 html[lang=en] #victory-title{font-size:clamp(30px,4vw,64px)}
+
+/* Preserve floor texture proportions; choose wide/portrait art in scene-resources. */
+body{background-image:var(--floor-image,url('floor-layer.png'));background-position:center;background-size:cover;background-repeat:no-repeat}
+.scene-settings{display:grid;gap:10px}.scene-settings label{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:17px;padding:10px 14px;background:#ffffff09;border-radius:14px}.scene-settings select{font:inherit;font-size:15px;color:#fff;background:#393140;border:1px solid #ffffff26;border-radius:10px;min-height:48px;max-width:76%;padding:8px}.scene-settings p{font-size:14px;color:#ffc3ce;margin:0}.scene-settings p:empty{display:none}
+/* Nameplates float with the character positions, never inside the meld lanes. */
+.world .seat,.world .player-label{position:absolute;writing-mode:horizontal-tb;transform:translateX(-50%);padding:5px 10px;border:1px solid color-mix(in srgb,var(--tag-accent) 65%,transparent);border-bottom:2px solid var(--tag-accent);border-radius:9px;background:#16131de8;box-shadow:0 4px 12px #0008;z-index:10;font-size:14px;line-height:20px;max-width:190px;text-align:center;white-space:nowrap;letter-spacing:0;animation:nameplate-hover 5s ease-in-out infinite;pointer-events:none}
+.world .north,.world:has(.bm2 .meld) .north{left:50%;top:8px;right:auto;padding:5px 10px;font-size:14px}
+.world .west,html[lang=en] .world .west{left:10.5%;top:226px;right:auto;max-width:190px;font-size:14px;padding:5px 10px;animation-delay:-1.2s}
+.world .east,html[lang=en] .world .east{left:89.5%;right:auto;top:226px;max-width:190px;font-size:14px;padding:5px 10px;animation-delay:-2.4s}
+.world .player-label{left:50%;top:602px;bottom:auto;animation-delay:-.6s}.world .player-label span{font-size:14px}
+@keyframes nameplate-hover{0%,100%{translate:0 0}50%{translate:0 -3px}}
+.world [id^="seat-label"]{display:block;font-size:clamp(14px,calc(10px / var(--scene-scale,1)),28px);line-height:1.25;max-width:168px;overflow:hidden;text-overflow:ellipsis}

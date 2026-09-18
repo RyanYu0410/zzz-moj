@@ -1,0 +1,35 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "name": "billy",
+      "kind": "table",
+      "prompt": "Edit the reference into a new Billy's red and gunmetal arcade workshop; angular crimson steel, graphite panels, warm amber indicator strips, subtle star emblem mahjong TABLE skin. Exact strict top-down orthographic view, preserve reference 3:2 canvas and exact table geometry: outer table bounds x10%-90%, y9%-89%, rounded rectangular rim, felt interior x15%-85% y18%-79%. Keep large empty dark felt playing surface with only a faint central emblem. Redesign colors, textures, corner fittings and accents to the specified character theme. No tiles, people, text or UI. Everything outside table must be genuinely transparent alpha, no ground, no black backdrop, no cast shadow beyond silhouette. Production game layer, crisp cel shaded anime illustration. 1536x1024 landscape."
+    },
+    {
+      "name": "billy",
+      "kind": "floor",
+      "prompt": "Use case: stylized-concept. Production full-screen floor background for a Zenless Zone Zero fan mahjong game. Billy's red and gunmetal arcade workshop; angular crimson steel, graphite panels, warm amber indicator strips, subtle star emblem. FLOOR ONLY: strict vertical top-down orthographic camera, no horizon, no table, no people, no tiles, no text, no UI. Broad quiet central 85 percent with fine-scale floor material so it reads well in both portrait and landscape crops. Characteristic architecture and tasteful details at the very outer corners; low contrast matte surface, dark game-friendly lighting, polished anime game art. Square 1536x1536 canvas. Dark small industrial steel floor plates, rivets, red workshop stripe accents, amber reflected lights."
+    },
+    {
+      "name": "miyabi",
+      "kind": "table",
+      "prompt": "Edit the reference into a new Miyabi's refined frost-blue dojo; dark lacquer, brushed silver corners, icy cyan inlays, subtle fox crest mahjong TABLE skin. Exact strict top-down orthographic view, preserve reference 3:2 canvas and exact table geometry: outer table bounds x10%-90%, y9%-89%, rounded rectangular rim, felt interior x15%-85% y18%-79%. Keep large empty dark felt playing surface with only a faint central emblem. Redesign colors, textures, corner fittings and accents to the specified character theme. No tiles, people, text or UI. Everything outside table must be genuinely transparent alpha, no ground, no black backdrop, no cast shadow beyond silhouette. Production game layer, crisp cel shaded anime illustration. 1536x1024 landscape."
+    },
+    {
+      "name": "miyabi",
+      "kind": "floor",
+      "prompt": "Use case: stylized-concept. Production full-screen floor background for a Zenless Zone Zero fan mahjong game. Miyabi's refined frost-blue dojo; dark lacquer, brushed silver corners, icy cyan inlays, subtle fox crest. FLOOR ONLY: strict vertical top-down orthographic camera, no horizon, no table, no people, no tiles, no text, no UI. Broad quiet central 85 percent with fine-scale floor material so it reads well in both portrait and landscape crops. Characteristic architecture and tasteful details at the very outer corners; low contrast matte surface, dark game-friendly lighting, polished anime game art. Square 1536x1536 canvas. Dark fine-grained wood planks, cool blue moonlight, subtle frosted stone edging, delicate silver geometric trim."
+    },
+    {
+      "name": "ellen",
+      "kind": "table",
+      "prompt": "Edit the reference into a new Ellen's elegant shark-themed midnight lounge; midnight teal lacquer, pearl white corners, restrained crimson accents, subtle shark fin crest mahjong TABLE skin. Exact strict top-down orthographic view, preserve reference 3:2 canvas and exact table geometry: outer table bounds x10%-90%, y9%-89%, rounded rectangular rim, felt interior x15%-85% y18%-79%. Keep large empty dark felt playing surface with only a faint central emblem. Redesign colors, textures, corner fittings and accents to the specified character theme. No tiles, people, text or UI. Everything outside table must be genuinely transparent alpha, no ground, no black backdrop, no cast shadow beyond silhouette. Production game layer, crisp cel shaded anime illustration. 1536x1024 landscape."
+    },
+    {
+      "name": "ellen",
+      "kind": "floor",
+      "prompt": "Use case: stylized-concept. Production full-screen floor background for a Zenless Zone Zero fan mahjong game. Ellen's elegant shark-themed midnight lounge; midnight teal lacquer, pearl white corners, restrained crimson accents, subtle shark fin crest. FLOOR ONLY: strict vertical top-down orthographic camera, no horizon, no table, no people, no tiles, no text, no UI. Broad quiet central 85 percent with fine-scale floor material so it reads well in both portrait and landscape crops. Characteristic architecture and tasteful details at the very outer corners; low contrast matte surface, dark game-friendly lighting, polished anime game art. Square 1536x1536 canvas. Deep blue-green small marble floor squares, subtle waterlike reflections, refined white stone border and tiny crimson lounge accents."
+    }
+  ]
+}

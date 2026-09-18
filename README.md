@@ -77,3 +77,7 @@ Additional UI checks: `node scripts/call-options-browser-check.cjs`.
 ### Language selection
 
 Menu → Language supports 简体中文, English, and 日本語. The browser remembers the selection when local storage is available. Changing language preserves the active hand and translates controls, live status, accessibility labels, rules, score panels, and results. Generated tile/call artwork stays unchanged.
+
+### Scene resources
+
+Menu → Scene styles offers independent floor and table choices for Nicole, Billy, Miyabi, and Ellen. Choices persist locally and do not reset the hand. Nicole uses portrait or landscape floor artwork according to the window aspect ratio; other floors use square compositions suitable for both crops. All tables preserve the shared board coordinates. Character nameplates float over the seated characters.
