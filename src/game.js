@@ -128,4 +128,5 @@ function publicTable(){const m=match?.model;if(!m?.shan)return {};return {round:
 if(navigator.modelContext?.registerTool){try{navigator.modelContext.registerTool({name:'read_mahjong_table',description:'Read public mahjong table and your own hand; never opponent hands or hidden wall.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:async()=>({content:[{type:'text',text:JSON.stringify(publicTable())}]})})}catch{}}
 // Test access is opt-in and never enabled by the normal playable URL.
 if(new URLSearchParams(location.search).has('test'))window.mahjongTest={get match(){return match},get decision(){return decision},get human(){return human},newGame,submit,render,tile,publicTable,Majiang,RULE,showVictory,showResult,playCallEffect};
+require('./i18n').initLanguage();
 newGame();

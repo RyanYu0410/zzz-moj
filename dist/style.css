@@ -248,3 +248,11 @@ button,select{touch-action:manipulation}button:disabled{opacity:.48}
 .no-motion .win-streak,.no-motion .win-flare,.no-motion .win-spark{display:none}
 @media(prefers-reduced-motion:reduce){.win-streak,.win-flare,.win-spark{display:none}.win-halo,#victory-art,.victory-copy,#modal.winner-result .settlement-art,#modal.winner-result .settlement-detail{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.win-atmosphere .win-streak,.win-atmosphere .win-flare,.win-atmosphere .win-spark{display:none}}
+.language-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding:12px 14px;background:#ffffff09;border-radius:16px;font-size:16px}
+.language-setting select{font:inherit;color:#fff;background:#393140;border:1px solid #ffffff26;border-radius:12px;padding:10px;min-height:48px;max-width:55%}
+html[lang=en] .world .seat,html[lang=ja] .world .seat{letter-spacing:0}
+html[lang=en] .world .west,html[lang=en] .world .east{writing-mode:horizontal-tb;font-size:12px;padding:5px;max-width:120px}
+html[lang=en] .world .west{left:25%}html[lang=en] .world .east{right:25%}
+html[lang=en] .controlbar strong{white-space:normal;font-size:15px}
+html[lang=en] .actions button{font-size:15px}html[lang=ja] .actions button{font-size:15px}
+html[lang=en] #victory-title{font-size:clamp(30px,4vw,64px)}

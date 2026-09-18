@@ -2712,6 +2712,261 @@
     }
   });
 
+  // src/i18n.js
+  var require_i18n = __commonJS({
+    "src/i18n.js"(exports, module) {
+      "use strict";
+      var copy = [
+        ["\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u6309\u4E1C\u4E00\u81F3\u4E1C\u56DB\u63A8\u8FDB\uFF1B\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u65E0\u4EBA\u8FBE\u5230 30,000 \u70B9\u65F6\u8FDB\u5165\u5357\u5165\u5EF6\u957F\uFF1B\u98DE\u4EBA\u7ED3\u675F\u3002", "Each player starts with 25,000 points. A random dealer starts East 1\u20134. The dealer repeats after winning or a tenpai draw. Play extends into South if nobody reaches 30,000; bankruptcy ends the match.", "\u5404\u5BB625,000\u70B9\u6301\u3061\u3002\u8D77\u5BB6\u306F\u30E9\u30F3\u30C0\u30E0\u3067\u67711\u301C4\u5C40\u3092\u9032\u884C\u3002\u89AA\u306E\u548C\u4E86\u30FB\u8074\u724C\u3067\u9023\u8358\u300230,000\u70B9\u672A\u6E80\u306A\u3089\u5357\u5165\u3001\u30C8\u30D3\u3067\u7D42\u4E86\u3002"],
+        ["\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002", "Chi is only from the player on your left. Pon and open Kan can use any opponent\u2019s discard. Ron takes priority over Pon/Kan, then Chi. Kuikae is prohibited.", "\u30C1\u30FC\u306F\u4E0A\u5BB6\u304B\u3089\u306E\u307F\u3002\u30DD\u30F3\u30FB\u5927\u660E\u69D3\u306F\u5168\u54E1\u304B\u3089\u53EF\u80FD\u3002\u30ED\u30F3\u3001\u30DD\u30F3\u30FB\u30AB\u30F3\u3001\u30C1\u30FC\u306E\u9806\u306B\u512A\u5148\u3002\u55B0\u3044\u66FF\u3048\u306F\u7981\u6B62\u3002"],
+        ["\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002", "All Kans draw a replacement tile and reveal Kan dora. Added Kan can be robbed. Four Kans abort the hand unless all belong to one player.", "\u69D3\u306E\u5F8C\u306F\u5DBA\u4E0A\u724C\u3092\u5F15\u304D\u3001\u69D3\u30C9\u30E9\u3092\u8868\u793A\u3002\u52A0\u69D3\u306B\u306F\u69CD\u69D3\u304C\u53EF\u80FD\u3002\u56DB\u69D3\u6563\u4E86\u3042\u308A\uFF081\u4EBA\u306E\u56DB\u69D3\u3092\u9664\u304F\uFF09\u3002"],
+        ["\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002", "A winning hand needs a yaku. Tsumo, Ron, furiten, temporary furiten, riichi furiten, standard yaku and fu/han scoring are supported.", "\u548C\u4E86\u306B\u306F\u5F79\u304C\u5FC5\u8981\u3002\u30C4\u30E2\u30FB\u30ED\u30F3\u30FB\u632F\u8074\u30FB\u540C\u5DE1\u632F\u8074\u30FB\u7ACB\u76F4\u5F8C\u306E\u632F\u8074\u3068\u3001\u6A19\u6E96\u306E\u5F79\u30FB\u7B26\u7FFB\u8A08\u7B97\u306B\u5BFE\u5FDC\u3002"],
+        ["\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002", "A closed tenpai hand may declare Riichi for 1,000 points. Ippatsu, double Riichi, red/ura/Kan dora apply. After Riichi, a concealed Kan must preserve the wait.", "\u9580\u524D\u8074\u724C\u30671,000\u70B9\u3092\u4F9B\u8A17\u3057\u3066\u7ACB\u76F4\u3002\u4E00\u767A\u30FB\u30C0\u30D6\u30EB\u7ACB\u76F4\u30FB\u8D64\u30C9\u30E9\u30FB\u88CF\u30C9\u30E9\u30FB\u69D3\u30C9\u30E9\u3042\u308A\u3002\u7ACB\u76F4\u5F8C\u306E\u6697\u69D3\u306F\u5F85\u3061\u304C\u5909\u308F\u3089\u306A\u3044\u5834\u5408\u306E\u307F\u3002"],
+        ["\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002", "Double Ron is allowed; triple Ron aborts the hand. Exhaustive draws use a 3,000-point tenpai payment. Deposits and repeats carry over according to the rules.", "\u30C0\u30D6\u30ED\u30F3\u3042\u308A\u3001\u4E09\u5BB6\u548C\u306F\u6D41\u5C40\u3002\u6D41\u5C40\u6642\u306E\u30CE\u30FC\u30C6\u30F3\u7F70\u7B26\u306F3,000\u70B9\u3002\u4F9B\u8A17\u30FB\u672C\u5834\u306F\u30EB\u30FC\u30EB\u306B\u5F93\u3063\u3066\u6301\u3061\u8D8A\u3057\u3002"],
+        ["\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002", "Characters keep their seats; seat winds rotate with the dealer. Confirm the result to start the next hand.", "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u306E\u4F4D\u7F6E\u306F\u56FA\u5B9A\u3067\u3001\u98A8\u306F\u89AA\u3068\u3068\u3082\u306B\u4EA4\u4EE3\u3002\u7CBE\u7B97\u3092\u78BA\u8A8D\u3059\u308B\u3068\u6B21\u5C40\u3078\u9032\u307F\u307E\u3059\u3002"],
+        ["\u5F53\u524D\u70B9\u6570\u548C\u672C\u573A\u8FDB\u5EA6\u4F1A\u91CD\u7F6E\uFF0C\u56DB\u4EBA\u4ECE 25,000 \u70B9\u5F00\u59CB\u3002", "Scores and repeats will reset. Everyone starts with 25,000 points.", "\u70B9\u6570\u3068\u672C\u5834\u3092\u30EA\u30BB\u30C3\u30C8\u3057\u3001\u5168\u54E125,000\u70B9\u304B\u3089\u958B\u59CB\u3057\u307E\u3059\u3002"],
+        ["\u672C\u724C\u5C40\u76F4\u63A5\u4F7F\u7528\u8FD9\u4E9B PNG\uFF1B\u6BCF\u95E8\u4E00\u5F20\u7EA2\u4E94\uFF0C\u8BA1\u5165\u8D64\u5B9D\u724C\u3002", "These tiles are used in play. Each suit has one red five, counted as red dora.", "\u5BFE\u5C40\u3067\u4F7F\u7528\u3059\u308B\u724C\u3067\u3059\u3002\u5404\u8272\u306B\u8D645\u304C1\u679A\u3042\u308A\u3001\u8D64\u30C9\u30E9\u3068\u3057\u3066\u6570\u3048\u307E\u3059\u3002"],
+        ["\u4E0A\u5BB6\u5F03\u724C\u53EF\u7EC4\u6210\u987A\u5B50\u65F6\u53EF\u5403", "Chi is available when the left player\u2019s discard completes a sequence.", "\u4E0A\u5BB6\u306E\u6368\u3066\u724C\u3067\u9806\u5B50\u3092\u4F5C\u308C\u308B\u3068\u304D\u306B\u30C1\u30FC\u3067\u304D\u307E\u3059"],
+        ["\u5BF9\u624B\u5F03\u724C\u4E0E\u4F60\u7684\u5BF9\u5B50\u76F8\u540C\u65F6\u53EF\u78B0", "Pon is available when a discard matches your pair.", "\u5BFE\u5B50\u3068\u540C\u3058\u724C\u304C\u6368\u3066\u3089\u308C\u305F\u3068\u304D\u306B\u30DD\u30F3\u3067\u304D\u307E\u3059"],
+        ["\u6301\u6709\u56DB\u5F20\u540C\u724C\u6216\u53EF\u52A0\u6760\u65F6\u5F00\u653E", "Kan is available with four identical tiles or an added Kan.", "\u540C\u3058\u724C\u304C4\u679A\u3042\u308B\u3068\u304D\u3001\u307E\u305F\u306F\u52A0\u69D3\u3067\u304D\u308B\u3068\u304D\u306B\u9078\u3079\u307E\u3059"],
+        ["\u8363\u548C\u4F18\u5148\uFF1B\u8DF3\u8FC7\u8363\u548C\u4F1A\u8FDB\u5165\u632F\u542C", "Ron has priority. Passing Ron causes furiten.", "\u30ED\u30F3\u304C\u512A\u5148\u3002\u30ED\u30F3\u3092\u898B\u9001\u308B\u3068\u632F\u8074\u306B\u306A\u308A\u307E\u3059"],
+        ["\u5207\u51FA\u9AD8\u4EAE\u724C\u5E76\u652F\u4ED8 1,000 \u70B9", "Discard a highlighted tile and pay 1,000 points.", "\u9078\u629E\u53EF\u80FD\u306A\u724C\u3092\u5207\u308A\u30011,000\u70B9\u3092\u4F9B\u8A17\u3057\u307E\u3059"],
+        ["\u7ACB\u76F4\u540E\u53EA\u53EF\u6478\u5207\u3001\u5408\u6CD5\u6697\u6760\u6216\u548C\u724C", "After Riichi: discard the drawn tile, make a legal concealed Kan, or win.", "\u7ACB\u76F4\u5F8C\u306F\u30C4\u30E2\u5207\u308A\u30FB\u5408\u6CD5\u306A\u6697\u69D3\u30FB\u548C\u4E86\u306E\u307F"],
+        ["\u724C\u5F62\u5B8C\u6210\uFF0C\u987B\u6709\u5F79\u624D\u80FD\u548C\u724C", "Complete shape \u2014 a yaku is required to win.", "\u548C\u4E86\u5F62\u3067\u3059\u3002\u548C\u4E86\u306B\u306F\u5F79\u304C\u5FC5\u8981\u3067\u3059"],
+        ["\u7535\u8111\u8BA1\u7B97\u4E2D\u65AD\uFF0C\u8BF7\u91CD\u65B0\u5F00\u59CB\u5BF9\u5C40\u3002", "AI interrupted. Please start a new match.", "AI\u304C\u505C\u6B62\u3057\u307E\u3057\u305F\u3002\u5BFE\u5C40\u3092\u518D\u958B\u3057\u3066\u304F\u3060\u3055\u3044\u3002"],
+        ["\u7535\u8111\u8F7D\u5165\u5931\u8D25\uFF0C\u8BF7\u5237\u65B0\u9875\u9762\u540E\u91CD\u8BD5\u3002", "AI could not load. Please reload the page.", "AI\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002\u518D\u8AAD\u307F\u8FBC\u307F\u3057\u3066\u304F\u3060\u3055\u3044\u3002"],
+        ["\u5F53\u524D\u6D4F\u89C8\u5668\u4E0D\u652F\u6301\u5168\u5C4F", "Fullscreen unavailable in this browser", "\u3053\u306E\u30D6\u30E9\u30A6\u30B6\u3067\u306F\u5168\u753B\u9762\u306B\u975E\u5BFE\u5FDC"],
+        ["\u70B9\u51FB\u90A6\u5E03\u5C55\u5F00\u724C\u5C40\u4FE1\u606F", "Tap Bangboo for round details", "\u30DC\u30F3\u30D7\u3092\u30BF\u30C3\u30D7\u3057\u3066\u5C40\u60C5\u5831\u3092\u8868\u793A"],
+        ["\u67E5\u770B\u7ACB\u7ED8\u4E0E\u7ED3\u7B97 \u2197", "View results \u2197", "\u7CBE\u7B97\u3092\u898B\u308B \u2197"],
+        ["\u786E\u8BA4\u7ED3\u7B97 \xB7 \u7EE7\u7EED", "Continue", "\u78BA\u8A8D\u3057\u3066\u6B21\u3078"],
+        ["\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06 \xB7 \u4E1C\u98CE\u6218", "Four-player Riichi \xB7 East match", "\u56DB\u4EBA\u30EA\u30FC\u30C1\u9EBB\u96C0\u30FB\u6771\u98A8\u6226"],
+        ["\u4E1C\u98CE\u6218 \xB7 \u7EC8\u5C40", "Final standings", "\u6771\u98A8\u6226\u30FB\u6700\u7D42\u7D50\u679C"],
+        ["\u91CD\u65B0\u5F00\u59CB\u4E1C\u98CE\u6218\uFF1F", "Start a new match?", "\u5BFE\u5C40\u3092\u3084\u308A\u76F4\u3057\u307E\u3059\u304B\uFF1F"],
+        ["\u65B0\u827E\u5229\u90FD \xB7 37 \u5F20\u7279\u8272\u724C", "New Eridu \xB7 37 tile designs", "\u65B0\u30A8\u30EA\u30FC\u90FD\u30FB37\u7A2E\u306E\u724C"],
+        ["\u90A6\u5E03\u64AD\u62A5 \xB7 \u6771\u98A8\u6226", "Bangboo \xB7 East match", "\u30DC\u30F3\u30D7\u901A\u4FE1\u30FB\u6771\u98A8\u6226"],
+        ["\u4E1C\u98CE\u6218 \xB7 25,000 \u70B9\u8D77\u59CB", "East match \xB7 25,000 starting points", "\u6771\u98A8\u6226\u30FB25,000\u70B9\u6301\u3061"],
+        ["\u5DF2\u7ACB\u76F4 \xB7 \u6478\u5207\uFF0F\u81EA\u6478", "Riichi \xB7 Draw discard / Tsumo", "\u7ACB\u76F4\u4E2D\u30FB\u30C4\u30E2\u5207\u308A\uFF0F\u30C4\u30E2"],
+        ["\u5CAD\u4E0A\u6478\u724C \xB7 \u8BF7\u9009\u62E9\u51FA\u724C", "Replacement draw \xB7 Choose a discard", "\u5DBA\u4E0A\u724C\u30FB\u6253\u724C\u3092\u9078\u629E"],
+        ["\u53EF\u4FDD\u6301\u542C\u724C \xB7 \u8BF7\u9009\u62E9\u5207\u724C", "Tenpai available \xB7 Choose a discard", "\u8074\u724C\u53EF\u80FD\u30FB\u6253\u724C\u3092\u9078\u629E"],
+        ["\u7ACB\u76F4 \xB7 \u9009\u62E9\u5207\u724C", "Riichi \xB7 Choose a discard", "\u7ACB\u76F4\u30FB\u6253\u724C\u3092\u9078\u629E"],
+        ["\u53EF\u4EE5\u9E23\u724C\uFF0F\u8363\u548C", "Call or Ron available", "\u9CF4\u304D\uFF0F\u30ED\u30F3\u304C\u53EF\u80FD"],
+        ["\u9009\u62E9\u6697\u6760\uFF0F\u52A0\u6760", "Choose a Kan", "\u6697\u69D3\uFF0F\u52A0\u69D3\u3092\u9078\u629E"],
+        ["\u8F6E\u5230\u4F60\u51FA\u724C", "Your turn", "\u3042\u306A\u305F\u306E\u756A\u3067\u3059"],
+        ["\u6B63\u5728\u53D1\u724C\u2026", "Dealing\u2026", "\u914D\u724C\u4E2D\u2026"],
+        ["\u65B0\u4E00\u5C40\u5F00\u59CB", "New hand", "\u65B0\u3057\u3044\u5C40"],
+        ["\u6B63\u5728\u601D\u8003\u2026", "Thinking\u2026", "\u8003\u3048\u4E2D\u2026"],
+        ["\u672C\u5C40\u6D41\u5C40", "Drawn hand", "\u6D41\u5C40"],
+        ["\u5BF9\u5C40\u5DF2\u6682\u505C", "Match paused", "\u5BFE\u5C40\u3092\u4E2D\u65AD"],
+        ["\u9009\u62E9\u4E00\u5F20\u724C", "Select a tile", "\u724C\u3092\u9078\u629E"],
+        ["\u62A2\u6760\u673A\u4F1A", "Robbing a Kan", "\u69CD\u69D3\u306E\u6A5F\u4F1A"],
+        ["\u5173\u95ED\u724C\u5C40\u4FE1\u606F", "Close round details", "\u5C40\u60C5\u5831\u3092\u9589\u3058\u308B"],
+        ["\u6536\u8D77\u724C\u5C40\u4FE1\u606F", "Close round details", "\u5C40\u60C5\u5831\u3092\u9589\u3058\u308B"],
+        ["\u6253\u5F00\u6E38\u620F\u83DC\u5355", "Open game menu", "\u30E1\u30CB\u30E5\u30FC\u3092\u958B\u304F"],
+        ["\u5173\u95ED\u83DC\u5355", "Close menu", "\u30E1\u30CB\u30E5\u30FC\u3092\u9589\u3058\u308B"],
+        ["\u5173\u95ED\u70B9\u6570", "Close scores", "\u70B9\u6570\u3092\u9589\u3058\u308B"],
+        ["\u70B9\u51FB\u7A7A\u767D\u5904\u6536\u8D77", "Tap outside to close", "\u5916\u5074\u3092\u30BF\u30C3\u30D7\u3057\u3066\u9589\u3058\u308B"],
+        ["\u70B9\u51FB\u5C55\u5F00 \u2303", "Details \u2303", "\u8A73\u7D30 \u2303"],
+        ["\u9884\u89C8\u5403\u724C\u6F14\u51FA", "Preview Chi", "\u30C1\u30FC\u6F14\u51FA\u3092\u898B\u308B"],
+        ["\u9884\u89C8\u78B0\u724C\u6F14\u51FA", "Preview Pon", "\u30DD\u30F3\u6F14\u51FA\u3092\u898B\u308B"],
+        ["\u9884\u89C8\u6760\u724C\u6F14\u51FA", "Preview Kan", "\u30AB\u30F3\u6F14\u51FA\u3092\u898B\u308B"],
+        ["\u6F14\u51FA\u89D2\u8272", "Preview character", "\u6F14\u51FA\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC"],
+        ["\u6F14\u51FA\u9884\u89C8", "Preview", "\u6F14\u51FA\u30D7\u30EC\u30D3\u30E5\u30FC"],
+        ["\u89D2\u8272\u6F14\u51FA", "Character effects", "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u6F14\u51FA"],
+        ["\u56DB\u5BB6\u70B9\u6570", "Player scores", "\u5404\u5BB6\u306E\u70B9\u6570"],
+        ["\u724C\u684C\u83DC\u5355", "Game menu", "\u5BFE\u5C40\u30E1\u30CB\u30E5\u30FC"],
+        ["\u724C\u5C40\u4FE1\u606F", "Round details", "\u5C40\u60C5\u5831"],
+        ["\u8FDB\u5165\u5168\u5C4F \u2197", "Fullscreen \u2197", "\u5168\u753B\u9762 \u2197"],
+        ["\u9000\u51FA\u5168\u5C4F \u2199", "Exit fullscreen \u2199", "\u5168\u753B\u9762\u3092\u7D42\u4E86 \u2199"],
+        ["\u73A9\u6CD5\u8BF4\u660E", "How to play", "\u904A\u3073\u65B9"],
+        ["\u52A8\u4F5C\u7279\u6548", "Motion", "\u6F14\u51FA"],
+        ["\u58F0\u97F3", "Sound", "\u30B5\u30A6\u30F3\u30C9"],
+        ["\u5149\u7EBF\uFF1A", "Lighting: ", "\u7167\u660E\uFF1A"],
+        ["\u5207\u6362\u573A\u666F\u5149\u7EBF", "Change lighting", "\u7167\u660E\u3092\u5909\u66F4"],
+        ["\u65E5\u5149", "Day", "\u663C"],
+        ["\u591C\u573A", "Night", "\u591C"],
+        ["\u65B0\u5BF9\u5C40 \u2197", "New match \u2197", "\u65B0\u3057\u3044\u5BFE\u5C40 \u2197"],
+        ["\u91CD\u65B0\u5F00\u59CB", "Restart", "\u3084\u308A\u76F4\u3059"],
+        ["\u518D\u5F00\u4E00\u573A", "Play again", "\u3082\u3046\u4E00\u5EA6"],
+        ["\u4FDD\u5B58\u724C\u8C31", "Save game log", "\u724C\u8B5C\u3092\u4FDD\u5B58"],
+        ["\u724C\u9762\u56FE\u9274 \u2197", "Tile gallery \u2197", "\u724C\u4E00\u89A7 \u2197"],
+        ["\u8DF3\u8FC7 \xB7 Esc", "Pass \xB7 Esc", "\u898B\u9001\u308A \xB7 Esc"],
+        ["\u5173\u95ED \xD7", "Close \xD7", "\u9589\u3058\u308B \xD7"],
+        ["\u724C\u5C71\u5269\u4F59", "Tiles left", "\u6B8B\u308A\u724C"],
+        ["\u91CC\u5B9D\u724C\u6307\u793A", "Ura dora indicators", "\u88CF\u30C9\u30E9\u8868\u793A\u724C"],
+        ["\u5B9D\u724C\u6307\u793A", "Dora indicators", "\u30C9\u30E9\u8868\u793A\u724C"],
+        ["\u672C\u573A", "Honba", "\u672C\u5834"],
+        ["\u4F9B\u6258", "Deposits", "\u4F9B\u8A17"],
+        ["\u53D6\u6D88\u7ACB\u76F4", "Cancel", "\u53D6\u6D88"],
+        ["\u5DF2\u7ACB\u76F4", "Riichi", "\u7ACB\u76F4\u4E2D"],
+        ["\u6697\u6760\u80CC\u9762", "Concealed Kan back", "\u6697\u69D3\u306E\u88CF\u9762"],
+        ["\u660E\u6760\uFF0F\u52A0\u6760", "Open / added Kan", "\u5927\u660E\u69D3\uFF0F\u52A0\u69D3"],
+        ["\u5F20\u6697\u724C", "concealed tiles", "\u679A\u306E\u624B\u724C"],
+        ["\u4F60\u7684\u684C\u9762\u624B\u724C", "Your hand", "\u3042\u306A\u305F\u306E\u624B\u724C"],
+        ["\u4F60\u7684\u684C\u9762\u526F\u9732", "Your melds", "\u3042\u306A\u305F\u306E\u526F\u9732"],
+        ["\u4E13\u5C5E\u548C\u724C\u7ACB\u7ED8", "win illustration", "\u548C\u4E86\u30A4\u30E9\u30B9\u30C8"],
+        ["\u548C\u724C\u7ACB\u7ED8", "win illustration", "\u548C\u4E86\u30A4\u30E9\u30B9\u30C8"],
+        ["\u4E13\u5C5E\u52A8\u4F5C", "action illustration", "\u5C02\u7528\u30A2\u30AF\u30B7\u30E7\u30F3"],
+        ["\u4E3E\u724C\u5C0F\u90A6\u5E03", "Bangboo holding a sign", "\u770B\u677F\u3092\u6301\u3064\u30DC\u30F3\u30D7"],
+        ["\u5411\u542C \xB7 \u5403\u78B0\u540E\u4E0D\u53EF\u7ACB\u76F4", "shanten \xB7 Open hands cannot declare Riichi", "\u5411\u8074\u30FB\u9CF4\u304F\u3068\u7ACB\u76F4\u4E0D\u53EF"],
+        ["\u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002", "rules and majiang-ai opponents; MIT licensed. Unofficial fan game.", "\u30EB\u30FC\u30EB\u30A8\u30F3\u30B8\u30F3\u3068 majiang-ai \u3092\u4F7F\u7528\u3002MIT\u30E9\u30A4\u30BB\u30F3\u30B9\u3002\u975E\u516C\u5F0F\u30D5\u30A1\u30F3\u4F5C\u54C1\u3002"],
+        ["\u59AE\u53EF", "Nicole", "\u30CB\u30B3"],
+        ["\u6BD4\u5229", "Billy", "\u30D3\u30EA\u30FC"],
+        ["\u827E\u83B2", "Ellen", "\u30A8\u30EC\u30F3"],
+        ["\u96C5", "Miyabi", "\u96C5"],
+        ["\u4E1C\u5BB6", "East", "\u6771\u5BB6"],
+        ["\u5357\u5BB6", "South", "\u5357\u5BB6"],
+        ["\u897F\u5BB6", "West", "\u897F\u5BB6"],
+        ["\u5317\u5BB6", "North", "\u5317\u5BB6"],
+        ["\u8352\u724C\u6D41\u5C40", "Exhaustive draw", "\u8352\u724C\u6D41\u5C40"],
+        ["\u4E5D\u79CD\u4E5D\u724C", "Nine terminals", "\u4E5D\u7A2E\u4E5D\u724C"],
+        ["\u56DB\u98CE\u8FDE\u6253", "Four winds", "\u56DB\u98A8\u9023\u6253"],
+        ["\u56DB\u5BB6\u7ACB\u76F4", "Four Riichi", "\u56DB\u5BB6\u7ACB\u76F4"],
+        ["\u56DB\u6760\u6563\u4E86", "Four Kans", "\u56DB\u69D3\u6563\u4E86"],
+        ["\u4E09\u5BB6\u548C\u6D41\u5C40", "Triple Ron", "\u4E09\u5BB6\u548C"],
+        ["\u6D41\u5C40\u6EE1\u8D2F", "Nagashi Mangan", "\u6D41\u3057\u6E80\u8CAB"],
+        ["\u95E8\u524D\u6E05\u81EA\u6478\u548C", "Menzen Tsumo", "\u9580\u524D\u6E05\u81EA\u6478\u548C"],
+        ["\u9580\u524D\u6E05\u81EA\u6478\u548C", "Menzen Tsumo", "\u9580\u524D\u6E05\u81EA\u6478\u548C"],
+        ["\u30C0\u30D6\u30EB\u7ACB\u76F4", "Double Riichi", "\u30C0\u30D6\u30EB\u7ACB\u76F4"],
+        ["\u4E00\u767A", "Ippatsu", "\u4E00\u767A"],
+        ["\u5E73\u548C", "Pinfu", "\u5E73\u548C"],
+        ["\u65AD\u5E7A\u4E5D", "Tanyao", "\u65AD\u5E7A\u4E5D"],
+        ["\u5F79\u724C", "Yakuhai", "\u5F79\u724C"],
+        ["\u4E00\u76C3\u53E3", "Iipeikou", "\u4E00\u76C3\u53E3"],
+        ["\u4E8C\u76C3\u53E3", "Ryanpeikou", "\u4E8C\u76C3\u53E3"],
+        ["\u4E03\u5BFE\u5B50", "Chiitoitsu", "\u4E03\u5BFE\u5B50"],
+        ["\u5BFE\u3005\u548C", "Toitoi", "\u5BFE\u3005\u548C"],
+        ["\u4E09\u6697\u523B", "Sanankou", "\u4E09\u6697\u523B"],
+        ["\u4E09\u69D3\u5B50", "Sankantsu", "\u4E09\u69D3\u5B50"],
+        ["\u4E09\u8272\u540C\u9806", "Sanshoku Doujun", "\u4E09\u8272\u540C\u9806"],
+        ["\u4E09\u8272\u540C\u523B", "Sanshoku Doukou", "\u4E09\u8272\u540C\u523B"],
+        ["\u4E00\u6C17\u901A\u8CAB", "Ittsu", "\u4E00\u6C17\u901A\u8CAB"],
+        ["\u6DF7\u5168\u5E2F\u5E7A\u4E5D", "Chanta", "\u6DF7\u5168\u5E2F\u5E7A\u4E5D"],
+        ["\u7D14\u5168\u5E2F\u5E7A\u4E5D", "Junchan", "\u7D14\u5168\u5E2F\u5E7A\u4E5D"],
+        ["\u6DF7\u8001\u982D", "Honroutou", "\u6DF7\u8001\u982D"],
+        ["\u5C0F\u4E09\u5143", "Shousangen", "\u5C0F\u4E09\u5143"],
+        ["\u6DF7\u4E00\u8272", "Honitsu", "\u6DF7\u4E00\u8272"],
+        ["\u6E05\u4E00\u8272", "Chinitsu", "\u6E05\u4E00\u8272"],
+        ["\u5DBA\u4E0A\u958B\u82B1", "Rinshan Kaihou", "\u5DBA\u4E0A\u958B\u82B1"],
+        ["\u69CD\u69D3", "Chankan", "\u69CD\u69D3"],
+        ["\u6D77\u5E95\u6478\u6708", "Haitei", "\u6D77\u5E95\u6478\u6708"],
+        ["\u6CB3\u5E95\u6488\u9B5A", "Houtei", "\u6CB3\u5E95\u6488\u9B5A"],
+        ["\u56FD\u58EB\u7121\u53CC", "Kokushi Musou", "\u56FD\u58EB\u7121\u53CC"],
+        ["\u56DB\u6697\u523B", "Suuankou", "\u56DB\u6697\u523B"],
+        ["\u5927\u4E09\u5143", "Daisangen", "\u5927\u4E09\u5143"],
+        ["\u5B57\u4E00\u8272", "Tsuuiisou", "\u5B57\u4E00\u8272"],
+        ["\u7DD1\u4E00\u8272", "Ryuuiisou", "\u7DD1\u4E00\u8272"],
+        ["\u6E05\u8001\u982D", "Chinroutou", "\u6E05\u8001\u982D"],
+        ["\u5C0F\u56DB\u559C", "Shousuushii", "\u5C0F\u56DB\u559C"],
+        ["\u5927\u56DB\u559C", "Daisuushii", "\u5927\u56DB\u559C"],
+        ["\u56DB\u69D3\u5B50", "Suukantsu", "\u56DB\u69D3\u5B50"],
+        ["\u4E5D\u84EE\u5B9D\u71C8", "Chuuren Poutou", "\u4E5D\u84EE\u5B9D\u71C8"],
+        ["\u5929\u548C", "Tenhou", "\u5929\u548C"],
+        ["\u5730\u548C", "Chiihou", "\u5730\u548C"],
+        ["\u88CF\u30C9\u30E9", "Ura Dora", "\u88CF\u30C9\u30E9"],
+        ["\u8D64\u30C9\u30E9", "Red Dora", "\u8D64\u30C9\u30E9"],
+        ["\u30C9\u30E9", "Dora", "\u30C9\u30E9"],
+        ["\u81EA\u6478", "Tsumo", "\u30C4\u30E2"],
+        ["\u8363\u548C", "Ron", "\u30ED\u30F3"],
+        ["\u653E\u94F3", "dealt in", "\u653E\u9283"],
+        ["\u542C\u724C", "Tenpai", "\u8074\u724C"],
+        ["\u7ACB\u76F4", "Riichi", "\u7ACB\u76F4"],
+        ["\u6697\u6760", "Concealed Kan", "\u6697\u69D3"],
+        ["\u52A0\u6760", "Added Kan", "\u52A0\u69D3"],
+        ["\u5403", "Chi", "\u30C1\u30FC"],
+        ["\u78B0", "Pon", "\u30DD\u30F3"],
+        ["\u6760", "Kan", "\u30AB\u30F3"],
+        ["\u6253\u51FA", "Discard", "\u6253\u724C"],
+        ["\u5207\u51FA", "discards", "\u6253\u724C"],
+        ["\u6478\u5165", "drawn", "\u30C4\u30E2\u724C"],
+        ["\u500D\u5F79\u6EE1", "\xD7 Yakuman", "\u500D\u5F79\u6E80"],
+        ["\u70B9\u6570", "Scores", "\u70B9\u6570"],
+        ["\u83DC\u5355 \u2630", "Menu \u2630", "\u30E1\u30CB\u30E5\u30FC \u2630"],
+        ["\u756A", "han", "\u7FFB"],
+        ["\u7B26", "fu", "\u7B26"],
+        ["\u70B9", "pts", "\u70B9"],
+        ["\u679A", "tiles", "\u679A"],
+        ["\u5E84", "Dealer", "\u89AA"],
+        ["\u7B49\u5F85\u53D1\u724C", "Waiting for tiles", "\u914D\u724C\u5F85\u3061"],
+        ["\u9009\u62E9", "Choose ", "\u9078\u629E"],
+        ["\u724C\u7EC4\u5408", " combination", "\u306E\u7D44\u5408\u305B"],
+        ["\u4F7F\u7528 ", "Uses ", "\u4F7F\u7528\uFF1A"],
+        ["\u4E07\u5B50", "Characters", "\u842C\u5B50"],
+        ["\u997C\u5B50", "Circles", "\u7B52\u5B50"],
+        ["\u7D22\u5B50", "Bamboo", "\u7D22\u5B50"],
+        ["\u5B57\u724C", "Honors", "\u5B57\u724C"],
+        ["\u8D64\u4E94", "Red fives", "\u8D645"],
+        ["\u8D64 ", "Red ", "\u8D64 "],
+        [" / \u5207", " / Discard", " / \u6253\u724C"]
+      ];
+      var digits = ["\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D", "\u4E03", "\u516B", "\u4E5D"];
+      for (let suit = 0; suit < 3; suit++) digits.forEach((d, n) => copy.push([d + ["\u842C", "\u7B52", "\u7D22"][suit], `${n + 1} ${["Characters", "Circles", "Bamboo"][suit]}`, `${d}${["\u842C", "\u7B52", "\u7D22"][suit]}`]));
+      copy.push(["\u6771", "East", "\u6771"], ["\u5357", "South", "\u5357"], ["\u897F", "West", "\u897F"], ["\u5317", "North", "\u5317"], ["\u767D", "White", "\u767D"], ["\u767C", "Green", "\u767C"], ["\u4E2D", "Red", "\u4E2D"]);
+      copy.push(["\u5834\u98A8", "Round wind", "\u5834\u98A8"], ["\u81EA\u98A8", "Seat wind", "\u81EA\u98A8"], ["\u7FFB\u724C", "Dragon", "\u5F79\u724C"], ["\u56FD\u58EB\u7121\u53CC\u5341\u4E09\u9762", "Kokushi 13-sided wait", "\u56FD\u58EB\u7121\u53CC\u5341\u4E09\u9762"], ["\u56DB\u6697\u523B\u5358\u9A0E", "Suuankou single wait", "\u56DB\u6697\u523B\u5358\u9A0E"], ["\u7D14\u6B63\u4E5D\u84EE\u5B9D\u71C8", "Pure Chuuren Poutou", "\u7D14\u6B63\u4E5D\u84EE\u5B9D\u71C8"]);
+      var entries = new Map(copy.map((r) => [r[0], r]));
+      var escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      var pattern = new RegExp([...entries.keys()].sort((a, b) => b.length - a.length).map(escape).join("|"), "g");
+      function initLanguage() {
+        let locale = "zh";
+        try {
+          const saved = localStorage.getItem("riichi-language");
+          if (["zh", "en", "ja"].includes(saved)) locale = saved;
+        } catch {
+        }
+        const sources = /* @__PURE__ */ new WeakMap();
+        function translate(text) {
+          if (locale === "zh") return text;
+          return text.replace(/([东南西北]) (\d+) 局/g, (_, w, n) => locale === "en" ? `${{ \u4E1C: "East", \u5357: "South", \u897F: "West", \u5317: "North" }[w]} ${n}` : `${w === "\u4E1C" ? "\u6771" : w}${n}\u5C40`).replace(pattern, (key) => entries.get(key)[locale === "en" ? 1 : 2]);
+        }
+        function set(node, key, value, write) {
+          let map = sources.get(node);
+          if (!map) {
+            map = /* @__PURE__ */ new Map();
+            sources.set(node, map);
+          }
+          let saved = map.get(key);
+          if (!saved || value !== saved.last) saved = { source: value, last: value };
+          const next = translate(saved.source);
+          saved.last = next;
+          map.set(key, saved);
+          if (next !== value) write(next);
+        }
+        function walk(root) {
+          if (root.nodeType === 3) {
+            if (root.parentElement?.closest("script,style,#language-select")) return;
+            set(root, "text", root.nodeValue, (v) => root.nodeValue = v);
+            return;
+          }
+          if (root.nodeType !== 1) return;
+          if (root.matches("script,style,#language-select")) return;
+          for (const key of ["title", "aria-label", "alt"]) if (root.hasAttribute(key)) set(root, key, root.getAttribute(key), (v) => root.setAttribute(key, v));
+          for (const child of root.childNodes) walk(child);
+        }
+        const select = document.getElementById("language-select");
+        function apply() {
+          document.documentElement.lang = { zh: "zh-CN", en: "en", ja: "ja" }[locale];
+          select.value = locale;
+          walk(document.body);
+        }
+        select.addEventListener("change", () => {
+          locale = select.value;
+          try {
+            localStorage.setItem("riichi-language", locale);
+          } catch {
+          }
+          apply();
+        });
+        new MutationObserver((changes) => {
+          for (const m of changes) {
+            if (m.type === "childList") for (const n of m.addedNodes) walk(n);
+            else walk(m.target);
+          }
+        }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["title", "aria-label", "alt"] });
+        apply();
+      }
+      module.exports = { initLanguage };
+    }
+  });
+
   // src/game.js
   var require_game2 = __commonJS({
     "src/game.js"() {
@@ -2786,7 +3041,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=0502d7285c22");
+          this.worker = new Worker("ai-worker.js?v=ed1f53488622");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3384,6 +3639,7 @@
       }, get human() {
         return human;
       }, newGame, submit, render, tile, publicTable, Majiang, RULE, showVictory, showResult, playCallEffect };
+      require_i18n().initLanguage();
       newGame();
     }
   });
