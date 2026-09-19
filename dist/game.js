@@ -2714,10 +2714,25 @@
     }
   });
 
+  // src/ui-icons.js
+  var require_ui_icons = __commonJS({
+    "src/ui-icons.js"(exports, module) {
+      "use strict";
+      var paths = { play: '<path d="m9 5 11 7-11 7Z"/>', settings: '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/>', history: '<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2"/>', check: '<path d="m6 12 4 4 8-9"/>', close: '<path d="m6 6 12 12M6 18 18 6"/>' };
+      function icon(name) {
+        const template = document.createElement("template");
+        template.innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + paths[name] + "</svg>";
+        return template.content.firstChild;
+      }
+      module.exports = { icon };
+    }
+  });
+
   // src/preferences.js
   var require_preferences = __commonJS({
     "src/preferences.js"(exports, module) {
       "use strict";
+      var { icon } = require_ui_icons();
       var SETTINGS = "riichi-settings-v1";
       var HISTORY = "riichi-history-v1";
       var defaults = { rounds: 1, extension: true, bankruptcy: true, lastDealer: true, sound: false, motion: true };
@@ -2767,7 +2782,8 @@
         };
         function shell(title) {
           panel.replaceChildren();
-          const close = node("button", "\u5173\u95ED \xD7");
+          const close = node("button", "\u5173\u95ED");
+          close.prepend(icon("close"));
           close.className = "preferences-close";
           close.onclick = () => panel.close();
           const h = node("h2", title);
@@ -2793,6 +2809,21 @@
           const form = node("div", "");
           form.className = "preferences-form";
           panel.append(form);
+          if (!setup) {
+            const label = node("label", "Language / \u8BED\u8A00");
+            const select = node("select", "");
+            select.id = "settings-language";
+            select.setAttribute("aria-label", "Language");
+            const original = document.getElementById("language-select");
+            select.append(...[...original.options].map((o) => o.cloneNode(true)));
+            select.value = original.value;
+            select.onchange = () => {
+              original.value = select.value;
+              original.dispatchEvent(new Event("change", { bubbles: true }));
+            };
+            label.append(select);
+            form.append(label);
+          }
           if (setup) {
             const label = node("label", "\u5BF9\u5C40\u957F\u5EA6");
             const select = node("select", "");
@@ -2837,6 +2868,7 @@
             panel.append(node("p", "\u4E1C\u98CE\u6218\u5230\u4E1C\u56DB\uFF0C\u534A\u5E84\u6218\u5230\u5357\u56DB\uFF1B\u5E84\u5BB6\u8FDE\u5E84\u53EF\u80FD\u589E\u52A0\u5C40\u6570\u3002\u4E00\u5C40\u6218\u65E0\u5EF6\u957F\u3002"));
             const play = node("button", "\u786E\u8BA4\u5E76\u53D1\u724C");
             play.id = "confirm-start";
+            play.prepend(icon("play"));
             play.onclick = () => {
               panel.close();
               confirm();
@@ -2871,6 +2903,7 @@
         function button(parent, id, title, handler) {
           const b = node("button", title);
           b.id = id;
+          b.prepend(icon(id.includes("history") ? "history" : "settings"));
           b.onclick = () => {
             document.getElementById("game-menu").hidePopover();
             handler();
@@ -2904,13 +2937,15 @@
   var require_start_screen = __commonJS({
     "src/start-screen.js"(exports, module) {
       "use strict";
+      var { icon } = require_ui_icons();
       var AGENTS = [["\u59AE\u53EF", "nicole", "#ff4d9b"], ["\u6BD4\u5229", "billy", "#ff9a4d"], ["\u96C5", "miyabi", "#7fddff"], ["\u827E\u83B2", "ellen", "#ff4664"]];
       function initStartScreen(start, confirmStart) {
         const screen = document.createElement("dialog");
         screen.id = "start-screen";
         screen.setAttribute("aria-labelledby", "start-title");
-        screen.innerHTML = '<div class="start-glow"></div><img id="start-portrait" alt=""><div class="start-content"><p class="start-eyebrow">NEW ERIDU \xB7 RIICHI CLUB</p><h1 id="start-title">\u65B0\u827E\u5229\u90FD\u724C\u5C40</h1><p class="start-subtitle">\u9009\u62E9\u89D2\u8272\uFF0C\u5165\u5EA7\u5F00\u5C40</p><h2 id="start-name"></h2><div class="agent-picker" role="group" aria-label="\u9009\u62E9\u89D2\u8272"></div><p class="start-rules">\u4E1C\u98CE\u6218 \xB7 \u56DB\u4EBA\u9EBB\u5C06 \xB7 25,000 \u70B9</p><button id="start-play">\u5F00\u59CB\u5BF9\u5C40 <span aria-hidden="true">\u2197</span></button></div>';
+        screen.innerHTML = '<div class="start-glow"></div><img id="start-portrait" alt=""><div class="start-content"><p class="start-eyebrow">NEW ERIDU \xB7 RIICHI CLUB</p><h1 id="start-title">\u65B0\u827E\u5229\u90FD\u724C\u5C40</h1><p class="start-subtitle">\u9009\u62E9\u89D2\u8272\uFF0C\u5165\u5EA7\u5F00\u5C40</p><h2 id="start-name"></h2><div class="agent-picker" role="group" aria-label="\u9009\u62E9\u89D2\u8272"></div><p class="start-rules">\u4E1C\u98CE\u6218 \xB7 \u56DB\u4EBA\u9EBB\u5C06 \xB7 25,000 \u70B9</p><button id="start-play"><span>\u5F00\u59CB\u5BF9\u5C40</span></button></div>';
         document.body.append(screen);
+        screen.querySelector("#start-play").prepend(icon("play"));
         let selected = 0;
         try {
           const saved = Number(localStorage.getItem("riichi-character"));
@@ -2930,6 +2965,9 @@
           const b = document.createElement("button");
           b.className = "agent-option";
           b.innerHTML = '<img src="winners/' + art + '.png" alt=""><span>' + name + "</span>";
+          const badge = icon("check");
+          badge.classList.add("agent-check");
+          b.append(badge);
           b.onclick = () => select(id);
           screen.querySelector(".agent-picker").append(b);
         });
@@ -3362,7 +3400,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=a4b9b57fe913");
+          this.worker = new Worker("ai-worker.js?v=8455a9a9ced4");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
