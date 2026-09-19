@@ -88,4 +88,6 @@ Choose Nicole, Billy, Miyabi or Ellen before starting. The chosen character occu
 
 ### Settings and local match history
 
-Start screen and in-game menu offer ending rules: single hand, East, or East–South; extension below 30,000, bankruptcy, and final dealer finish. Rules are captured at match start; edits apply to the next match. Sound and animation preferences apply immediately and persist. Completed matches save automatically in this browser (latest 20), with final standings and full JSON record export. Unfinished matches are not recorded; storage failures show a message at settlement.
+After Start match, a confirmation dialog offers ending rules: single hand, East, or East–South; extension below 30,000, bankruptcy, and final dealer finish. Confirm and deal starts the match with these rules; closing the dialog returns to character selection. General Settings contains sound and motion controls. Sound and animation preferences apply immediately and persist. Completed matches save automatically in this browser (latest 20), with final standings and full JSON record export. Unfinished matches are not recorded; storage failures show a message at settlement.
+
+Each hand opens with staggered tile dealing from the table center to all four racks. Input waits until dealing finishes. Motion off or reduced-motion skips the animation.

@@ -15,12 +15,13 @@ function initPreferences(download){
  function shell(title){panel.replaceChildren();const close=node('button','关闭 ×');close.className='preferences-close';close.onclick=()=>panel.close();const h=node('h2',title);h.id='preferences-title';panel.append(close,h);if(!panel.open)panel.showModal()}
  function updateSummary(){const el=document.querySelector('.start-rules');if(el)el.textContent=mode(settings)+' · 四人麻将 · 25,000 点'}
  function persist(){try{localStorage.setItem(SETTINGS,JSON.stringify(settings));return true}catch{return false}}
- function openSettings(){shell('设置');panel.append(node('p','结束条件在下一场对局生效。'));const form=node('div','');form.className='preferences-form';panel.append(form);
- const label=node('label','对局长度');const select=node('select','');select.id='setting-rounds';[[0,'一局战'],[1,'东风战'],[2,'半庄战']].forEach(([v,t])=>{const o=node('option',t);o.value=v;select.append(o)});select.value=settings.rounds;label.append(select);form.append(label);
+ function openSettings(confirm){const setup=typeof confirm==='function';shell(setup?'结束条件':'设置');const form=node('div','');form.className='preferences-form';panel.append(form);
+ if(setup){const label=node('label','对局长度');const select=node('select','');select.id='setting-rounds';[[0,'一局战'],[1,'东风战'],[2,'半庄战']].forEach(([v,t])=>{const o=node('option',t);o.value=v;select.append(o)});select.value=settings.rounds;label.append(select);form.append(label);
+select.onchange=()=>{settings.rounds=Number(select.value);persist();updateSummary()};}
  const status=node('p','');status.setAttribute('role','status');
- const save=()=>{status.textContent=persist()?'已保存':'无法保存到本机，本次设置仍然有效。';updateSummary()};select.onchange=()=>{settings.rounds=Number(select.value);save()};
- for(const [key,title] of [['extension','未满 30,000 点时延长'],['bankruptcy','负分时结束'],['lastDealer','末局庄家第一名可结束'],['sound','声音'],['motion','动作特效']]){const l=node('label',title),input=document.createElement('input');input.type='checkbox';input.id='setting-'+key;input.checked=settings[key];l.append(input);form.append(l);input.onchange=()=>{settings[key]=input.checked;if(key==='sound'||key==='motion'){const b=document.getElementById(key);if(b.getAttribute('aria-pressed')!==String(input.checked))b.click()}save()}}
- panel.append(node('p','东风战到东四，半庄战到南四；庄家连庄可能增加局数。一局战无延长。'),status);
+ const save=()=>{status.textContent=persist()?'已保存':'无法保存到本机，本次设置仍然有效。';updateSummary()};
+ for(const [key,title] of (setup?[['extension','未满 30,000 点时延长'],['bankruptcy','负分时结束'],['lastDealer','末局庄家第一名可结束']]:[['sound','声音'],['motion','动作特效']])){const l=node('label',title),input=document.createElement('input');input.type='checkbox';input.id='setting-'+key;input.checked=settings[key];l.append(input);form.append(l);input.onchange=()=>{settings[key]=input.checked;if(key==='sound'||key==='motion'){const b=document.getElementById(key);if(b.getAttribute('aria-pressed')!==String(input.checked))b.click()}save()}}
+ if(setup){panel.append(node('p','东风战到东四，半庄战到南四；庄家连庄可能增加局数。一局战无延长。'));const play=node('button','确认并发牌');play.id='confirm-start';play.onclick=()=>{panel.close();confirm()};panel.append(play)}panel.append(status);
  }
  function openHistory(){shell('对局历史');panel.append(node('p','仅保存在当前浏览器，保留最近 20 场已完成对局。'));const rows=history();if(!rows.length){panel.append(node('p','还没有已完成的对局。'));return}
  for(const row of rows){const card=node('article','');card.className='history-card';card.append(node('h3',new Date(row.date).toLocaleString()),node('p',mode(row.rules||defaults)+' · '+row.log.player[0]+' · #'+row.log.rank[0]+' · '+row.log.defen[0].toLocaleString()+' 点'));const details=node('details','');details.append(node('summary','查看排名与牌谱'));row.log.rank.map((rank,id)=>({rank,id})).sort((a,b)=>a.rank-b.rank).forEach(({rank,id})=>details.append(node('p','#'+rank+' '+row.log.player[id]+' · '+row.log.defen[id].toLocaleString()+' 点')));details.append(node('p',(row.log.log?.length||0)+' 局'));const btn=node('button','保存牌谱');btn.onclick=()=>download(row.log);details.append(btn);card.append(details);panel.append(card)}
@@ -29,6 +30,6 @@ function initPreferences(download){
  const lobby=document.createElement('div');lobby.className='start-tools';document.querySelector('.start-content').append(lobby);button(lobby,'start-settings','设置',openSettings);button(lobby,'start-history','对局历史',openHistory);
  const menu=document.querySelector('.menu-buttons');button(menu,'menu-settings','设置',openSettings);button(menu,'menu-history','对局历史',openHistory);
  for(const key of ['sound','motion']){const b=document.getElementById(key);if(b.getAttribute('aria-pressed')!==String(settings[key]))b.click();b.addEventListener('click',()=>{settings[key]=b.getAttribute('aria-pressed')==='true';persist()})}
- updateSummary();return {openSettings,openHistory};
+ updateSummary();return {openSettings,openHistory,confirmStart:openSettings};
 }
 module.exports={getRules,getSettings,saveMatch,initPreferences};

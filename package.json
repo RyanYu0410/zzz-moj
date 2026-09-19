@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node scripts/build.cjs",
     "test": "node check.cjs",
-    "test:browser": "node scripts/visual-check.cjs && node scripts/winner-browser-check.cjs && node scripts/call-options-browser-check.cjs && node scripts/bangboo-browser-check.cjs && node scripts/mobile-layout-check.cjs && node scripts/meld-layout-check.cjs && node scripts/language-browser-check.cjs && node scripts/scene-resources-check.cjs && node scripts/action-art-check.cjs && node scripts/optional-actions-check.cjs && node scripts/start-screen-check.cjs && node scripts/preferences-check.cjs"
+    "test:browser": "node scripts/visual-check.cjs && node scripts/winner-browser-check.cjs && node scripts/call-options-browser-check.cjs && node scripts/bangboo-browser-check.cjs && node scripts/mobile-layout-check.cjs && node scripts/meld-layout-check.cjs && node scripts/language-browser-check.cjs && node scripts/scene-resources-check.cjs && node scripts/action-art-check.cjs && node scripts/optional-actions-check.cjs && node scripts/start-screen-check.cjs && node scripts/preferences-check.cjs && node scripts/deal-check.cjs"
   },
   "repository": {
     "type": "git",

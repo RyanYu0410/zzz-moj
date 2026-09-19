@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch({channel:'chrome',headless:true});
  const page=await browser.newPage();
- await page.goto('http://localhost:8080/');await page.locator('#start-play').click();
+ await page.goto('http://localhost:8080/');await page.locator('#start-play').click();await page.locator('#confirm-start').click();
  await page.locator('#round-toggle img').evaluate(e=>e.decode());
  for(const viewport of [{width:1280,height:960},{width:390,height:844}]){
   await page.setViewportSize(viewport);

@@ -16,10 +16,10 @@ function responseChoices(player,event,rob=false){
  return {type:'response',from:event.l,tile:p,rob,win:!!player.allow_hule(player.shoupai,p,rob),calls:rob?[]:[...(player.get_gang_mianzi(player.shoupai,p)||[]),...(player.get_peng_mianzi(player.shoupai,p)||[]),...(player.get_chi_mianzi(player.shoupai,p)||[])]};
 }
 class HumanPlayer extends Majiang.Player{
- constructor(onDecision){super();this.onDecision=onDecision}
+ constructor(onDecision,onDeal){super();this.onDecision=onDecision;this.onDeal=onDeal}
  decide(options){const cb=this._callback;this.onDecision(options,reply=>cb(reply))}
  action_kaiju(){this._callback()}
- action_qipai(){this._callback()}
+ action_qipai(){if(this.onDeal)this.onDeal(this._callback);else this._callback()}
  action_zimo(event,gangzimo){if(event.l!==this._menfeng)return this._callback();this.decide(turnChoices(this,gangzimo))}
  action_dapai(event){if(event.l===this._menfeng)return this._callback();const options=responseChoices(this,event);if(options.win||options.calls.length)this.decide(options);else this._callback()}
  action_fulou(event){if(event.l!==this._menfeng||meldKind(event.m)==='kan')return this._callback();this.decide({type:'turn',discards:this.get_dapai(this.shoupai)||[],riichi:[],kan:[],win:false,abort:false})}

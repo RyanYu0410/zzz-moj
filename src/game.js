@@ -1,7 +1,7 @@
 'use strict';
 const {Majiang,RULE,CHARACTERS:DEFAULT_CHARACTERS,WINDS,handTiles,tileId,tileFile,meldKind,meldTiles,HumanPlayer,Match}=require('./engine');
 const preferences=require('./preferences');
-let matchId,matchSettings;
+let matchId,matchSettings,preferenceUI;let dealAnimations=[];
 const $=id=>document.getElementById(id);
 const NAMES=['一萬','二萬','三萬','四萬','五萬','六萬','七萬','八萬','九萬','一筒','二筒','三筒','四筒','五筒','六筒','七筒','八筒','九筒','一索','二索','三索','四索','五索','六索','七索','八索','九索','東','南','西','北','白','發','中'];
 const CHARACTERS=DEFAULT_CHARACTERS.slice();
@@ -13,7 +13,7 @@ const later=(fn,ms)=>{const id=setTimeout(fn,ms);effectsTimers.push(id);return i
 function tone(freq=450){if(!sound)return;try{ctx??=new(window.AudioContext||window.webkitAudioContext)();ctx.resume();const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=freq;o.connect(g);g.connect(ctx.destination);g.gain.setValueAtTime(.045,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.13);o.start();o.stop(ctx.currentTime+.14)}catch{}}
 function tile(p,small=false){const id=typeof p==='number'?p:tileId(p),el=document.createElement('span');el.className='tile art-tile png-tile'+(small?' small':'')+(id>=34?' aka':'');el.title=tileName(p);el.setAttribute('aria-label',tileName(p));const img=document.createElement('img');img.src='tiles/'+tileFile(p)+'.png';img.alt='';img.draggable=false;el.appendChild(img);return el}
 function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function clearEffects(){effectsTimers.forEach(clearTimeout);effectsTimers=[];for(const fx of actionEffects)fx.remove();actionEffects=[];document.querySelectorAll('.character-sprite').forEach(p=>p.classList.remove('discarding'));$('cutin').hidden=true;$('call-fx').hidden=true}
+function clearEffects(){dealAnimations.forEach(a=>a.cancel());dealAnimations=[];document.body.classList.remove('dealing');effectsTimers.forEach(clearTimeout);effectsTimers=[];for(const fx of actionEffects)fx.remove();actionEffects=[];document.querySelectorAll('.character-sprite').forEach(p=>p.classList.remove('discarding'));$('cutin').hidden=true;$('call-fx').hidden=true}
 class BotWorker{
  constructor(){this.worker=new Worker('ai-worker.js?v='+__BUILD_VERSION__);this.pending=new Map();this.sequence=0;this.alive=true;this.worker.onmessage=({data})=>{if(!this.alive)return;if(data.error)return failMatch('电脑计算中断，请重新开始对局。');const cb=this.pending.get(data.id);this.pending.delete(data.id);cb?.(data.result)};this.worker.onerror=()=>{if(this.alive)failMatch('电脑载入失败，请刷新页面后重试。')}}
  action(message,callback){const id=++this.sequence;if(callback)this.pending.set(id,callback);this.worker.postMessage({id,message,reply:!!callback})}
@@ -22,7 +22,7 @@ class BotWorker{
 function failMatch(text){match?.dispose();decision=null;reply=null;lastText=text;render();show('<h2>对局已暂停</h2><p>'+text+'</p><button id="restart-error">重新开始</button>');$('restart-error').onclick=newGame}
 function submit(answer){if(!reply)return;const cb=reply;reply=null;decision=null;riichiPick=false;kanPick=false;callFilter=null;selected=-1;if(resultOpen){resultOpen=false;$('modal').close();$('victory').close();$('modal').classList.remove('winner-result')}render();cb(answer)}
 function onDecision(options,callback){skippedActions=false;lastTileTap=0;decision=options;reply=callback;selected=-1;riichiPick=false;kanPick=false;callFilter=null;if(['result','draw','match'].includes(options.type)){if(options.type==='result')showVictory(options);else showResult(options);render();return}render()}
-function newGame(dealer){matchId=crypto.randomUUID();matchSettings=preferences.getSettings();skippedActions=false;lastTileTap=0;$('round-info').hidePopover();match?.dispose();clearEffects();if($('modal').open)$('modal').close();if($('victory').open)$('victory').close();$('modal').classList.remove('winner-result');resultOpen=false;decision=null;reply=null;selected=-1;riichiPick=false;kanPick=false;callFilter=null;lastText='正在发牌…';human=new HumanPlayer(onDecision);match=new Match([human,new BotWorker(),new BotWorker(),new BotWorker()],()=>{},preferences.getRules(RULE),'New Eridu · Riichi Club');match.model.player=CHARACTERS.slice();match.speed=4;match.wait=0;match.view={kaiju:render,redraw:()=>{clearEffects();lastText='新一局开始';render()},update:onEvent,say:()=>{},summary:render};match.kaiju(Number.isInteger(dealer)?dealer:undefined);}
+function newGame(dealer){matchId=crypto.randomUUID();matchSettings=preferences.getSettings();skippedActions=false;lastTileTap=0;$('round-info').hidePopover();match?.dispose();clearEffects();if($('modal').open)$('modal').close();if($('victory').open)$('victory').close();$('modal').classList.remove('winner-result');resultOpen=false;decision=null;reply=null;selected=-1;riichiPick=false;kanPick=false;callFilter=null;lastText='正在发牌…';human=new HumanPlayer(onDecision,done=>match.schedule(()=>{document.body.classList.remove('dealing');done()},dealDuration()));match=new Match([human,new BotWorker(),new BotWorker(),new BotWorker()],()=>{},preferences.getRules(RULE),'New Eridu · Riichi Club');match.model.player=CHARACTERS.slice();match.speed=4;match.wait=0;match.view={kaiju:render,redraw:()=>{clearEffects();lastText='正在发牌…';render();animateDeal()},update:onEvent,say:()=>{},summary:render};match.kaiju(Number.isInteger(dealer)?dealer:undefined);}
 function onEvent(event){render();if(!event)return;const [type,data]=Object.entries(event)[0],id=data.l==null?null:match.model.player_id[data.l];if(type==='dapai'){lastText=CHARACTERS[id]+' 切出 '+tileName(data.p);animateDiscard(id,data.p);if(data.p.includes('*')){lastText=CHARACTERS[id]+' 立直';playWords('立直','RIICHI',id)}}else if(type==='fulou'||type==='gang'){const kind=type==='gang'?'kan':meldKind(data.m);lastText=CHARACTERS[id]+' '+({chi:'吃',pon:'碰',kan:'杠'}[kind]);playCallEffect(kind,id)}else if(type==='zimo'||type==='gangzimo'){lastText=id===0?(type==='gangzimo'?'岭上摸牌 · 请选择出牌':'轮到你出牌'):CHARACTERS[id]+' 正在思考…'}else if(type==='hule'){lastText=CHARACTERS[id]+(data.baojia==null?' 自摸':' 荣和');$('cutin').hidden=true}else if(type==='pingju'){lastText='本局流局'}render()}
 function ownSeat(){return match.model.player_id.indexOf(0)}
 function discardCode(index){const hand=match.model.shoupai[ownSeat()],tiles=handTiles(hand);return tiles[index]+(hand._zimo?.length===2&&index===tiles.length-1?'_':'')}
@@ -111,6 +111,17 @@ $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await docume
 document.addEventListener('fullscreenchange',()=>{$('fullscreen').textContent=document.fullscreenElement?'退出全屏 ↙':'进入全屏 ↗'});
 for(const id of ['rules','new','tile-gallery'])$(id).addEventListener('click',()=>$('game-menu').hidePopover());
 for(const id of ['preview-chi','preview-pon','preview-kan'])$(id).addEventListener('click',()=>$('game-menu').hidePopover());
+function dealDuration(){return document.body.classList.contains('no-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches?0:1700}
+function animateDeal(){
+ if(!dealDuration())return;
+ document.body.classList.add('dealing');
+ const table=document.querySelector('.table-layer').getBoundingClientRect(),cx=table.left+table.width/2,cy=table.top+table.height/2;
+ for(const [seat,selector] of ['#hand button','#backs1 .tile-back','#backs2 .tile-back','#backs3 .tile-back'].entries()){
+  document.querySelectorAll(selector).forEach((el,i)=>{const r=el.getBoundingClientRect(),scale=r.width/(el.offsetWidth||r.width)||1;
+   dealAnimations.push(el.animate([{translate:`${(cx-r.left-r.width/2)/scale}px ${(cy-r.top-r.height/2)/scale}px`,opacity:0,scale:'.45'},{opacity:1,offset:.25},{translate:'0 0',opacity:1,scale:'1'}],{duration:420,delay:Math.floor(i/4)*280+seat*65+(i%4)*35,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}));
+  });
+ }
+}
 function animateDiscard(player,called){
  if(document.body.classList.contains('no-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const target=$('river'+player).lastElementChild;
@@ -142,8 +153,8 @@ if(new URLSearchParams(location.search).has('test'))window.mahjongTest={get matc
 const openStart=require('./start-screen').initStartScreen(agents=>{
  agents.forEach(([name,art,color],id)=>{CHARACTERS[id]=name;WIN_ART[id]=art;WIN_COLORS[id]=color;const sprite=document.querySelector('.person-'+id+' .character-sprite');sprite.className='character-sprite '+art;sprite.style.backgroundImage='url('+art+'-action6.png)';$('score'+id).querySelector('span').textContent=name+(id===0?' / YOU':'');$('preview-character').options[id].textContent=name;$('seat-label'+id).parentElement.style.setProperty('--tag-accent',color);});
  newGame();
-});
+},start=>preferenceUI.confirmStart(start));
 require('./scene-resources').initSceneResources();
-preferences.initPreferences(downloadLog);
+preferenceUI=preferences.initPreferences(downloadLog);
 require('./i18n').initLanguage();
 if(new URLSearchParams(location.search).has('test'))newGame();else openStart();
