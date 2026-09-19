@@ -2712,6 +2712,179 @@
     }
   });
 
+  // src/preferences.js
+  var require_preferences = __commonJS({
+    "src/preferences.js"(exports, module) {
+      "use strict";
+      var SETTINGS = "riichi-settings-v1";
+      var HISTORY = "riichi-history-v1";
+      var defaults = { rounds: 1, extension: true, bankruptcy: true, lastDealer: true, sound: false, motion: true };
+      function read(key, fallback) {
+        try {
+          return JSON.parse(localStorage.getItem(key)) ?? fallback;
+        } catch {
+          return fallback;
+        }
+      }
+      function normalize(value) {
+        const v = value && typeof value === "object" ? value : {};
+        return Object.fromEntries(Object.entries(defaults).map(([k, d]) => [k, k === "rounds" ? [0, 1, 2].includes(v[k]) ? v[k] : d : typeof v[k] === "boolean" ? v[k] : d]));
+      }
+      var settings = normalize(read(SETTINGS, defaults));
+      var mode = (s) => ["\u4E00\u5C40\u6218", "\u4E1C\u98CE\u6218", "\u534A\u5E84\u6218"][s.rounds];
+      function getRules(base) {
+        return { ...base, "\u5834\u6570": settings.rounds, "\u5EF6\u9577\u6226\u65B9\u5F0F": settings.extension ? 1 : 0, "\u30C8\u30D3\u7D42\u4E86\u3042\u308A": settings.bankruptcy, "\u30AA\u30FC\u30E9\u30B9\u6B62\u3081\u3042\u308A": settings.lastDealer };
+      }
+      function getSettings() {
+        return { ...settings };
+      }
+      function history() {
+        const rows = read(HISTORY, []);
+        return Array.isArray(rows) ? rows.filter((r) => r && Array.isArray(r.log?.rank) && Array.isArray(r.log?.defen) && Array.isArray(r.log?.player)).slice(0, 20) : [];
+      }
+      function saveMatch(id, log, rules) {
+        const rows = history();
+        if (rows.some((r) => r.id === id)) return true;
+        rows.unshift({ id, date: (/* @__PURE__ */ new Date()).toISOString(), rules, log: JSON.parse(JSON.stringify(log)) });
+        try {
+          localStorage.setItem(HISTORY, JSON.stringify(rows.slice(0, 20)));
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      function initPreferences(download) {
+        const panel = document.createElement("dialog");
+        panel.id = "preferences-panel";
+        panel.setAttribute("aria-labelledby", "preferences-title");
+        document.body.append(panel);
+        const node = (tag, text) => {
+          const n = document.createElement(tag);
+          n.textContent = text;
+          return n;
+        };
+        function shell(title) {
+          panel.replaceChildren();
+          const close = node("button", "\u5173\u95ED \xD7");
+          close.className = "preferences-close";
+          close.onclick = () => panel.close();
+          const h = node("h2", title);
+          h.id = "preferences-title";
+          panel.append(close, h);
+          if (!panel.open) panel.showModal();
+        }
+        function updateSummary() {
+          const el = document.querySelector(".start-rules");
+          if (el) el.textContent = mode(settings) + " \xB7 \u56DB\u4EBA\u9EBB\u5C06 \xB7 25,000 \u70B9";
+        }
+        function persist() {
+          try {
+            localStorage.setItem(SETTINGS, JSON.stringify(settings));
+            return true;
+          } catch {
+            return false;
+          }
+        }
+        function openSettings() {
+          shell("\u8BBE\u7F6E");
+          panel.append(node("p", "\u7ED3\u675F\u6761\u4EF6\u5728\u4E0B\u4E00\u573A\u5BF9\u5C40\u751F\u6548\u3002"));
+          const form = node("div", "");
+          form.className = "preferences-form";
+          panel.append(form);
+          const label = node("label", "\u5BF9\u5C40\u957F\u5EA6");
+          const select = node("select", "");
+          select.id = "setting-rounds";
+          [[0, "\u4E00\u5C40\u6218"], [1, "\u4E1C\u98CE\u6218"], [2, "\u534A\u5E84\u6218"]].forEach(([v, t]) => {
+            const o = node("option", t);
+            o.value = v;
+            select.append(o);
+          });
+          select.value = settings.rounds;
+          label.append(select);
+          form.append(label);
+          const status = node("p", "");
+          status.setAttribute("role", "status");
+          const save = () => {
+            status.textContent = persist() ? "\u5DF2\u4FDD\u5B58" : "\u65E0\u6CD5\u4FDD\u5B58\u5230\u672C\u673A\uFF0C\u672C\u6B21\u8BBE\u7F6E\u4ECD\u7136\u6709\u6548\u3002";
+            updateSummary();
+          };
+          select.onchange = () => {
+            settings.rounds = Number(select.value);
+            save();
+          };
+          for (const [key, title] of [["extension", "\u672A\u6EE1 30,000 \u70B9\u65F6\u5EF6\u957F"], ["bankruptcy", "\u8D1F\u5206\u65F6\u7ED3\u675F"], ["lastDealer", "\u672B\u5C40\u5E84\u5BB6\u7B2C\u4E00\u540D\u53EF\u7ED3\u675F"], ["sound", "\u58F0\u97F3"], ["motion", "\u52A8\u4F5C\u7279\u6548"]]) {
+            const l = node("label", title), input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = "setting-" + key;
+            input.checked = settings[key];
+            l.append(input);
+            form.append(l);
+            input.onchange = () => {
+              settings[key] = input.checked;
+              if (key === "sound" || key === "motion") {
+                const b = document.getElementById(key);
+                if (b.getAttribute("aria-pressed") !== String(input.checked)) b.click();
+              }
+              save();
+            };
+          }
+          panel.append(node("p", "\u4E1C\u98CE\u6218\u5230\u4E1C\u56DB\uFF0C\u534A\u5E84\u6218\u5230\u5357\u56DB\uFF1B\u5E84\u5BB6\u8FDE\u5E84\u53EF\u80FD\u589E\u52A0\u5C40\u6570\u3002\u4E00\u5C40\u6218\u65E0\u5EF6\u957F\u3002"), status);
+        }
+        function openHistory() {
+          shell("\u5BF9\u5C40\u5386\u53F2");
+          panel.append(node("p", "\u4EC5\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\uFF0C\u4FDD\u7559\u6700\u8FD1 20 \u573A\u5DF2\u5B8C\u6210\u5BF9\u5C40\u3002"));
+          const rows = history();
+          if (!rows.length) {
+            panel.append(node("p", "\u8FD8\u6CA1\u6709\u5DF2\u5B8C\u6210\u7684\u5BF9\u5C40\u3002"));
+            return;
+          }
+          for (const row of rows) {
+            const card = node("article", "");
+            card.className = "history-card";
+            card.append(node("h3", new Date(row.date).toLocaleString()), node("p", mode(row.rules || defaults) + " \xB7 " + row.log.player[0] + " \xB7 #" + row.log.rank[0] + " \xB7 " + row.log.defen[0].toLocaleString() + " \u70B9"));
+            const details = node("details", "");
+            details.append(node("summary", "\u67E5\u770B\u6392\u540D\u4E0E\u724C\u8C31"));
+            row.log.rank.map((rank, id) => ({ rank, id })).sort((a, b) => a.rank - b.rank).forEach(({ rank, id }) => details.append(node("p", "#" + rank + " " + row.log.player[id] + " \xB7 " + row.log.defen[id].toLocaleString() + " \u70B9")));
+            details.append(node("p", (row.log.log?.length || 0) + " \u5C40"));
+            const btn = node("button", "\u4FDD\u5B58\u724C\u8C31");
+            btn.onclick = () => download(row.log);
+            details.append(btn);
+            card.append(details);
+            panel.append(card);
+          }
+        }
+        function button(parent, id, title, handler) {
+          const b = node("button", title);
+          b.id = id;
+          b.onclick = () => {
+            document.getElementById("game-menu").hidePopover();
+            handler();
+          };
+          parent.append(b);
+        }
+        const lobby = document.createElement("div");
+        lobby.className = "start-tools";
+        document.querySelector(".start-content").append(lobby);
+        button(lobby, "start-settings", "\u8BBE\u7F6E", openSettings);
+        button(lobby, "start-history", "\u5BF9\u5C40\u5386\u53F2", openHistory);
+        const menu = document.querySelector(".menu-buttons");
+        button(menu, "menu-settings", "\u8BBE\u7F6E", openSettings);
+        button(menu, "menu-history", "\u5BF9\u5C40\u5386\u53F2", openHistory);
+        for (const key of ["sound", "motion"]) {
+          const b = document.getElementById(key);
+          if (b.getAttribute("aria-pressed") !== String(settings[key])) b.click();
+          b.addEventListener("click", () => {
+            settings[key] = b.getAttribute("aria-pressed") === "true";
+            persist();
+          });
+        }
+        updateSummary();
+        return { openSettings, openHistory };
+      }
+      module.exports = { getRules, getSettings, saveMatch, initPreferences };
+    }
+  });
+
   // src/start-screen.js
   var require_start_screen = __commonJS({
     "src/start-screen.js"(exports, module) {
@@ -3021,6 +3194,7 @@
       copy.push(["\u7ACB\u76F4\u68D2", "Riichi deposit stick", "\u30EA\u30FC\u30C1\u68D2"]);
       copy.push(["\u8DF3\u8FC7", "Pass", "\u898B\u9001\u308A"], ["\u53CC\u51FB\u624B\u724C\u6253\u51FA", "Double-tap a tile to discard", "\u724C\u3092\u30C0\u30D6\u30EB\u30BF\u30C3\u30D7\u3057\u3066\u6253\u724C"]);
       copy.push(["\u65B0\u827E\u5229\u90FD\u724C\u5C40", "New Eridu Riichi", "\u65B0\u30A8\u30EA\u30FC\u90FD\u306E\u9EBB\u96C0"], ["\u9009\u62E9\u89D2\u8272\uFF0C\u5165\u5EA7\u5F00\u5C40", "Choose your character. Take your seat.", "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u3092\u9078\u3093\u3067\u5BFE\u5C40\u3078"], ["\u9009\u62E9\u89D2\u8272", "Choose a character", "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u9078\u629E"], ["\u5F00\u59CB\u5BF9\u5C40", "Start match", "\u5BFE\u5C40\u958B\u59CB"], ["\u4E1C\u98CE\u6218 \xB7 \u56DB\u4EBA\u9EBB\u5C06 \xB7 25,000 \u70B9", "East match \xB7 Four players \xB7 25,000 points", "\u6771\u98A8\u6226 \xB7 \u56DB\u4EBA\u9EBB\u96C0 \xB7 25,000\u70B9"]);
+      copy.push(["\u4E1C\u98CE\u6218", "East match", "\u6771\u98A8\u6226"], ["\u8BBE\u7F6E", "Settings", "\u8A2D\u5B9A"], ["\u5BF9\u5C40\u5386\u53F2", "Match history", "\u5BFE\u5C40\u5C65\u6B74"], ["\u7ED3\u675F\u6761\u4EF6\u5728\u4E0B\u4E00\u573A\u5BF9\u5C40\u751F\u6548\u3002", "Ending rules apply to the next match.", "\u7D42\u4E86\u6761\u4EF6\u306F\u6B21\u306E\u5BFE\u5C40\u304B\u3089\u9069\u7528\u3055\u308C\u307E\u3059\u3002"], ["\u5BF9\u5C40\u957F\u5EA6", "Match length", "\u5BFE\u5C40\u5F62\u5F0F"], ["\u4E00\u5C40\u6218", "Single hand", "\u4E00\u5C40\u6226"], ["\u534A\u5E84\u6218", "East\u2013South match", "\u534A\u8358\u6226"], ["\u672A\u6EE1 30,000 \u70B9\u65F6\u5EF6\u957F", "Extend below 30,000 points", "30,000\u70B9\u672A\u6E80\u306A\u3089\u5EF6\u9577"], ["\u8D1F\u5206\u65F6\u7ED3\u675F", "End on negative points", "\u6301\u3061\u70B9\u304C\u30DE\u30A4\u30CA\u30B9\u3067\u7D42\u4E86"], ["\u672B\u5C40\u5E84\u5BB6\u7B2C\u4E00\u540D\u53EF\u7ED3\u675F", "Final dealer may finish in first place", "\u6700\u7D42\u5C40\u306E\u89AA\u304C\u9996\u4F4D\u306A\u3089\u7D42\u4E86"], ["\u5DF2\u4FDD\u5B58", "Saved", "\u4FDD\u5B58\u6E08\u307F"], ["\u65E0\u6CD5\u4FDD\u5B58\u5230\u672C\u673A\uFF0C\u672C\u6B21\u8BBE\u7F6E\u4ECD\u7136\u6709\u6548\u3002", "Cannot save locally; settings still apply this session.", "\u4FDD\u5B58\u3067\u304D\u307E\u305B\u3093\u3002\u3053\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3067\u306F\u6709\u52B9\u3067\u3059\u3002"], ["\u4E1C\u98CE\u6218\u5230\u4E1C\u56DB\uFF0C\u534A\u5E84\u6218\u5230\u5357\u56DB\uFF1B\u5E84\u5BB6\u8FDE\u5E84\u53EF\u80FD\u589E\u52A0\u5C40\u6570\u3002\u4E00\u5C40\u6218\u65E0\u5EF6\u957F\u3002", "East ends at East 4; East\u2013South ends at South 4. Dealer repeats may add hands. Single-hand mode has no extension.", "\u6771\u98A8\u6226\u306F\u67714\u5C40\u3001\u534A\u8358\u6226\u306F\u53574\u5C40\u307E\u3067\u3002\u9023\u8358\u3067\u5C40\u6570\u304C\u5897\u3048\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002\u4E00\u5C40\u6226\u306B\u5EF6\u9577\u306F\u3042\u308A\u307E\u305B\u3093\u3002"], ["\u4EC5\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\uFF0C\u4FDD\u7559\u6700\u8FD1 20 \u573A\u5DF2\u5B8C\u6210\u5BF9\u5C40\u3002", "Stored in this browser only: the last 20 completed matches.", "\u3053\u306E\u30D6\u30E9\u30A6\u30B6\u30FC\u306B\u76F4\u8FD120\u6226\u306E\u7D42\u4E86\u3057\u305F\u5BFE\u5C40\u3092\u4FDD\u5B58\u3057\u307E\u3059\u3002"], ["\u8FD8\u6CA1\u6709\u5DF2\u5B8C\u6210\u7684\u5BF9\u5C40\u3002", "No completed matches yet.", "\u7D42\u4E86\u3057\u305F\u5BFE\u5C40\u306F\u307E\u3060\u3042\u308A\u307E\u305B\u3093\u3002"], ["\u67E5\u770B\u6392\u540D\u4E0E\u724C\u8C31", "View standings and record", "\u9806\u4F4D\u3068\u724C\u8B5C\u3092\u898B\u308B"], ["\u5BF9\u5C40\u7ED3\u675F", "Match complete", "\u5BFE\u5C40\u7D42\u4E86"], ["\u5DF2\u4FDD\u5B58\u5230\u5BF9\u5C40\u5386\u53F2", "Saved to match history", "\u5BFE\u5C40\u5C65\u6B74\u306B\u4FDD\u5B58\u3057\u307E\u3057\u305F"], ["\u5386\u53F2\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u4E0B\u8F7D\u724C\u8C31\u3002", "History could not be saved. Please download the record.", "\u5C65\u6B74\u3092\u4FDD\u5B58\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u724C\u8B5C\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3057\u3066\u304F\u3060\u3055\u3044\u3002"], ["\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u7ED3\u675F\u6761\u4EF6\u4F7F\u7528\u5F00\u5C40\u65F6\u9009\u5B9A\u7684\u8BBE\u7F6E\u3002", "Each player starts with 25,000 points. The dealer is random and repeats after winning or tenpai. Ending rules follow the settings selected at the start.", "25,000\u70B9\u6301\u3061\u3001\u8D77\u5BB6\u306F\u30E9\u30F3\u30C0\u30E0\u3002\u89AA\u306E\u548C\u4E86\u30FB\u8074\u724C\u3067\u9023\u8358\u3002\u7D42\u4E86\u6761\u4EF6\u306F\u958B\u59CB\u6642\u306E\u8A2D\u5B9A\u306B\u5F93\u3044\u307E\u3059\u3002"]);
       var entries = new Map(copy.map((r) => [r[0], r]));
       var escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       var pattern = new RegExp([...entries.keys()].sort((a, b) => b.length - a.length).map(escape).join("|"), "g");
@@ -3090,6 +3264,9 @@
   var require_game2 = __commonJS({
     "src/game.js"() {
       var { Majiang, RULE, CHARACTERS: DEFAULT_CHARACTERS, WINDS, handTiles, tileId, tileFile, meldKind, meldTiles, HumanPlayer, Match } = require_engine();
+      var preferences = require_preferences();
+      var matchId;
+      var matchSettings;
       var $ = (id) => document.getElementById(id);
       var NAMES = ["\u4E00\u842C", "\u4E8C\u842C", "\u4E09\u842C", "\u56DB\u842C", "\u4E94\u842C", "\u516D\u842C", "\u4E03\u842C", "\u516B\u842C", "\u4E5D\u842C", "\u4E00\u7B52", "\u4E8C\u7B52", "\u4E09\u7B52", "\u56DB\u7B52", "\u4E94\u7B52", "\u516D\u7B52", "\u4E03\u7B52", "\u516B\u7B52", "\u4E5D\u7B52", "\u4E00\u7D22", "\u4E8C\u7D22", "\u4E09\u7D22", "\u56DB\u7D22", "\u4E94\u7D22", "\u516D\u7D22", "\u4E03\u7D22", "\u516B\u7D22", "\u4E5D\u7D22", "\u6771", "\u5357", "\u897F", "\u5317", "\u767D", "\u767C", "\u4E2D"];
       var CHARACTERS = DEFAULT_CHARACTERS.slice();
@@ -3163,7 +3340,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=6d6d5b79c990");
+          this.worker = new Worker("ai-worker.js?v=b7ad6258a518");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3234,6 +3411,8 @@
         render();
       }
       function newGame(dealer) {
+        matchId = crypto.randomUUID();
+        matchSettings = preferences.getSettings();
         skippedActions = false;
         lastTileTap = 0;
         $("round-info").hidePopover();
@@ -3252,7 +3431,7 @@
         lastText = "\u6B63\u5728\u53D1\u724C\u2026";
         human = new HumanPlayer(onDecision);
         match = new Match([human, new BotWorker(), new BotWorker(), new BotWorker()], () => {
-        }, RULE, "Nicole \u2022 Riichi Club \xB7 \u4E1C\u98CE\u6218");
+        }, preferences.getRules(RULE), "New Eridu \xB7 Riichi Club");
         match.model.player = CHARACTERS.slice();
         match.speed = 4;
         match.wait = 0;
@@ -3542,7 +3721,8 @@
         $("modal").classList.remove("winner-result");
         const result = options.result, model = match.model;
         if (options.type === "match") {
-          show('<h2>\u4E1C\u98CE\u6218 \xB7 \u7EC8\u5C40</h2><div class="settlement">' + result.rank.map((rank, id) => ({ rank, id })).sort((a, b) => a.rank - b.rank).map(({ rank, id }) => "<p><b>#" + rank + " " + CHARACTERS[id] + "</b><span>" + result.defen[id].toLocaleString() + " \u70B9</span></p>").join("") + '</div><button id="next" class="primary">\u518D\u5F00\u4E00\u573A</button><button id="download-log">\u4FDD\u5B58\u724C\u8C31</button>');
+          const saved = preferences.saveMatch(matchId, result, matchSettings);
+          show("<h2>\u5BF9\u5C40\u7ED3\u675F</h2><p>" + (saved ? "\u5DF2\u4FDD\u5B58\u5230\u5BF9\u5C40\u5386\u53F2" : "\u5386\u53F2\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u4E0B\u8F7D\u724C\u8C31\u3002") + '</p><div class="settlement">' + result.rank.map((rank, id) => ({ rank, id })).sort((a, b) => a.rank - b.rank).map(({ rank, id }) => "<p><b>#" + rank + " " + CHARACTERS[id] + "</b><span>" + result.defen[id].toLocaleString() + " \u70B9</span></p>").join("") + '</div><button id="next" class="primary">\u518D\u5F00\u4E00\u573A</button><button id="download-log">\u4FDD\u5B58\u724C\u8C31</button>');
           $("next").onclick = newGame;
           $("download-log").onclick = () => downloadLog(result);
           return;
@@ -3672,9 +3852,9 @@
       $("preview-pon").onclick = () => playCallEffect("pon", Number($("preview-character").value), true);
       $("preview-kan").onclick = () => playCallEffect("kan", Number($("preview-character").value), true);
       $("tile-gallery").onclick = showGallery;
-      $("rules").onclick = () => show('<h2>\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06 \xB7 \u4E1C\u98CE\u6218</h2><p>\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u6309\u4E1C\u4E00\u81F3\u4E1C\u56DB\u63A8\u8FDB\uFF1B\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u65E0\u4EBA\u8FBE\u5230 30,000 \u70B9\u65F6\u8FDB\u5165\u5357\u5165\u5EF6\u957F\uFF1B\u98DE\u4EBA\u7ED3\u675F\u3002</p><ul><li>\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002</li><li>\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002</li><li>\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002</li><li>\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002</li><li>\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002</li><li>\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002</li></ul><p>\u4F7F\u7528 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> \u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002</p>');
+      $("rules").onclick = () => show('<h2>\u56DB\u4EBA\u7ACB\u76F4\u9EBB\u5C06</h2><p>\u56DB\u4EBA\u5404 25,000 \u70B9\u3002\u5E84\u5BB6\u968F\u673A\uFF0C\u5E84\u5BB6\u548C\u724C\u6216\u542C\u724C\u8FDE\u5E84\u3002\u7ED3\u675F\u6761\u4EF6\u4F7F\u7528\u5F00\u5C40\u65F6\u9009\u5B9A\u7684\u8BBE\u7F6E\u3002</p><ul><li>\u5403\u4EC5\u9650\u4E0A\u5BB6\uFF1B\u78B0\u3001\u660E\u6760\u53EF\u63A5\u4EFB\u610F\u5BF9\u624B\u3002\u8363\u548C\u4F18\u5148\u4E8E\u78B0\u6760\uFF0C\u78B0\u6760\u4F18\u5148\u4E8E\u5403\u3002\u7981\u6B62\u98DF\u66FF\u3002</li><li>\u6697\u6760\u3001\u52A0\u6760\u3001\u660E\u6760\u540E\u6478\u5CAD\u4E0A\u724C\u5E76\u7FFB\u6760\u5B9D\u724C\u3002\u52A0\u6760\u53EF\u88AB\u62A2\u6760\uFF0C\u56DB\u6760\u6563\u4E86\u9664\u5355\u4EBA\u56DB\u6760\u3002</li><li>\u548C\u724C\u5FC5\u987B\u6709\u5F79\u3002\u652F\u6301\u81EA\u6478\u3001\u8363\u548C\u3001\u632F\u542C\u3001\u540C\u5DE1\u632F\u542C\u3001\u7ACB\u76F4\u632F\u542C\uFF0C\u4EE5\u53CA\u6807\u51C6\u5F79\u79CD\u4E0E\u7B26\u756A\u8BA1\u5206\u3002</li><li>\u95E8\u524D\u542C\u724C\u53EF\u4ED8 1,000 \u70B9\u7ACB\u76F4\u3002\u652F\u6301\u4E00\u53D1\u3001\u53CC\u7ACB\u76F4\u3001\u8D64\u5B9D\u724C\u3001\u91CC\u5B9D\u724C\u3001\u6760\u5B9D\u724C\uFF1B\u7ACB\u76F4\u540E\u4EC5\u5141\u8BB8\u4E0D\u6539\u53D8\u542C\u724C\u7684\u6697\u6760\u3002</li><li>\u53CC\u54CD\u6709\u6548\uFF0C\u4E09\u5BB6\u548C\u6D41\u5C40\u3002\u6D41\u5C40\u542C\u724C\u7F5A\u7B26 3,000 \u70B9\uFF0C\u4F9B\u6258\u4E0E\u672C\u573A\u6309\u89C4\u5219\u5EF6\u7EED\u3002</li><li>\u89D2\u8272\u4F4D\u7F6E\u4FDD\u6301\u4E0D\u53D8\uFF1B\u4E1C\u5357\u897F\u5317\u8EAB\u4EFD\u968F\u5E84\u5BB6\u8F6E\u6362\u3002\u7ED3\u7B97\u9700\u786E\u8BA4\u540E\u8FDB\u5165\u4E0B\u4E00\u5C40\u3002</li></ul><p>\u4F7F\u7528 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> \u89C4\u5219\u5F15\u64CE\u4E0E majiang-ai \u7535\u8111\uFF1BMIT \u6388\u6743\u3002\u975E\u5B98\u65B9\u540C\u4EBA\u4F5C\u54C1\u3002</p>');
       document.addEventListener("keydown", (e) => {
-        if ($("modal").open || $("victory").open || document.querySelector("[popover]:popover-open")) return;
+        if ($("modal").open || $("victory").open || document.querySelector("[popover]:popover-open, #preferences-panel[open]")) return;
         if (decision?.type === "response") {
           if (e.key === "Escape") submit({});
           return;
@@ -3832,6 +4012,7 @@
         newGame();
       });
       require_scene_resources().initSceneResources();
+      preferences.initPreferences(downloadLog);
       require_i18n().initLanguage();
       if (new URLSearchParams(location.search).has("test")) newGame();
       else openStart();

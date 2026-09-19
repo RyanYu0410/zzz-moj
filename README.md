@@ -85,3 +85,7 @@ Menu → Scene styles offers independent floor and table choices for Nicole, Bil
 ### Start screen and playable characters
 
 Choose Nicole, Billy, Miyabi or Ellen before starting. The chosen character occupies your bottom seat, with matching idle/discard sprites, call illustrations, riichi cut-in, scores and victory art. The other three characters become AI opponents. Your choice is remembered locally; Menu → New match returns to character selection after confirming the reset. Existing winner portraits are reused for the lobby.
+
+### Settings and local match history
+
+Start screen and in-game menu offer ending rules: single hand, East, or East–South; extension below 30,000, bankruptcy, and final dealer finish. Rules are captured at match start; edits apply to the next match. Sound and animation preferences apply immediately and persist. Completed matches save automatically in this browser (latest 20), with final standings and full JSON record export. Unfinished matches are not recorded; storage failures show a message at settlement.
