@@ -2965,6 +2965,8 @@
       copy.push(["\u6771", "East", "\u6771"], ["\u5357", "South", "\u5357"], ["\u897F", "West", "\u897F"], ["\u5317", "North", "\u5317"], ["\u767D", "White", "\u767D"], ["\u767C", "Green", "\u767C"], ["\u4E2D", "Red", "\u4E2D"]);
       copy.push(["\u5834\u98A8", "Round wind", "\u5834\u98A8"], ["\u81EA\u98A8", "Seat wind", "\u81EA\u98A8"], ["\u7FFB\u724C", "Dragon", "\u5F79\u724C"], ["\u56FD\u58EB\u7121\u53CC\u5341\u4E09\u9762", "Kokushi 13-sided wait", "\u56FD\u58EB\u7121\u53CC\u5341\u4E09\u9762"], ["\u56DB\u6697\u523B\u5358\u9A0E", "Suuankou single wait", "\u56DB\u6697\u523B\u5358\u9A0E"], ["\u7D14\u6B63\u4E5D\u84EE\u5B9D\u71C8", "Pure Chuuren Poutou", "\u7D14\u6B63\u4E5D\u84EE\u5B9D\u71C8"]);
       copy.push(["\u573A\u666F\u7D20\u6750", "Scene styles", "\u30B7\u30FC\u30F3\u7D20\u6750"], ["\u5730\u9762", "Floor", "\u5E8A"], ["\u724C\u684C", "Table", "\u5353"], ["\u9713\u8679\u8857\u533A", "Neon streets", "\u30CD\u30AA\u30F3\u8857"], ["\u8D64\u8272\u5DE5\u574A", "Crimson workshop", "\u8D64\u306E\u5DE5\u623F"], ["\u971C\u6708\u9053\u573A", "Frostmoon dojo", "\u971C\u6708\u9053\u5834"], ["\u6DF1\u6D77\u4F1A\u9986", "Deep sea lounge", "\u6DF1\u6D77\u30E9\u30A6\u30F3\u30B8"], ["\u7D20\u6750\u8F7D\u5165\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u3002", "Could not load the artwork. Please try again.", "\u7D20\u6750\u3092\u8AAD\u307F\u8FBC\u3081\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u518D\u5EA6\u304A\u8A66\u3057\u304F\u3060\u3055\u3044\u3002"]);
+      copy.push(["\u7ACB\u76F4\u68D2", "Riichi deposit stick", "\u30EA\u30FC\u30C1\u68D2"]);
+      copy.push(["\u8DF3\u8FC7", "Pass", "\u898B\u9001\u308A"], ["\u53CC\u51FB\u624B\u724C\u6253\u51FA", "Double-tap a tile to discard", "\u724C\u3092\u30C0\u30D6\u30EB\u30BF\u30C3\u30D7\u3057\u3066\u6253\u724C"]);
       var entries = new Map(copy.map((r) => [r[0], r]));
       var escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       var pattern = new RegExp([...entries.keys()].sort((a, b) => b.length - a.length).map(escape).join("|"), "g");
@@ -3050,6 +3052,8 @@
       var riichiPick = false;
       var kanPick = false;
       var callFilter = null;
+      var skippedActions = false;
+      var lastTileTap = 0;
       var lastText = "\u6B63\u5728\u53D1\u724C\u2026";
       var sound = false;
       var ctx;
@@ -3104,7 +3108,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=1990cbdae121");
+          this.worker = new Worker("ai-worker.js?v=5d1993dd82ba");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3158,6 +3162,8 @@
         cb(answer);
       }
       function onDecision(options, callback) {
+        skippedActions = false;
+        lastTileTap = 0;
         decision = options;
         reply = callback;
         selected = -1;
@@ -3173,6 +3179,8 @@
         render();
       }
       function newGame(dealer) {
+        skippedActions = false;
+        lastTileTap = 0;
         $("round-info").hidePopover();
         match?.dispose();
         clearEffects();
@@ -3237,9 +3245,13 @@
         if (decision?.type !== "turn") return;
         const p = discardCode(index), allowed = riichiPick ? decision.riichi : decision.discards;
         if (!allowed.includes(p)) return;
-        if (selected === index) discard();
-        else {
+        const now = performance.now();
+        if (selected === index && now - lastTileTap < 450) {
+          lastTileTap = 0;
+          discard();
+        } else {
           selected = index;
+          lastTileTap = now;
           tone(540);
           render();
         }
@@ -3298,6 +3310,7 @@
           score.querySelector("small").textContent = WINDS[l] + "\u5BB6" + (l === 0 ? " \xB7 \u5E84" : "") + (model.shoupai[l].lizhi ? " \xB7 \u7ACB\u76F4" : "");
           score.querySelector("b").textContent = model.defen[id].toLocaleString();
           score.classList.toggle("active-seat", model.lunban === l);
+          $("riichi-stick" + id).hidden = !model.shoupai[l].lizhi;
           $("seat-label" + id).textContent = CHARACTERS[id] + " \xB7 " + WINDS[l] + "\u5BB6";
           $("board-melds" + id).replaceChildren(...model.shoupai[l]._fulou.map((m) => renderMeld(m)));
           if (id !== 0) {
@@ -3328,18 +3341,23 @@
           b.onclick = () => selectDiscard(i);
           handNode.appendChild(b);
         });
-        $("discard").disabled = decision?.type !== "turn" || selected < 0;
         $("win").disabled = decision?.type !== "turn" || !decision.win;
         $("riichi").disabled = decision?.type !== "turn" || !decision.riichi.length;
-        $("riichi").textContent = hand.lizhi ? "\u5DF2\u7ACB\u76F4" : riichiPick ? "\u53D6\u6D88\u7ACB\u76F4" : "\u7ACB\u76F4";
+        $("riichi").querySelector(".action-caption").textContent = hand.lizhi ? "\u5DF2\u7ACB\u76F4" : riichiPick ? "\u53D6\u6D88\u7ACB\u76F4" : "\u7ACB\u76F4";
         for (const kind of ["chi", "pon", "kan"]) {
           const available = decision?.type === "response" ? decision.calls.some((m) => meldKind(m) === kind) : kind === "kan" && decision?.type === "turn" && decision.kan.length > 0;
-          $(kind).disabled = !available;
+          $(kind).disabled = !available || skippedActions;
+          $(kind).hidden = $(kind).disabled;
           $(kind).setAttribute("aria-expanded", kind === "kan" && decision?.type === "turn" ? kanPick : callFilter === kind);
           $(kind).title = available ? "\u9009\u62E9" + { chi: "\u5403", pon: "\u78B0", kan: "\u6760" }[kind] + "\u724C\u7EC4\u5408" : { chi: "\u4E0A\u5BB6\u5F03\u724C\u53EF\u7EC4\u6210\u987A\u5B50\u65F6\u53EF\u5403", pon: "\u5BF9\u624B\u5F03\u724C\u4E0E\u4F60\u7684\u5BF9\u5B50\u76F8\u540C\u65F6\u53EF\u78B0", kan: "\u6301\u6709\u56DB\u5F20\u540C\u724C\u6216\u53EF\u52A0\u6760\u65F6\u5F00\u653E" }[kind];
         }
-        $("abort").hidden = decision?.type !== "turn" || !decision.abort;
-        $("status").textContent = decision?.type === "response" ? decision.rob ? "\u62A2\u6760\u673A\u4F1A" : "\u53EF\u4EE5\u9E23\u724C\uFF0F\u8363\u548C" : decision?.type === "turn" ? riichiPick ? "\u7ACB\u76F4 \xB7 \u9009\u62E9\u5207\u724C" : hand.lizhi ? "\u5DF2\u7ACB\u76F4 \xB7 \u6478\u5207\uFF0F\u81EA\u6478" : "\u8F6E\u5230\u4F60\u51FA\u724C" : lastText;
+        $("abort").hidden = decision?.type !== "turn" || !decision.abort || skippedActions;
+        $("win").hidden = $("win").disabled || skippedActions;
+        $("riichi").hidden = $("riichi").disabled || skippedActions;
+        $("ron").hidden = decision?.type !== "response" || !decision.win;
+        $("ron").disabled = $("ron").hidden;
+        $("call-pass").hidden = decision?.type === "response" ? false : decision?.type !== "turn" || skippedActions || ![decision.win, decision.riichi.length, decision.kan.length, decision.abort].some(Boolean);
+        $("status").textContent = decision?.type === "response" ? decision.rob ? "\u62A2\u6760\u673A\u4F1A" : "\u53EF\u4EE5\u9E23\u724C\uFF0F\u8363\u548C" : decision?.type === "turn" ? riichiPick ? "\u7ACB\u76F4 \xB7 \u9009\u62E9\u5207\u724C" : hand.lizhi ? "\u5DF2\u7ACB\u76F4 \xB7 \u6478\u5207\uFF0F\u81EA\u6478" : "\u53CC\u51FB\u624B\u724C\u6253\u51FA" : lastText;
         const shanten = Majiang.Util.xiangting(hand);
         $("hint").textContent = decision?.type === "response" ? "\u8363\u548C\u4F18\u5148\uFF1B\u8DF3\u8FC7\u8363\u548C\u4F1A\u8FDB\u5165\u632F\u542C" : riichiPick ? "\u5207\u51FA\u9AD8\u4EAE\u724C\u5E76\u652F\u4ED8 1,000 \u70B9" : hand.lizhi ? "\u7ACB\u76F4\u540E\u53EA\u53EF\u6478\u5207\u3001\u5408\u6CD5\u6697\u6760\u6216\u548C\u724C" : shanten === 0 ? hand._zimo ? "\u53EF\u4FDD\u6301\u542C\u724C \xB7 \u8BF7\u9009\u62E9\u5207\u724C" : "\u542C\u724C \xB7 " + (Majiang.Util.tingpai(hand) || []).map(tileName).join("\u3001") : shanten < 0 ? "\u724C\u5F62\u5B8C\u6210\uFF0C\u987B\u6709\u5F79\u624D\u80FD\u548C\u724C" : shanten + " \u5411\u542C \xB7 \u5403\u78B0\u540E\u4E0D\u53EF\u7ACB\u76F4";
         $("tilelabel").textContent = selected >= 0 ? tileName(handTiles(hand)[selected]) : "\u9009\u62E9\u4E00\u5F20\u724C";
@@ -3351,7 +3369,7 @@
         b.setAttribute("aria-label", label + (meld ? " " + meldTiles(meld).map((t) => tileName(t.p)).join("\u3001") : ""));
         if (kind) {
           const img = document.createElement("img");
-          img.src = kind + "-fx.png";
+          img.src = kind === "ron" ? "actions/ron.png" : kind + "-fx.png";
           img.alt = label;
           b.appendChild(img);
         } else {
@@ -3367,12 +3385,10 @@
         const panel = $("call-panel"), choices = $("call-choices");
         choices.replaceChildren();
         const response = decision?.type === "response";
-        panel.hidden = !response && !(kanPick && decision?.kan.length);
-        $("call-pass").hidden = !response;
+        panel.hidden = response ? !callFilter : !(kanPick && decision?.kan.length);
         if (panel.hidden) return;
         if (response) {
           $("call-label").textContent = CHARACTERS[match.model.player_id[decision.from]] + " " + (decision.rob ? "\u52A0\u6760" : "\u5207\u51FA") + " " + tileName(decision.tile);
-          if (decision.win) choices.appendChild(actionButton("\u8363\u548C", () => submit({ hule: "-" })));
           for (const m of decision.calls) {
             const kind = meldKind(m);
             if (callFilter && kind !== callFilter) continue;
@@ -3452,6 +3468,8 @@
         addWinAtmosphere(dialog);
         $("victory-art").src = "winners/" + WIN_ART[id] + ".png";
         $("victory-art").alt = CHARACTERS[id] + " \u4E13\u5C5E\u548C\u724C\u7ACB\u7ED8";
+        $("victory-call-art").src = "actions/" + (r.baojia == null ? "tsumo" : "ron") + ".png";
+        $("victory-call-art").alt = r.baojia == null ? "\u81EA\u6478" : "\u8363\u548C";
         $("victory-title").textContent = CHARACTERS[id] + " \xB7 " + (r.baojia == null ? "\u81EA\u6478" : "\u8363\u548C");
         $("victory-sub").textContent = (r.damanguan ? r.damanguan + " \u500D\u5F79\u6EE1" : r.fanshu + " \u756A " + r.fu + " \u7B26") + " / " + r.defen.toLocaleString() + " \u70B9";
         $("reveal-result").onclick = () => {
@@ -3527,7 +3545,9 @@
         }
       }
       $("round-info").addEventListener("toggle", (e) => $("round-toggle").setAttribute("aria-expanded", String(e.newState === "open")));
-      $("discard").onclick = discard;
+      $("ron").onclick = () => {
+        if (decision?.type === "response" && decision.win) submit({ hule: "-" });
+      };
       $("win").onclick = () => {
         if (decision?.type === "turn" && decision.win) submit({ hule: "-" });
       };
@@ -3547,6 +3567,15 @@
       };
       $("call-pass").onclick = () => {
         if (decision?.type === "response") submit({});
+        else if (decision?.type === "turn") {
+          skippedActions = true;
+          riichiPick = false;
+          kanPick = false;
+          callFilter = null;
+          selected = -1;
+          lastTileTap = 0;
+          render();
+        }
       };
       $("new").onclick = () => {
         if (resultOpen) return;
@@ -3587,6 +3616,10 @@
           return;
         }
         if (decision?.type !== "turn") return;
+        if (e.key === "Escape" && !$("call-pass").hidden) {
+          $("call-pass").click();
+          return;
+        }
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
           e.preventDefault();
           const n = handTiles(match.model.shoupai[ownSeat()]).length, step = e.key === "ArrowRight" ? 1 : -1;
@@ -3598,6 +3631,22 @@
         }
         if (e.key === "Enter" && document.activeElement.tagName !== "BUTTON") discard();
       });
+      for (const [id, path] of [["chi", "chi-fx.png"], ["pon", "pon-fx.png"], ["kan", "kan-fx.png"], ["riichi", "actions/riichi.png"], ["win", "actions/tsumo.png"], ["call-pass", "actions/pass.png"], ["ron", "actions/ron.png"]]) {
+        const b = $(id), label = b.textContent;
+        b.textContent = "";
+        b.classList.add("illustrated-action");
+        const img = document.createElement("img");
+        img.src = path;
+        img.alt = "";
+        img.className = "action-art";
+        const caption = document.createElement("span");
+        caption.className = "action-caption";
+        caption.textContent = label;
+        b.append(img, caption);
+      }
+      var actionRow = document.querySelector(".actions");
+      actionRow.append(...[...actionRow.children].reverse());
+      actionRow.prepend($("call-pass"));
       var viewport = document.querySelector(".board");
       var world = document.querySelector(".world");
       var compactLayout = matchMedia("(max-aspect-ratio: 1/1), (max-width: 700px)");
@@ -3607,6 +3656,7 @@
         const scale = Math.min(viewport.clientWidth / 1e3, viewport.clientHeight / (2e3 / 3));
         world.style.setProperty("--scene-scale", scale);
         world.style.setProperty("--touch-world", 44 / Math.max(scale, 0.01) + "px");
+        document.querySelector(".game").style.setProperty("--controls-bottom", document.querySelector(".game").clientHeight - (viewport.offsetTop + viewport.clientHeight / 2 + (524 - 1e3 / 3) * scale) + 12 + "px");
       }
       function fitHand() {
         const target = compactLayout.matches ? $("mobile-hand-dock") : world;

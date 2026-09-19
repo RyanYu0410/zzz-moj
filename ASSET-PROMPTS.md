@@ -34,3 +34,7 @@ Generated with built-in imagegen: four characters × Chi/Pon/Kan. Exact prompts:
 ## Character scene resources
 
 Six new built-in image_gen assets are saved in `dist/themes/`: Billy crimson workshop, Miyabi frostmoon dojo, and Ellen deep-sea lounge, each with a separate floor and transparent table. Tables use `dist/table-layer.png` as the geometry reference. Exact prompts are in `dist/themes/prompts.json`. Nicole retains the original assets.
+
+## Optional action badges and riichi deposit
+
+Five transparent PNGs generated with built-in image_gen: `dist/actions/pass.png`, `riichi.png`, `ron.png`, `tsumo.png`, and `riichi-stick.png`. Badges follow the existing Pon callout style. Exact prompts and tool attribution: `dist/actions/prompts.json`.

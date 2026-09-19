@@ -21,7 +21,7 @@ Open http://localhost:8080/. The committed `dist` also runs directly on a static
 - Confirm each settlement to continue. Download the match record at the final ranking screen.
 - Selected house rules appear in the in-game rules dialog. This is an unofficial fan project, not a certified tournament client; opponents run locally and online multiplayer is not included.
 
-Click a tile twice to discard, or select it and use the discard button. Arrow keys select legal tiles; Enter discards. Escape skips a call. During riichi selection only legal declaration discards are enabled.
+Double-tap the same tile within 450 ms to discard; the first tap selects it. Arrow keys select legal tiles; Enter discards. Escape skips the current optional actions. During riichi selection only legal declaration discards are enabled.
 
 ## Artwork
 
@@ -62,7 +62,7 @@ Additional browser checks: `node scripts/winner-browser-check.cjs`.
 
 ## Call options and action artwork
 
-Chi, Pon and Kan remain visible in the action bar. They enable only when legal; selecting one filters the available tile combinations, and a second selection confirms the call. Concealed/added Kan uses the same Kan control on your turn. Skip remains available during responses.
+Only currently legal actions appear above the hand, arranged from right to left without an outer panel; selecting one filters the available tile combinations, and a second selection confirms the call. Concealed/added Kan uses the same Kan control on your turn. Pass declines all response choices (Chi/Pon/Kan/Ron). On your own turn it dismisses Riichi/Tsumo/Kan options without discarding or ending your turn; options reset on the next decision. Pass, Riichi, Ron and Tsumo use transparent generated artwork, and actual riichi deposits appear beside each player on the table.
 
 Every character has three distinct action illustrations in `dist/calls/` (`nicole`, `billy`, `miyabi`, `ellen` × `chi`, `pon`, `kan`). Gameplay maps each call to the acting character; the preview character selector lets you inspect all twelve without changing the hand. Reduced motion keeps a static illustration.
 

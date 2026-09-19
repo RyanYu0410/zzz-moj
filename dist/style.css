@@ -268,3 +268,39 @@ body{background-image:var(--floor-image,url('floor-layer.png'));background-posit
 .world .player-label{left:50%;top:602px;bottom:auto;animation-delay:-.6s}.world .player-label span{font-size:14px}
 @keyframes nameplate-hover{0%,100%{translate:0 0}50%{translate:0 -3px}}
 .world [id^="seat-label"]{display:block;font-size:clamp(14px,calc(10px / var(--scene-scale,1)),28px);line-height:1.25;max-width:168px;overflow:hidden;text-overflow:ellipsis}
+
+/* Transparent action art sits immediately above the hand, starting at the right. */
+.game{position:relative}
+.controlbar{border:0;background:transparent;box-shadow:none;backdrop-filter:none;padding:0;gap:3px;flex-direction:column;align-items:flex-end}
+.controlbar>div:first-child{flex:none;min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;max-width:100%;text-shadow:0 2px 5px #000}
+.controlbar small{display:none}.controlbar strong{font-size:15px}
+.controlbar .actions{display:flex;width:100%;flex-direction:row-reverse;flex-wrap:nowrap;justify-content:flex-start;gap:8px;margin:0;overflow-x:auto;scrollbar-width:thin;padding:4px 3px 7px}
+.controlbar .actions button,.controlbar .actions button:hover,.controlbar .actions button[aria-expanded=true],.controlbar .actions #discard,.controlbar .actions #chi:not(:disabled),.controlbar .actions #pon:not(:disabled),.controlbar .actions #kan:not(:disabled){flex:0 0 74px;min-width:64px;min-height:66px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#fff4d3;position:relative;text-shadow:0 2px 5px #000}
+.illustrated-action{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0}
+.action-art{display:block;width:74px;height:48px;object-fit:contain;filter:drop-shadow(0 2px 3px #0008);pointer-events:none}
+.action-caption{display:block;font-size:13px;line-height:18px;white-space:nowrap;pointer-events:none}
+.actions button:disabled{opacity:.38;filter:grayscale(.7)}.actions button:not(:disabled):hover .action-art{filter:drop-shadow(0 0 8px #ffd590);transform:translateY(-2px)}
+.controlbar .actions #discard{font-size:19px;font-weight:900;color:#ffdfa2;border-bottom:2px solid #ffcc7870}
+.game .call-panel{background:none;border:0;box-shadow:none;backdrop-filter:none;justify-content:flex-end;flex-direction:row-reverse;padding:0;gap:8px}
+#call-choices{display:flex;flex-direction:row-reverse;justify-content:flex-start;flex-wrap:wrap;gap:8px}
+.game .call-panel .call-choice,.game #call-pass{background:none;border:0;box-shadow:none;border-radius:0;text-shadow:0 2px 5px #000}
+#call-pass{min-width:74px;min-height:64px;padding:0}.call-panel #call-label{width:100%;order:-1;text-align:right;font-size:14px;text-shadow:0 2px 5px #000}
+@media(min-width:701px) and (min-aspect-ratio:1001/1000){
+ .game .controlbar{position:absolute;bottom:var(--controls-bottom,140px);left:50%;transform:translateX(-50%);width:min(740px,90%);z-index:14}
+ .game .call-panel{position:absolute;bottom:calc(var(--controls-bottom,140px) + 96px);left:50%;transform:translateX(-50%);width:min(760px,90%);max-height:145px;z-index:14}
+}
+@media(max-aspect-ratio:1/1),(max-width:700px){
+ .controlbar{padding:0 4px;gap:1px}.controlbar .actions{display:flex;gap:3px;overflow-x:auto}.controlbar .actions button{flex-basis:60px;min-width:56px;min-height:62px}.action-art{width:60px;height:42px}.action-caption{font-size:12px}.controlbar strong{font-size:14px}
+ .game .call-panel{max-height:128px;padding:0 4px}.game #call-choices{flex-wrap:nowrap;overflow-x:auto;max-width:100%}.game .call-choice{flex-shrink:0}
+ #mobile-hand-dock{padding-top:5px}
+}
+.riichi-stick{position:absolute;width:88px;height:18px;object-fit:contain;z-index:8;pointer-events:none;filter:drop-shadow(0 1px 2px #000a)}.riichi-stick[hidden]{display:none}
+.stick-0{left:535px;top:502px}.stick-2{left:375px;top:159px;transform:rotate(180deg)}.stick-1{left:732px;top:290px;transform:rotate(90deg);transform-origin:left top}.stick-3{left:266px;top:290px;transform:rotate(90deg);transform-origin:left top}
+.riichi-badge{width:min(360px,65vw);height:180px;object-fit:contain;filter:drop-shadow(0 0 15px #ffdf8166)}
+#victory-call-art{width:min(300px,100%);height:140px;object-fit:contain;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--winner-color) 45%,transparent));margin-bottom:-10px}
+@media(max-width:700px){#victory-call-art{height:100px;width:180px}.victory-copy h2{margin:6px 0}}
+@media(max-aspect-ratio:1/1),(max-width:700px){.controlbar .actions button{flex-basis:calc((100% - 21px)/6);min-width:44px}.actions .action-art{width:100%;max-width:74px}}
+.riichi-stick{object-fit:cover;object-position:center}
+.actions button[hidden],.actions .illustrated-action[hidden]{display:none!important}
+.controlbar .actions{min-height:0}.controlbar .actions:empty{display:none}
+@media(max-aspect-ratio:1/1),(max-width:700px){.controlbar .actions button{flex:0 0 64px;min-width:56px}.actions .action-art{width:64px}.controlbar .actions{gap:4px}}

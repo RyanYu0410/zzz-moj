@@ -1,7 +1,7 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const assert=require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({channel:'chrome',headless:true}),page=await browser.newPage({viewport:{width:1280,height:960}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.url().includes('localhost')&&r.status()>=400)errors.push(r.url())});await page.goto('http://localhost:8080/?test');await page.waitForFunction(()=>mahjongTest.decision);
  assert(await page.evaluate(()=>getComputedStyle(document.querySelector('.player-rack')).position==='absolute'));
- for(const kind of ['chi','pon','kan'])assert.equal(await page.locator('#'+kind).isVisible(),true);
+ for(const kind of ['chi','pon','kan'])assert.equal(await page.locator('#'+kind).isVisible(),await page.locator('#'+kind).isEnabled());
  const tiles=await page.locator('#hand img').evaluateAll(els=>els.map(e=>({loaded:e.complete&&e.naturalWidth>0,width:e.getBoundingClientRect().width})));assert(tiles.length>=13&&tiles.every(t=>t.loaded&&t.width>0));
  await page.evaluate(()=>mahjongTest.match.dispose());
  // Feed the normal decision handler isolated response fixtures; rule legality is

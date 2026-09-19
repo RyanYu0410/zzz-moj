@@ -1,0 +1,25 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "name": "pass",
+      "prompt": "Generate a transparent PNG action badge matching the reference neon comic mahjong badge style. Exact main text: 跳过. Exact smaller English text: PASS. Bold legible two-character gold lettering with hot pink extruded edge, black ink strokes, restrained cyan shards, a few star glints, energetic arcade anime ZZZ fan game look. Wide 3:2 canvas, centered compact typography composition filling canvas with safe edge margin. TRUE transparent alpha around letter-and-energy silhouette; no rectangle, no frame, no scene, no character, no opaque background. Keep text highly readable at small button size. This is the PASS action, do not copy reference Pon lettering."
+    },
+    {
+      "name": "riichi",
+      "prompt": "Generate a transparent PNG action badge matching the reference neon comic mahjong badge style. Exact main text: 立直. Exact smaller English text: RIICHI. Bold legible two-character gold lettering with hot pink extruded edge, black ink strokes, restrained cyan shards, a few star glints, energetic arcade anime ZZZ fan game look. Wide 3:2 canvas, centered compact typography composition filling canvas with safe edge margin. TRUE transparent alpha around letter-and-energy silhouette; no rectangle, no frame, no scene, no character, no opaque background. Keep text highly readable at small button size. This is the RIICHI action, do not copy reference Pon lettering."
+    },
+    {
+      "name": "ron",
+      "prompt": "Generate a transparent PNG action badge matching the reference neon comic mahjong badge style. Exact main text: 荣和. Exact smaller English text: RON. Bold legible two-character gold lettering with hot pink extruded edge, black ink strokes, restrained cyan shards, a few star glints, energetic arcade anime ZZZ fan game look. Wide 3:2 canvas, centered compact typography composition filling canvas with safe edge margin. TRUE transparent alpha around letter-and-energy silhouette; no rectangle, no frame, no scene, no character, no opaque background. Keep text highly readable at small button size. This is the RON action, do not copy reference Pon lettering."
+    },
+    {
+      "name": "tsumo",
+      "prompt": "Generate a transparent PNG action badge matching the reference neon comic mahjong badge style. Exact main text: 自摸. Exact smaller English text: TSUMO. Bold legible two-character gold lettering with hot pink extruded edge, black ink strokes, restrained cyan shards, a few star glints, energetic arcade anime ZZZ fan game look. Wide 3:2 canvas, centered compact typography composition filling canvas with safe edge margin. TRUE transparent alpha around letter-and-energy silhouette; no rectangle, no frame, no scene, no character, no opaque background. Keep text highly readable at small button size. This is the TSUMO action, do not copy reference Pon lettering."
+    },
+    {
+      "name": "riichi-stick",
+      "prompt": "Generate a transparent PNG sprite of ONE Japanese riichi mahjong 1000 point stick, horizontal, ivory white slim rectangular scoring stick with exactly ONE centered red dot. Strict top down, slight polished bevel, tiny warm highlight, clean cel shaded anime game rendering consistent with a neon arcade mahjong game. No letters, no extra dots, no scenery, no frame, no badge, no floor or cast shadow. True transparent alpha around the stick. Horizontal stick spans 85% of a wide 3:2 canvas, centered; width to height ratio of stick around 10:1."
+    }
+  ]
+}
