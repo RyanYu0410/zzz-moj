@@ -304,3 +304,15 @@ body{background-image:var(--floor-image,url('floor-layer.png'));background-posit
 .actions button[hidden],.actions .illustrated-action[hidden]{display:none!important}
 .controlbar .actions{min-height:0}.controlbar .actions:empty{display:none}
 @media(max-aspect-ratio:1/1),(max-width:700px){.controlbar .actions button{flex:0 0 64px;min-width:56px}.actions .action-art{width:64px}.controlbar .actions{gap:4px}}
+
+/* Double-size action artwork; keep the first action anchored at the right edge. */
+.controlbar .actions{flex-direction:row-reverse;justify-content:flex-start;gap:8px}
+.controlbar .actions button,.controlbar .actions button:hover,.controlbar .actions button[aria-expanded=true],.controlbar .actions #chi:not(:disabled),.controlbar .actions #pon:not(:disabled),.controlbar .actions #kan:not(:disabled){flex:0 0 148px;min-width:148px;min-height:132px}
+.actions .action-art{width:148px;max-width:148px;height:96px}
+.actions .action-caption{font-size:26px;line-height:36px}
+@media(min-width:701px) and (min-aspect-ratio:1001/1000){.game .call-panel{bottom:calc(var(--controls-bottom,140px) + 168px)}}
+@media(max-aspect-ratio:1/1),(max-width:700px){
+ .controlbar .actions button,.controlbar .actions button:hover,.controlbar .actions button[aria-expanded=true],.controlbar .actions #chi:not(:disabled),.controlbar .actions #pon:not(:disabled),.controlbar .actions #kan:not(:disabled){flex:0 0 128px;min-width:128px;min-height:124px}
+ .actions .action-art{width:128px;max-width:128px;height:84px}
+ .actions .action-caption{font-size:24px;line-height:36px}
+}
