@@ -65,6 +65,7 @@ copy.push(['場風','Round wind','場風'],['自風','Seat wind','自風'],['翻
 copy.push(['场景素材','Scene styles','シーン素材'],['地面','Floor','床'],['牌桌','Table','卓'],['霓虹街区','Neon streets','ネオン街'],['赤色工坊','Crimson workshop','赤の工房'],['霜月道场','Frostmoon dojo','霜月道場'],['深海会馆','Deep sea lounge','深海ラウンジ'],['素材载入失败，请重试。','Could not load the artwork. Please try again.','素材を読み込めませんでした。再度お試しください。']);
 copy.push(['立直棒','Riichi deposit stick','リーチ棒']);
 copy.push(['跳过','Pass','見送り'],['双击手牌打出','Double-tap a tile to discard','牌をダブルタップして打牌']);
+copy.push(['新艾利都牌局','New Eridu Riichi','新エリー都の麻雀'],['选择角色，入座开局','Choose your character. Take your seat.','キャラクターを選んで対局へ'],['选择角色','Choose a character','キャラクター選択'],['开始对局','Start match','対局開始'],['东风战 · 四人麻将 · 25,000 点','East match · Four players · 25,000 points','東風戦 · 四人麻雀 · 25,000点']);
 const entries=new Map(copy.map(r=>[r[0],r]));const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const pattern=new RegExp([...entries.keys()].sort((a,b)=>b.length-a.length).map(escape).join('|'),'g');
 function initLanguage(){
  let locale='zh';try{const saved=localStorage.getItem('riichi-language');if(['zh','en','ja'].includes(saved))locale=saved}catch{}

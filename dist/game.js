@@ -2712,6 +2712,59 @@
     }
   });
 
+  // src/start-screen.js
+  var require_start_screen = __commonJS({
+    "src/start-screen.js"(exports, module) {
+      "use strict";
+      var AGENTS = [["\u59AE\u53EF", "nicole", "#ff4d9b"], ["\u6BD4\u5229", "billy", "#ff9a4d"], ["\u96C5", "miyabi", "#7fddff"], ["\u827E\u83B2", "ellen", "#ff4664"]];
+      function initStartScreen(start) {
+        const screen = document.createElement("dialog");
+        screen.id = "start-screen";
+        screen.setAttribute("aria-labelledby", "start-title");
+        screen.innerHTML = '<div class="start-glow"></div><img id="start-portrait" alt=""><div class="start-content"><p class="start-eyebrow">NEW ERIDU \xB7 RIICHI CLUB</p><h1 id="start-title">\u65B0\u827E\u5229\u90FD\u724C\u5C40</h1><p class="start-subtitle">\u9009\u62E9\u89D2\u8272\uFF0C\u5165\u5EA7\u5F00\u5C40</p><h2 id="start-name"></h2><div class="agent-picker" role="group" aria-label="\u9009\u62E9\u89D2\u8272"></div><p class="start-rules">\u4E1C\u98CE\u6218 \xB7 \u56DB\u4EBA\u9EBB\u5C06 \xB7 25,000 \u70B9</p><button id="start-play">\u5F00\u59CB\u5BF9\u5C40 <span aria-hidden="true">\u2197</span></button></div>';
+        document.body.append(screen);
+        let selected = 0;
+        try {
+          const saved = Number(localStorage.getItem("riichi-character"));
+          if (Number.isInteger(saved) && saved >= 0 && saved < 4) selected = saved;
+        } catch {
+        }
+        function select(id) {
+          selected = id;
+          const [name, art, color] = AGENTS[id];
+          screen.style.setProperty("--agent-color", color);
+          screen.querySelector("#start-portrait").src = "winners/" + art + ".png";
+          screen.querySelector("#start-portrait").alt = name;
+          screen.querySelector("#start-name").textContent = name;
+          screen.querySelectorAll(".agent-option").forEach((b, i) => b.setAttribute("aria-pressed", String(i === id)));
+        }
+        AGENTS.forEach(([name, art], id) => {
+          const b = document.createElement("button");
+          b.className = "agent-option";
+          b.innerHTML = '<img src="winners/' + art + '.png" alt=""><span>' + name + "</span>";
+          b.onclick = () => select(id);
+          screen.querySelector(".agent-picker").append(b);
+        });
+        screen.addEventListener("cancel", (e) => e.preventDefault());
+        screen.querySelector("#start-play").onclick = () => {
+          try {
+            localStorage.setItem("riichi-character", selected);
+          } catch {
+          }
+          screen.close();
+          start([selected, ...AGENTS.map((_, i) => i).filter((i) => i !== selected)].map((i) => AGENTS[i]));
+        };
+        select(selected);
+        return () => {
+          select(selected);
+          screen.showModal();
+          screen.querySelectorAll(".agent-option")[selected].focus();
+        };
+      }
+      module.exports = { initStartScreen };
+    }
+  });
+
   // src/scene-resources.js
   var require_scene_resources = __commonJS({
     "src/scene-resources.js"(exports, module) {
@@ -2967,6 +3020,7 @@
       copy.push(["\u573A\u666F\u7D20\u6750", "Scene styles", "\u30B7\u30FC\u30F3\u7D20\u6750"], ["\u5730\u9762", "Floor", "\u5E8A"], ["\u724C\u684C", "Table", "\u5353"], ["\u9713\u8679\u8857\u533A", "Neon streets", "\u30CD\u30AA\u30F3\u8857"], ["\u8D64\u8272\u5DE5\u574A", "Crimson workshop", "\u8D64\u306E\u5DE5\u623F"], ["\u971C\u6708\u9053\u573A", "Frostmoon dojo", "\u971C\u6708\u9053\u5834"], ["\u6DF1\u6D77\u4F1A\u9986", "Deep sea lounge", "\u6DF1\u6D77\u30E9\u30A6\u30F3\u30B8"], ["\u7D20\u6750\u8F7D\u5165\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u3002", "Could not load the artwork. Please try again.", "\u7D20\u6750\u3092\u8AAD\u307F\u8FBC\u3081\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u518D\u5EA6\u304A\u8A66\u3057\u304F\u3060\u3055\u3044\u3002"]);
       copy.push(["\u7ACB\u76F4\u68D2", "Riichi deposit stick", "\u30EA\u30FC\u30C1\u68D2"]);
       copy.push(["\u8DF3\u8FC7", "Pass", "\u898B\u9001\u308A"], ["\u53CC\u51FB\u624B\u724C\u6253\u51FA", "Double-tap a tile to discard", "\u724C\u3092\u30C0\u30D6\u30EB\u30BF\u30C3\u30D7\u3057\u3066\u6253\u724C"]);
+      copy.push(["\u65B0\u827E\u5229\u90FD\u724C\u5C40", "New Eridu Riichi", "\u65B0\u30A8\u30EA\u30FC\u90FD\u306E\u9EBB\u96C0"], ["\u9009\u62E9\u89D2\u8272\uFF0C\u5165\u5EA7\u5F00\u5C40", "Choose your character. Take your seat.", "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u3092\u9078\u3093\u3067\u5BFE\u5C40\u3078"], ["\u9009\u62E9\u89D2\u8272", "Choose a character", "\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u9078\u629E"], ["\u5F00\u59CB\u5BF9\u5C40", "Start match", "\u5BFE\u5C40\u958B\u59CB"], ["\u4E1C\u98CE\u6218 \xB7 \u56DB\u4EBA\u9EBB\u5C06 \xB7 25,000 \u70B9", "East match \xB7 Four players \xB7 25,000 points", "\u6771\u98A8\u6226 \xB7 \u56DB\u4EBA\u9EBB\u96C0 \xB7 25,000\u70B9"]);
       var entries = new Map(copy.map((r) => [r[0], r]));
       var escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       var pattern = new RegExp([...entries.keys()].sort((a, b) => b.length - a.length).map(escape).join("|"), "g");
@@ -3035,9 +3089,10 @@
   // src/game.js
   var require_game2 = __commonJS({
     "src/game.js"() {
-      var { Majiang, RULE, CHARACTERS, WINDS, handTiles, tileId, tileFile, meldKind, meldTiles, HumanPlayer, Match } = require_engine();
+      var { Majiang, RULE, CHARACTERS: DEFAULT_CHARACTERS, WINDS, handTiles, tileId, tileFile, meldKind, meldTiles, HumanPlayer, Match } = require_engine();
       var $ = (id) => document.getElementById(id);
       var NAMES = ["\u4E00\u842C", "\u4E8C\u842C", "\u4E09\u842C", "\u56DB\u842C", "\u4E94\u842C", "\u516D\u842C", "\u4E03\u842C", "\u516B\u842C", "\u4E5D\u842C", "\u4E00\u7B52", "\u4E8C\u7B52", "\u4E09\u7B52", "\u56DB\u7B52", "\u4E94\u7B52", "\u516D\u7B52", "\u4E03\u7B52", "\u516B\u7B52", "\u4E5D\u7B52", "\u4E00\u7D22", "\u4E8C\u7D22", "\u4E09\u7D22", "\u56DB\u7D22", "\u4E94\u7D22", "\u516D\u7D22", "\u4E03\u7D22", "\u516B\u7D22", "\u4E5D\u7D22", "\u6771", "\u5357", "\u897F", "\u5317", "\u767D", "\u767C", "\u4E2D"];
+      var CHARACTERS = DEFAULT_CHARACTERS.slice();
       var WIN_ART = ["nicole", "billy", "miyabi", "ellen"];
       var WIN_COLORS = ["#ff4d9b", "#ff9a4d", "#7fddff", "#ff4664"];
       var tileName = (p) => {
@@ -3108,7 +3163,7 @@
       }
       var BotWorker = class {
         constructor() {
-          this.worker = new Worker("ai-worker.js?v=5d1993dd82ba");
+          this.worker = new Worker("ai-worker.js?v=6d6d5b79c990");
           this.pending = /* @__PURE__ */ new Map();
           this.sequence = 0;
           this.alive = true;
@@ -3431,6 +3486,8 @@
       }
       function playWords(title, english, id) {
         if (document.body.classList.contains("no-motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        document.querySelector(".cut-art").style.backgroundImage = "url(winners/" + WIN_ART[id] + ".png)";
+        document.querySelector(".cut-words small").textContent = CHARACTERS[id];
         $("cut-title").textContent = title;
         $("cut-sub").textContent = CHARACTERS[id] + " \xB7 " + english;
         $("cutin").hidden = false;
@@ -3580,7 +3637,14 @@
       $("new").onclick = () => {
         if (resultOpen) return;
         show('<h2>\u91CD\u65B0\u5F00\u59CB\u4E1C\u98CE\u6218\uFF1F</h2><p>\u5F53\u524D\u70B9\u6570\u548C\u672C\u573A\u8FDB\u5EA6\u4F1A\u91CD\u7F6E\uFF0C\u56DB\u4EBA\u4ECE 25,000 \u70B9\u5F00\u59CB\u3002</p><button id="reset" class="primary">\u91CD\u65B0\u5F00\u59CB</button>');
-        $("reset").onclick = newGame;
+        $("reset").onclick = () => {
+          match?.dispose();
+          clearEffects();
+          decision = null;
+          reply = null;
+          $("modal").close();
+          openStart();
+        };
       };
       $("close").onclick = () => {
         if (!resultOpen) $("modal").close();
@@ -3716,7 +3780,7 @@
         const banner = document.createElement("div");
         banner.className = "discard-banner " + (player === 0 ? "nicole-banner" : "opponent-banner");
         const label = document.createElement("b");
-        label.textContent = ["\u59AE\u53EF", "\u6BD4\u5229", "\u96C5", "\u827E\u83B2"][player] + " / \u5207";
+        label.textContent = CHARACTERS[player] + " / \u5207";
         banner.appendChild(label);
         const name = document.createElement("span");
         name.textContent = tileName(called);
@@ -3753,9 +3817,24 @@
       }, get human() {
         return human;
       }, newGame, submit, render, tile, publicTable, Majiang, RULE, showVictory, showResult, playCallEffect };
+      var openStart = require_start_screen().initStartScreen((agents) => {
+        agents.forEach(([name, art, color], id) => {
+          CHARACTERS[id] = name;
+          WIN_ART[id] = art;
+          WIN_COLORS[id] = color;
+          const sprite = document.querySelector(".person-" + id + " .character-sprite");
+          sprite.className = "character-sprite " + art;
+          sprite.style.backgroundImage = "url(" + art + "-action6.png)";
+          $("score" + id).querySelector("span").textContent = name + (id === 0 ? " / YOU" : "");
+          $("preview-character").options[id].textContent = name;
+          $("seat-label" + id).parentElement.style.setProperty("--tag-accent", color);
+        });
+        newGame();
+      });
       require_scene_resources().initSceneResources();
       require_i18n().initLanguage();
-      newGame();
+      if (new URLSearchParams(location.search).has("test")) newGame();
+      else openStart();
     }
   });
   require_game2();

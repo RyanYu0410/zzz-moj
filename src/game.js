@@ -1,7 +1,8 @@
 'use strict';
-const {Majiang,RULE,CHARACTERS,WINDS,handTiles,tileId,tileFile,meldKind,meldTiles,HumanPlayer,Match}=require('./engine');
+const {Majiang,RULE,CHARACTERS:DEFAULT_CHARACTERS,WINDS,handTiles,tileId,tileFile,meldKind,meldTiles,HumanPlayer,Match}=require('./engine');
 const $=id=>document.getElementById(id);
 const NAMES=['一萬','二萬','三萬','四萬','五萬','六萬','七萬','八萬','九萬','一筒','二筒','三筒','四筒','五筒','六筒','七筒','八筒','九筒','一索','二索','三索','四索','五索','六索','七索','八索','九索','東','南','西','北','白','發','中'];
+const CHARACTERS=DEFAULT_CHARACTERS.slice();
 const WIN_ART=['nicole','billy','miyabi','ellen'];
 const WIN_COLORS=['#ff4d9b','#ff9a4d','#7fddff','#ff4664'];
 const tileName=p=>{const id=typeof p==='number'?p:tileId(p);return id>=34?'赤 '+NAMES[[4,13,22][id-34]]:NAMES[id]};
@@ -55,7 +56,7 @@ function chooseCallKind(kind){
  if(decision?.type==='response'&&decision.calls.some(m=>meldKind(m)===kind)){callFilter=callFilter===kind?null:kind;render();return}
  if(kind==='kan'&&decision?.type==='turn'&&decision.kan.length){kanPick=!kanPick;riichiPick=false;selected=-1;render()}
 }
-function playWords(title,english,id){if(document.body.classList.contains('no-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;$('cut-title').textContent=title;$('cut-sub').textContent=CHARACTERS[id]+' · '+english;$('cutin').hidden=false;later(()=>$('cutin').hidden=true,1800)}
+function playWords(title,english,id){if(document.body.classList.contains('no-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.querySelector('.cut-art').style.backgroundImage='url(winners/'+WIN_ART[id]+'.png)';document.querySelector('.cut-words small').textContent=CHARACTERS[id];$('cut-title').textContent=title;$('cut-sub').textContent=CHARACTERS[id]+' · '+english;$('cutin').hidden=false;later(()=>$('cutin').hidden=true,1800)}
 function show(html){$('modalbody').innerHTML=html;if(!$('modal').open)$('modal').showModal()}
 const DRAW_NAMES={'荒牌平局':'荒牌流局','九種九牌':'九种九牌','四風連打':'四风连打','四家立直':'四家立直','四開槓':'四杠散了','三家和':'三家和流局','流し満貫':'流局满贯'};
 function addWinAtmosphere(root){
@@ -88,7 +89,7 @@ function downloadLog(log){const blob=new Blob([JSON.stringify(log,null,2)],{type
 function showGallery(){show('<h2>新艾利都 · 37 张特色牌</h2><p>本牌局直接使用这些 PNG；每门一张红五，计入赤宝牌。</p><div id="tile-catalog"></div>');const families=[['万子',0,9],['饼子',9,18],['索子',18,27],['字牌',27,34],['赤五',34,37]];for(const [label,start,end] of families){const h=document.createElement('h3');h.textContent=label;const row=document.createElement('div');row.className='catalog-row';for(let id=start;id<end;id++)row.appendChild(tile(id));$('tile-catalog').append(h,row)}}
 $('round-info').addEventListener('toggle',e=>$('round-toggle').setAttribute('aria-expanded',String(e.newState==='open')));
 $('ron').onclick=()=>{if(decision?.type==='response'&&decision.win)submit({hule:'-'})};$('win').onclick=()=>{if(decision?.type==='turn'&&decision.win)submit({hule:'-'})};$('riichi').onclick=()=>{if(decision?.type==='turn'&&decision.riichi.length){riichiPick=!riichiPick;selected=-1;kanPick=false;render()}};$('chi').onclick=()=>chooseCallKind('chi');$('pon').onclick=()=>chooseCallKind('pon');$('kan').onclick=()=>chooseCallKind('kan');$('abort').onclick=()=>{if(decision?.abort)submit({daopai:'-'})};$('call-pass').onclick=()=>{if(decision?.type==='response')submit({});else if(decision?.type==='turn'){skippedActions=true;riichiPick=false;kanPick=false;callFilter=null;selected=-1;lastTileTap=0;render()}};
-$('new').onclick=()=>{if(resultOpen)return;show('<h2>重新开始东风战？</h2><p>当前点数和本场进度会重置，四人从 25,000 点开始。</p><button id="reset" class="primary">重新开始</button>');$('reset').onclick=newGame};$('close').onclick=()=>{if(!resultOpen)$('modal').close()};$('modal').addEventListener('cancel',e=>{if(resultOpen)e.preventDefault()});
+$('new').onclick=()=>{if(resultOpen)return;show('<h2>重新开始东风战？</h2><p>当前点数和本场进度会重置，四人从 25,000 点开始。</p><button id="reset" class="primary">重新开始</button>');$('reset').onclick=()=>{match?.dispose();clearEffects();decision=null;reply=null;$('modal').close();openStart()}};$('close').onclick=()=>{if(!resultOpen)$('modal').close()};$('modal').addEventListener('cancel',e=>{if(resultOpen)e.preventDefault()});
 $('sound').onclick=()=>{sound=!sound;$('sound').textContent='声音 '+(sound?'ON':'OFF');$('sound').setAttribute('aria-pressed',sound);tone()};$('motion').onclick=()=>{const off=document.body.classList.toggle('no-motion');$('motion').textContent='动作特效 '+(off?'OFF':'ON');$('motion').setAttribute('aria-pressed',!off);if(off)clearEffects()};$('scene').onclick=()=>{const roof=document.body.classList.toggle('rooftop');$('scene').textContent='光线：'+(roof?'日光':'夜场')+' ↻'};
 $('preview-chi').onclick=()=>playCallEffect('chi',Number($('preview-character').value),true);$('preview-pon').onclick=()=>playCallEffect('pon',Number($('preview-character').value),true);$('preview-kan').onclick=()=>playCallEffect('kan',Number($('preview-character').value),true);$('tile-gallery').onclick=showGallery;
 $('rules').onclick=()=>show('<h2>四人立直麻将 · 东风战</h2><p>四人各 25,000 点。庄家随机，按东一至东四推进；庄家和牌或听牌连庄。无人达到 30,000 点时进入南入延长；飞人结束。</p><ul><li>吃仅限上家；碰、明杠可接任意对手。荣和优先于碰杠，碰杠优先于吃。禁止食替。</li><li>暗杠、加杠、明杠后摸岭上牌并翻杠宝牌。加杠可被抢杠，四杠散了除单人四杠。</li><li>和牌必须有役。支持自摸、荣和、振听、同巡振听、立直振听，以及标准役种与符番计分。</li><li>门前听牌可付 1,000 点立直。支持一发、双立直、赤宝牌、里宝牌、杠宝牌；立直后仅允许不改变听牌的暗杠。</li><li>双响有效，三家和流局。流局听牌罚符 3,000 点，供托与本场按规则延续。</li><li>角色位置保持不变；东南西北身份随庄家轮换。结算需确认后进入下一局。</li></ul><p>使用 <a href="https://github.com/kobalab/majiang-core" target="_blank" rel="noopener">majiang-core</a> 规则引擎与 majiang-ai 电脑；MIT 授权。非官方同人作品。</p>');
@@ -124,7 +125,7 @@ function animateDiscard(player,called){
  const burst=document.createElement('img');burst.src='impact.png';burst.className='impact-art';burst.alt='';burst.style.left=x+'px';burst.style.top=y+'px';board.appendChild(burst);actionEffects.push(burst);
  burst.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.15)'},{opacity:0,transform:'translate(-50%,-50%) scale(.15)',offset:.54},{opacity:.95,transform:'translate(-50%,-50%) scale(.65)',offset:.56},{opacity:0,transform:'translate(-50%,-50%) scale(1.25)'}],{duration:1200,fill:'forwards'});
  const banner=document.createElement('div');banner.className='discard-banner '+(player===0?'nicole-banner':'opponent-banner');
- const label=document.createElement('b');label.textContent=['妮可','比利','雅','艾莲'][player]+' / 切';banner.appendChild(label);
+ const label=document.createElement('b');label.textContent=CHARACTERS[player]+' / 切';banner.appendChild(label);
  const name=document.createElement('span');name.textContent=tileName(called);banner.appendChild(name);board.appendChild(banner);actionEffects.push(banner);
  banner.animate([{opacity:0,transform:'translateX(-110%) skewX(-7deg)'},{opacity:1,transform:'translateX(0) skewX(-7deg)',offset:.2},{opacity:1,transform:'translateX(0) skewX(-7deg)',offset:.7},{opacity:0,transform:'translateX(30%) skewX(-7deg)'}],{duration:900,fill:'forwards'});
  const surface=board.querySelector?.('.table-layer')||board;surface.animate([{transform:'translate(0,0)'},{transform:'translate(2px,1px)'},{transform:'translate(-2px,0)'},{transform:'translate(0,0)'}],{duration:150,delay:650});
@@ -136,6 +137,10 @@ function publicTable(){const m=match?.model;if(!m?.shan)return {};return {round:
 if(navigator.modelContext?.registerTool){try{navigator.modelContext.registerTool({name:'read_mahjong_table',description:'Read public mahjong table and your own hand; never opponent hands or hidden wall.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:async()=>({content:[{type:'text',text:JSON.stringify(publicTable())}]})})}catch{}}
 // Test access is opt-in and never enabled by the normal playable URL.
 if(new URLSearchParams(location.search).has('test'))window.mahjongTest={get match(){return match},get decision(){return decision},get human(){return human},newGame,submit,render,tile,publicTable,Majiang,RULE,showVictory,showResult,playCallEffect};
+const openStart=require('./start-screen').initStartScreen(agents=>{
+ agents.forEach(([name,art,color],id)=>{CHARACTERS[id]=name;WIN_ART[id]=art;WIN_COLORS[id]=color;const sprite=document.querySelector('.person-'+id+' .character-sprite');sprite.className='character-sprite '+art;sprite.style.backgroundImage='url('+art+'-action6.png)';$('score'+id).querySelector('span').textContent=name+(id===0?' / YOU':'');$('preview-character').options[id].textContent=name;$('seat-label'+id).parentElement.style.setProperty('--tag-accent',color);});
+ newGame();
+});
 require('./scene-resources').initSceneResources();
 require('./i18n').initLanguage();
-newGame();
+if(new URLSearchParams(location.search).has('test'))newGame();else openStart();

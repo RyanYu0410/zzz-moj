@@ -81,3 +81,7 @@ Menu → Language supports 简体中文, English, and 日本語. The browser rem
 ### Scene resources
 
 Menu → Scene styles offers independent floor and table choices for Nicole, Billy, Miyabi, and Ellen. Choices persist locally and do not reset the hand. Nicole uses portrait or landscape floor artwork according to the window aspect ratio; other floors use square compositions suitable for both crops. All tables preserve the shared board coordinates. Character nameplates float over the seated characters.
+
+### Start screen and playable characters
+
+Choose Nicole, Billy, Miyabi or Ellen before starting. The chosen character occupies your bottom seat, with matching idle/discard sprites, call illustrations, riichi cut-in, scores and victory art. The other three characters become AI opponents. Your choice is remembered locally; Menu → New match returns to character selection after confirming the reset. Existing winner portraits are reused for the lobby.
