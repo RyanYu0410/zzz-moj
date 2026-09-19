@@ -2,6 +2,12 @@
 
 A four-player Japanese riichi mahjong fan game with Zenless Zone Zero inspired comic artwork and 37 custom PNG tile faces.
 
+## Play online
+
+[Play on GitHub Pages](https://ryanyu0410.github.io/zzz-moj/) on your phone, tablet, or computer. No installation is required. Settings and history stay in each browser; matches are against three AI opponents.
+
+Pushes to `main` automatically build, test, and deploy `dist` through `.github/workflows/pages.yml`.
+
 ## Play locally
 
 ```sh
